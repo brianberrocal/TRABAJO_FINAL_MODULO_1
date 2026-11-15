@@ -1,0 +1,693 @@
+<rol>
+Eres un Product Manager Senior (Agente PM del framework BMAD). Tu especialidad es definir alcances realistas, priorizar sin piedad, y proteger al equipo de la sobreambición.
+</rol>
+
+<contexto>
+Proyecto: Muuvi
+# Project Brief — Muuvi
+**Versión:** 0.1.0 (borrador)
+**Fecha:** 11/11/2026
+**Autor:** Agente Analyst (BMAD), a partir de 5 rondas de descubrimiento con el emprendedor fundador
+**Estado:** Pendiente de revisión humana
+**Documento previo obligatorio:** [`00-constitucion.md`](00-constitucion.md)
+
+> **Leyenda de confianza**
+> - ✅ **Confirmado:** dato entregado por el fundador.
+> - 📌 **Supuesto:** hipótesis sin validar con clientes o fincas.
+> - ❓ **Pendiente:** dato todavía no definido.
+
+---
+
+## Índice
+1. [Problema y oportunidad](#1-problema-y-oportunidad)
+2. [Usuarios y segmentos objetivo](#2-usuarios-y-segmentos-objetivo)
+3. [Propuesta de valor](#3-propuesta-de-valor)
+4. [Modelo de negocio preliminar](#4-modelo-de-negocio-preliminar)
+5. [Métricas de éxito (KPIs medibles)](#5-métricas-de-éxito-kpis-medibles)
+6. [Riesgos identificados y supuestos](#6-riesgos-identificados-y-supuestos)
+7. [Restricciones conocidas](#7-restricciones-conocidas)
+8. [Pendientes antes de pasar al Product Manager](#8-pendientes-antes-de-pasar-al-product-manager)
+
+---
+
+## 1. Problema y oportunidad
+
+### 1.1 Problema
+**Del lado del hogar (prioridad):**
+- ✅ Hoy los hogares de Lima que quieren leche fresca de pastoreo la piden **directamente a las fincas por WhatsApp**, a un precio de **S/ 3.50 – S/ 6.00 por litro**.
+- 📌 El dolor principal, según la hipótesis del fundador, es que **no encuentran dónde comprarla cerca** y que **se olvidan de comprarla**. No se ha validado con entrevistas.
+- ❓ No sabemos todavía cuánto pierde el hogar con la situación actual (tiempo, dinero, leche desperdiciada, desconfianza en lo "orgánico").
+
+**Del lado de la finca:**
+- ✅ Las fincas **no quieren hacerse cargo de la logística de envío** ni de **atender los pedidos** de cada cliente.
+
+### 1.2 Oportunidad
+- **Hay oferta cerca de Lima.** La región Lima es la segunda cuenca lechera del Perú, con el 16.1 % de la producción nacional en 2024, solo detrás de Cajamarca (Midagri).
+- **La leche diferenciada puede pagar mejor al productor.** La gran industria paga en promedio alrededor de S/ 1.22 por kilo de leche cruda (estudio PUCP), y en algunas regiones el precio en chacra ronda los S/ 2.80 por litro en 2026. El canal directo por WhatsApp (S/ 3.50 – S/ 6.00) ya muestra que existe un consumidor que paga más por leche de finca.
+- **Hay un hueco entre los dos lados:** fincas certificadas que no quieren distribuir y hogares de alto poder adquisitivo que no tienen un acceso cómodo y recurrente.
+
+### 1.3 Cadena actual frente a la cadena propuesta
+
+```mermaid
+flowchart LR
+    subgraph Hoy
+        F1[Finca] -- WhatsApp y entrega informal --> H1[Hogar]
+    end
+    subgraph Con Muuvi
+        F2[Finca en Cañete o Huaral<br/>ordeño, enfriamiento y envasado] -- traslado refrigerado --> P[Punto de acopio en Lima]
+        P -- última milla Muuvi --> H2[Hogar]
+    end
+```
+
+---
+
+## 2. Usuarios y segmentos objetivo
+
+| Prioridad | Segmento | Estado | Por qué |
+|---|---|---|---|
+| 1 | **Hogares** de Miraflores, San Isidro y La Molina | ✅ Segmento de lanzamiento | Alto poder adquisitivo y densidad de entregas en tres distritos |
+| 2 | **Personas fitness o con dietas específicas** | ✅ Segunda fase | Valoran origen, pureza y regularidad del consumo |
+| 3 | **Cafeterías, pastelerías y otros negocios** | ✅ Fase posterior | Compran en volumen; modelo B2B con otra lógica de pedido |
+| — | Familias con niños y adultos mayores | 📌 Subsegmentos dentro de "hogares" | Mencionados por el fundador; falta priorizarlos dentro del segmento 1 |
+
+### 2.1 Usuario del otro lado: la finca proveedora
+- ✅ Fincas con **certificación SENASA** ubicadas en **Cañete y Huaral** (región Lima, a unas 2 o 3 horas de la ciudad).
+- ✅ La finca **ordeña, enfría y envasa** en botella de vidrio, y **lleva la leche hasta un punto en Lima**.
+- ❓ Número de fincas comprometidas y litros diarios disponibles: sin definir.
+
+### 2.2 Expansión geográfica prevista
+| Fase | Distritos |
+|---|---|
+| Lanzamiento (meses 1–3) | Miraflores, San Isidro, La Molina |
+| Consolidación (mes 6) | + San Borja, Surco, Barranco |
+
+---
+
+## 3. Propuesta de valor
+
+### 3.1 Para el hogar
+> **Leche fresca de vacas en libre pastoreo, de fincas con certificación SENASA, que llega en botella de vidrio a casa de forma recurrente y sin romper la cadena de frío. El hogar no tiene que acordarse de pedir ni buscar dónde comprarla.**
+
+Los cuatro diferenciadores que, según el fundador, justifican el precio adicional:
+1. **Certificación SENASA garantizada.**
+2. **Botella de vidrio retornable.**
+3. **Trazabilidad** de la finca y del bienestar del ganado.
+4. **Cadena de frío** garantizada hasta la puerta.
+
+Además: **comodidad**, porque la compra pasa a ser recurrente y ya no depende de recordar ni de buscar un proveedor.
+
+### 3.2 Para la finca
+> **Vende a hogares urbanos de alto valor sin montar su propia logística de reparto ni atender cliente por cliente.**
+
+### 3.3 Frente a las alternativas actuales
+| Alternativa | Qué ofrece | Qué le falta frente a Muuvi |
+|---|---|---|
+| Finca directa por WhatsApp | Precio bajo (S/ 3.50 – S/ 6.00) | Recurrencia, comodidad y cadena de frío garantizada 📌 |
+| Sección premium de Wong o Vivanda | Disponibilidad y confianza en la marca | Origen directo de finca, botella retornable y trazabilidad por finca 📌 |
+| Otras marcas de leche fresca con delivery | Entrega a domicilio | ❓ Falta el análisis competitivo (precios, cobertura, propuesta) |
+
+---
+
+## 4. Modelo de negocio preliminar
+
+### 4.1 Ingresos
+- ✅ **Suscripción** semanal o mensual.
+- ✅ **Pago por pedido** (compra puntual).
+- ✅ Precio al consumidor: **S/ 13.50 – S/ 16.00 por litro**.
+
+### 4.2 Costos principales (identificados, sin cuantificar)
+- ❓ Compra de leche a la finca, a un precio por litro todavía sin definir.
+- ❓ Operación del punto de acopio refrigerado en Lima.
+- ❓ Última milla propia refrigerada (personal, vehículos, cadena de frío).
+- ❓ Reposición de las botellas que no vuelven.
+- ❓ Comisiones de las pasarelas de pago (ver constitución, PRINCIPIO-002).
+
+### 4.3 Margen bruto por litro (escenario ilustrativo)
+📌 Este cálculo **supone** que Muuvi le paga a la finca el mismo precio que hoy cobra por WhatsApp. El fundador no lo ha confirmado.
+
+| Escenario | Precio de venta | Costo de la leche | Margen bruto antes de logística |
+|---|---|---|---|
+| Pesimista | S/ 13.50 | S/ 6.00 | **S/ 7.50** |
+| Optimista | S/ 16.00 | S/ 3.50 | **S/ 12.50** |
+
+### 4.4 Botella retornable
+- ✅ Botella de vidrio con meta de retorno ≥ 90 %.
+- ❓ Monto del depósito o garantía por botella: sin definir.
+
+### 4.5 Capital inicial
+- ❓ Sin definir.
+
+---
+
+## 5. Métricas de éxito (KPIs medibles)
+
+> Los meses se cuentan desde el lanzamiento comercial (fecha ❓ por definir).
+
+### 5.1 Crecimiento
+| KPI | Mes 3 (validación / PMV) | Mes 6 (consolidación) | Mes 12 (escala inicial) | Origen |
+|---|---|---|---|---|
+| Suscriptores activos | **50** | **200** | **600** | ✅ Fundador |
+| Distritos con servicio | 3 | 6 | ❓ | ✅ Fundador |
+
+### 5.2 Retención y operación
+| KPI | Meta | Cómo se mide | Origen |
+|---|---|---|---|
+| Retención de suscriptores a 3 meses | **≥ 60 %** | Suscriptores activos al día 90 ÷ suscriptores de la misma cohorte al día 0 | ✅ Fundador |
+| Tasa de retorno de botellas | **≥ 90 %** | Botellas devueltas ÷ botellas entregadas, por mes | ✅ Fundador |
+| Entregas sin rotura de cadena de frío | **100 %** en la fase PMV | Entregas dentro del rango de temperatura ÷ entregas totales | ✅ Objetivo del fundador; 📌 el rango de temperatura lo debe fijar un especialista sanitario |
+| Cumplimiento de abastecimiento de las fincas | 📌 **≥ 95 %** (propuesto) | Litros entregados ÷ litros comprometidos, por semana | 📌 Propuesto para medir el riesgo R2 |
+
+### 5.3 Validación del problema (antes o durante el PMV)
+| KPI | Meta propuesta 📌 | Cómo se mide |
+|---|---|---|
+| Entrevistas a hogares objetivo | **≥ 20** en Miraflores, San Isidro y La Molina | Conteo de entrevistas registradas |
+| Hogares que confirman el dolor ("no la encuentro cerca" o "me olvido de comprar") | **≥ 60 %** de los entrevistados | Respuestas codificadas en las entrevistas |
+| Disposición a pagar ≥ S/ 13.50 por litro | **≥ 40 %** de los entrevistados | Pregunta de precio en la entrevista |
+
+---
+
+## 6. Riesgos identificados y supuestos
+
+### 6.1 Riesgos
+| ID | Riesgo | Probabilidad | Impacto | Origen |
+|---|---|---|---|---|
+| R1 | **No hay suficientes clientes al precio de S/ 13.50 – S/ 16.00**, entre 2.3 y 4.6 veces lo que se paga hoy por WhatsApp | Alta | Crítico | ✅ Fundador |
+| R2 | **Las fincas entregan menos leche de la acordada** | Media | Alto | ✅ Fundador |
+| R3 | Rotura de la cadena de frío en el traslado de Cañete o Huaral a Lima (2 a 3 horas) o en la última milla | Media | Crítico (sanitario y reputacional) | 📌 Analista |
+| R4 | Las botellas no vuelven en la proporción esperada, lo que eleva el costo por litro | Media | Medio | 📌 Analista |
+| R5 | El cliente se salta a Muuvi y le compra directo a la finca por WhatsApp | Media | Alto | 📌 Analista |
+| R6 | La densidad de clientes por distrito no alcanza para rentabilizar la última milla propia | Media | Alto | ✅ Objetivo del mes 12 del fundador |
+| R7 | Una finca pierde o deja vencer su certificación SENASA o su registro DIGESA | Baja | Alto (no se puede vender ni rotular como orgánico) | 📌 Analista, a partir de la constitución |
+
+### 6.2 Supuestos por validar
+| ID | Supuesto | Cómo validarlo |
+|---|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar" | Entrevistas (KPI 5.3) |
+| S2 | Certificación, vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro | Pregunta de disposición a pagar y preventa |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro | Negociación con las fincas |
+| S4 | Las fincas de Cañete y Huaral tienen volumen suficiente para 600 suscriptores al mes 12 | Inventario de litros diarios por finca |
+| S5 | Las fincas aceptan llevar la leche hasta un punto en Lima por su cuenta | Acuerdo firmado con cada finca |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas | Medición en la fase PMV |
+
+---
+
+## 7. Restricciones conocidas
+
+### 7.1 Legales, sanitarias y tributarias (según `00-constitucion.md`)
+- **Datos personales:** cumplir la Ley N.° 29733 y el D.S. 016-2024-JUS. Esto incluye inscribir los bancos de datos ante la ANPDP, aceptar solo a mayores de 18 años, pedir consentimiento expreso y eliminar los datos en un plazo máximo de 30 días tras la baja (PRINCIPIO-005).
+- **Producto:** cada producto debe tener **registro sanitario DIGESA** antes de publicarse, y solo se puede rotular como "orgánico" con **certificación SENASA vigente** (PRINCIPIO-006). Como la finca envasa, estos registros dependen de ella.
+- **Tributaria:** cada pago confirmado debe emitir su **boleta o factura electrónica SUNAT** (PRINCIPIO-006).
+- **Consumidor:** **Libro de Reclamaciones virtual** (Ley 29571) y, cuando corresponda, **advertencias octogonales** (Ley 30021).
+- **Pagos:** el sistema no puede recibir ni guardar datos de tarjeta (PCI-DSS SAQ-A, PRINCIPIO-004).
+
+### 7.2 Operativas
+- **Cobertura inicial:** solo Miraflores, San Isidro y La Molina.
+- **Abastecimiento:** solo fincas de Cañete y Huaral, a 2 o 3 horas de Lima.
+- **Envasado:** lo hace la finca. Muuvi no manipula el producto, solo lo recibe y lo distribuye.
+- **Comunicaciones al cliente:** solo entre las **09:00 y las 20:00, hora de Lima** (PRINCIPIO-008).
+
+### 7.3 Del proyecto
+- El **stack tecnológico** y las **pasarelas de pago** ya están definidos en la constitución (PRINCIPIO-002). El Product Manager trabaja dentro de ese marco.
+- Fundador único, emprendedor independiente; el proyecto parte desde cero.
+- ❓ Capital inicial y fecha de lanzamiento sin definir.
+
+---
+
+## 8. Pendientes antes de pasar al Product Manager
+1. ❓ Precio por litro que Muuvi pagará a la finca (cierra el margen de la sección 4.3).
+2. ❓ Monto del depósito por botella.
+3. ❓ Rango de capital inicial.
+4. ❓ Número de fincas comprometidas y litros diarios disponibles.
+5. ❓ Fecha estimada de lanzamiento comercial.
+6. ❓ Análisis de la competencia directa (marcas de leche fresca con delivery en Lima).
+7. 📌 Hacer las ≥ 20 entrevistas de validación (KPI 5.3).
+8. ⚠️ Corregir el nombre "Muuuvi" a "Muuvi" en `00-constitucion.md`. Lo tiene que hacer un humano, porque el PRINCIPIO-008.10 prohíbe que un agente lo edite.
+
+---
+
+## Fuentes
+- [Midagri: en Perú existen más de 452 mil productores de leche — Agraria.pe (30/05/2025)](https://agraria.pe/noticias/midagri-en-peru-existen-mas-de-452-mil-productores-de-leche-39615)
+- [Estudio sobre el mercado de leche cruda en el Perú — Repositorio PUCP](https://repositorio.pucp.edu.pe/bitstreams/bf05f38a-1c40-422e-839b-c9051206ea9a/download)
+- [Piura produjo más de 51 millones de litros de leche en el 2025 — Agraria.pe (01/04/2026)](https://agraria.pe/noticias/piura-produjo-mas-de-51-millones-de-litros-de-leche-en-el-20-41971)
+
+
+---
+
+<rol>
+Eres un Analista de Negocios Senior (Agente Analyst del framework BMAD). Tu especialidad es descubrimiento de producto: entender profundamente un problema antes de proponer soluciones. No propones funcionalidades: investigas, preguntas y sintetizas.
+</rol>
+
+<contexto>
+Estamos en la fase de descubrimiento del producto Muuvi.
+Descripción inicial: Muuvi es una app móvil directa al consumidor que digitaliza y comercializa la venta de leche orgánica y lácteos artesanales provenientes de vacas en libre pastoreo, conectando fincas sostenibles directamente con hogares urbanos en Lima, Perú.
+Permite al consumidor programar entregas recurrentes de leche fresca en botellas retornables ecológicas, conocer la trazabilidad y el bienestar del ganado, y gestionar pagos y suscripciones de manera ágil.
+Este documento será el primer archivo que cualquier agente de IA lea antes de trabajar en el proyecto.
+País de operación: Perú.
+Este es un ejercicio académico de un Diploma en AI-First Software Architecture.
+</contexto>
+
+<tarea>
+FASE 1 — INVESTIGACIÓN (haz esto primero):
+Hazme preguntas para entender el proyecto. Organízalas en rondas de 3-5 preguntas. Cubre:
+- El problema real (¿quién sufre? ¿cómo lo resuelve hoy? ¿qué pierde?)
+- Los usuarios y segmentos (¿quiénes son? ¿qué necesitan diferente?)
+- La propuesta de valor (¿por qué usarían esto y no lo que tienen?)
+- El modelo de negocio (¿cómo generaría ingresos?)
+- Métricas de éxito (¿cómo sabemos que funciona?)
+- Riesgos y supuestos (¿qué puede salir mal? ¿qué estamos asumiendo?)
+
+NO propongas soluciones ni funcionalidades todavía. Solo pregunta.
+Después de mis respuestas a cada ronda, haz otra ronda hasta tener suficiente.
+
+FASE 2 — SÍNTESIS (cuando yo diga "genera el Project Brief"):
+Genera un Project Brief estructurado en Markdown con estas secciones:
+1. Problema y oportunidad
+2. Usuarios y segmentos objetivo
+3. Propuesta de valor
+4. Modelo de negocio preliminar
+5. Métricas de éxito (KPIs medibles)
+6. Riesgos identificados y supuestos
+7. Restricciones conocidas
+</tarea>
+
+<restricciones>
+- Haz preguntas, no asumas. Si algo no está claro, PREGUNTA.
+- No propongas funcionalidades técnicas. Eso es trabajo del Product Manager, no tuyo.
+- Usa datos y ejemplos específicos del contexto peruano cuando aplique.
+- Todas las métricas deben ser medibles (no "mejorar la experiencia").
+</restricciones>
+
+<formato>
+# Project Brief — Muuvi
+**Versión:** 0.1.0 (borrador)
+**Fecha:** 11/11/2026
+**Autor:** Agente Analyst (BMAD), a partir de 5 rondas de descubrimiento con el emprendedor fundador
+**Estado:** Pendiente de revisión humana
+**Documento previo obligatorio:** [`00-constitucion.md`](00-constitucion.md)
+
+> **Leyenda de confianza**
+> - ✅ **Confirmado:** dato entregado por el fundador.
+> - 📌 **Supuesto:** hipótesis sin validar con clientes o fincas.
+> - ❓ **Pendiente:** dato todavía no definido.
+
+---
+
+## Índice
+1. [Problema y oportunidad](#1-problema-y-oportunidad)
+2. [Usuarios y segmentos objetivo](#2-usuarios-y-segmentos-objetivo)
+3. [Propuesta de valor](#3-propuesta-de-valor)
+4. [Modelo de negocio preliminar](#4-modelo-de-negocio-preliminar)
+5. [Métricas de éxito (KPIs medibles)](#5-métricas-de-éxito-kpis-medibles)
+6. [Riesgos identificados y supuestos](#6-riesgos-identificados-y-supuestos)
+7. [Restricciones conocidas](#7-restricciones-conocidas)
+8. [Pendientes antes de pasar al Product Manager](#8-pendientes-antes-de-pasar-al-product-manager)
+
+---
+
+## 1. Problema y oportunidad
+
+### 1.1 Problema
+**Del lado del hogar (prioridad):**
+- ✅ Hoy los hogares de Lima que quieren leche fresca de pastoreo la piden **directamente a las fincas por WhatsApp**, a un precio de **S/ 3.50 – S/ 6.00 por litro**.
+- 📌 El dolor principal, según la hipótesis del fundador, es que **no encuentran dónde comprarla cerca** y que **se olvidan de comprarla**. No se ha validado con entrevistas.
+- ❓ No sabemos todavía cuánto pierde el hogar con la situación actual (tiempo, dinero, leche desperdiciada, desconfianza en lo "orgánico").
+
+**Del lado de la finca:**
+- ✅ Las fincas **no quieren hacerse cargo de la logística de envío** ni de **atender los pedidos** de cada cliente.
+
+### 1.2 Oportunidad
+- **Hay oferta cerca de Lima.** La región Lima es la segunda cuenca lechera del Perú, con el 16.1 % de la producción nacional en 2024, solo detrás de Cajamarca (Midagri).
+- **La leche diferenciada puede pagar mejor al productor.** La gran industria paga en promedio alrededor de S/ 1.22 por kilo de leche cruda (estudio PUCP), y en algunas regiones el precio en chacra ronda los S/ 2.80 por litro en 2026. El canal directo por WhatsApp (S/ 3.50 – S/ 6.00) ya muestra que existe un consumidor que paga más por leche de finca.
+- **Hay un hueco entre los dos lados:** fincas certificadas que no quieren distribuir y hogares de alto poder adquisitivo que no tienen un acceso cómodo y recurrente.
+
+### 1.3 Cadena actual frente a la cadena propuesta
+
+```mermaid
+flowchart LR
+    subgraph Hoy
+        F1[Finca] -- WhatsApp y entrega informal --> H1[Hogar]
+    end
+    subgraph Con Muuvi
+        F2[Finca en Cañete o Huaral<br/>ordeño, enfriamiento y envasado] -- traslado refrigerado --> P[Punto de acopio en Lima]
+        P -- última milla Muuvi --> H2[Hogar]
+    end
+```
+
+---
+
+## 2. Usuarios y segmentos objetivo
+
+| Prioridad | Segmento | Estado | Por qué |
+|---|---|---|---|
+| 1 | **Hogares** de Miraflores, San Isidro y La Molina | ✅ Segmento de lanzamiento | Alto poder adquisitivo y densidad de entregas en tres distritos |
+| 2 | **Personas fitness o con dietas específicas** | ✅ Segunda fase | Valoran origen, pureza y regularidad del consumo |
+| 3 | **Cafeterías, pastelerías y otros negocios** | ✅ Fase posterior | Compran en volumen; modelo B2B con otra lógica de pedido |
+| — | Familias con niños y adultos mayores | 📌 Subsegmentos dentro de "hogares" | Mencionados por el fundador; falta priorizarlos dentro del segmento 1 |
+
+### 2.1 Usuario del otro lado: la finca proveedora
+- ✅ Fincas con **certificación SENASA** ubicadas en **Cañete y Huaral** (región Lima, a unas 2 o 3 horas de la ciudad).
+- ✅ La finca **ordeña, enfría y envasa** en botella de vidrio, y **lleva la leche hasta un punto en Lima**.
+- ❓ Número de fincas comprometidas y litros diarios disponibles: sin definir.
+
+### 2.2 Expansión geográfica prevista
+| Fase | Distritos |
+|---|---|
+| Lanzamiento (meses 1–3) | Miraflores, San Isidro, La Molina |
+| Consolidación (mes 6) | + San Borja, Surco, Barranco |
+
+---
+
+## 3. Propuesta de valor
+
+### 3.1 Para el hogar
+> **Leche fresca de vacas en libre pastoreo, de fincas con certificación SENASA, que llega en botella de vidrio a casa de forma recurrente y sin romper la cadena de frío. El hogar no tiene que acordarse de pedir ni buscar dónde comprarla.**
+
+Los cuatro diferenciadores que, según el fundador, justifican el precio adicional:
+1. **Certificación SENASA garantizada.**
+2. **Botella de vidrio retornable.**
+3. **Trazabilidad** de la finca y del bienestar del ganado.
+4. **Cadena de frío** garantizada hasta la puerta.
+
+Además: **comodidad**, porque la compra pasa a ser recurrente y ya no depende de recordar ni de buscar un proveedor.
+
+### 3.2 Para la finca
+> **Vende a hogares urbanos de alto valor sin montar su propia logística de reparto ni atender cliente por cliente.**
+
+### 3.3 Frente a las alternativas actuales
+| Alternativa | Qué ofrece | Qué le falta frente a Muuvi |
+|---|---|---|
+| Finca directa por WhatsApp | Precio bajo (S/ 3.50 – S/ 6.00) | Recurrencia, comodidad y cadena de frío garantizada 📌 |
+| Sección premium de Wong o Vivanda | Disponibilidad y confianza en la marca | Origen directo de finca, botella retornable y trazabilidad por finca 📌 |
+| Otras marcas de leche fresca con delivery | Entrega a domicilio | ❓ Falta el análisis competitivo (precios, cobertura, propuesta) |
+
+---
+
+## 4. Modelo de negocio preliminar
+
+### 4.1 Ingresos
+- ✅ **Suscripción** semanal o mensual.
+- ✅ **Pago por pedido** (compra puntual).
+- ✅ Precio al consumidor: **S/ 13.50 – S/ 16.00 por litro**.
+
+### 4.2 Costos principales (identificados, sin cuantificar)
+- ❓ Compra de leche a la finca, a un precio por litro todavía sin definir.
+- ❓ Operación del punto de acopio refrigerado en Lima.
+- ❓ Última milla propia refrigerada (personal, vehículos, cadena de frío).
+- ❓ Reposición de las botellas que no vuelven.
+- ❓ Comisiones de las pasarelas de pago (ver constitución, PRINCIPIO-002).
+
+### 4.3 Margen bruto por litro (escenario ilustrativo)
+📌 Este cálculo **supone** que Muuvi le paga a la finca el mismo precio que hoy cobra por WhatsApp. El fundador no lo ha confirmado.
+
+| Escenario | Precio de venta | Costo de la leche | Margen bruto antes de logística |
+|---|---|---|---|
+| Pesimista | S/ 13.50 | S/ 6.00 | **S/ 7.50** |
+| Optimista | S/ 16.00 | S/ 3.50 | **S/ 12.50** |
+
+### 4.4 Botella retornable
+- ✅ Botella de vidrio con meta de retorno ≥ 90 %.
+- ❓ Monto del depósito o garantía por botella: sin definir.
+
+### 4.5 Capital inicial
+- ❓ Sin definir.
+
+---
+
+## 5. Métricas de éxito (KPIs medibles)
+
+> Los meses se cuentan desde el lanzamiento comercial (fecha ❓ por definir).
+
+### 5.1 Crecimiento
+| KPI | Mes 3 (validación / PMV) | Mes 6 (consolidación) | Mes 12 (escala inicial) | Origen |
+|---|---|---|---|---|
+| Suscriptores activos | **50** | **200** | **600** | ✅ Fundador |
+| Distritos con servicio | 3 | 6 | ❓ | ✅ Fundador |
+
+### 5.2 Retención y operación
+| KPI | Meta | Cómo se mide | Origen |
+|---|---|---|---|
+| Retención de suscriptores a 3 meses | **≥ 60 %** | Suscriptores activos al día 90 ÷ suscriptores de la misma cohorte al día 0 | ✅ Fundador |
+| Tasa de retorno de botellas | **≥ 90 %** | Botellas devueltas ÷ botellas entregadas, por mes | ✅ Fundador |
+| Entregas sin rotura de cadena de frío | **100 %** en la fase PMV | Entregas dentro del rango de temperatura ÷ entregas totales | ✅ Objetivo del fundador; 📌 el rango de temperatura lo debe fijar un especialista sanitario |
+| Cumplimiento de abastecimiento de las fincas | 📌 **≥ 95 %** (propuesto) | Litros entregados ÷ litros comprometidos, por semana | 📌 Propuesto para medir el riesgo R2 |
+
+### 5.3 Validación del problema (antes o durante el PMV)
+| KPI | Meta propuesta 📌 | Cómo se mide |
+|---|---|---|
+| Entrevistas a hogares objetivo | **≥ 20** en Miraflores, San Isidro y La Molina | Conteo de entrevistas registradas |
+| Hogares que confirman el dolor ("no la encuentro cerca" o "me olvido de comprar") | **≥ 60 %** de los entrevistados | Respuestas codificadas en las entrevistas |
+| Disposición a pagar ≥ S/ 13.50 por litro | **≥ 40 %** de los entrevistados | Pregunta de precio en la entrevista |
+
+---
+
+## 6. Riesgos identificados y supuestos
+
+### 6.1 Riesgos
+| ID | Riesgo | Probabilidad | Impacto | Origen |
+|---|---|---|---|---|
+| R1 | **No hay suficientes clientes al precio de S/ 13.50 – S/ 16.00**, entre 2.3 y 4.6 veces lo que se paga hoy por WhatsApp | Alta | Crítico | ✅ Fundador |
+| R2 | **Las fincas entregan menos leche de la acordada** | Media | Alto | ✅ Fundador |
+| R3 | Rotura de la cadena de frío en el traslado de Cañete o Huaral a Lima (2 a 3 horas) o en la última milla | Media | Crítico (sanitario y reputacional) | 📌 Analista |
+| R4 | Las botellas no vuelven en la proporción esperada, lo que eleva el costo por litro | Media | Medio | 📌 Analista |
+| R5 | El cliente se salta a Muuvi y le compra directo a la finca por WhatsApp | Media | Alto | 📌 Analista |
+| R6 | La densidad de clientes por distrito no alcanza para rentabilizar la última milla propia | Media | Alto | ✅ Objetivo del mes 12 del fundador |
+| R7 | Una finca pierde o deja vencer su certificación SENASA o su registro DIGESA | Baja | Alto (no se puede vender ni rotular como orgánico) | 📌 Analista, a partir de la constitución |
+
+### 6.2 Supuestos por validar
+| ID | Supuesto | Cómo validarlo |
+|---|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar" | Entrevistas (KPI 5.3) |
+| S2 | Certificación, vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro | Pregunta de disposición a pagar y preventa |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro | Negociación con las fincas |
+| S4 | Las fincas de Cañete y Huaral tienen volumen suficiente para 600 suscriptores al mes 12 | Inventario de litros diarios por finca |
+| S5 | Las fincas aceptan llevar la leche hasta un punto en Lima por su cuenta | Acuerdo firmado con cada finca |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas | Medición en la fase PMV |
+
+---
+
+## 7. Restricciones conocidas
+
+### 7.1 Legales, sanitarias y tributarias (según `00-constitucion.md`)
+- **Datos personales:** cumplir la Ley N.° 29733 y el D.S. 016-2024-JUS. Esto incluye inscribir los bancos de datos ante la ANPDP, aceptar solo a mayores de 18 años, pedir consentimiento expreso y eliminar los datos en un plazo máximo de 30 días tras la baja (PRINCIPIO-005).
+- **Producto:** cada producto debe tener **registro sanitario DIGESA** antes de publicarse, y solo se puede rotular como "orgánico" con **certificación SENASA vigente** (PRINCIPIO-006). Como la finca envasa, estos registros dependen de ella.
+- **Tributaria:** cada pago confirmado debe emitir su **boleta o factura electrónica SUNAT** (PRINCIPIO-006).
+- **Consumidor:** **Libro de Reclamaciones virtual** (Ley 29571) y, cuando corresponda, **advertencias octogonales** (Ley 30021).
+- **Pagos:** el sistema no puede recibir ni guardar datos de tarjeta (PCI-DSS SAQ-A, PRINCIPIO-004).
+
+### 7.2 Operativas
+- **Cobertura inicial:** solo Miraflores, San Isidro y La Molina.
+- **Abastecimiento:** solo fincas de Cañete y Huaral, a 2 o 3 horas de Lima.
+- **Envasado:** lo hace la finca. Muuvi no manipula el producto, solo lo recibe y lo distribuye.
+- **Comunicaciones al cliente:** solo entre las **09:00 y las 20:00, hora de Lima** (PRINCIPIO-008).
+
+### 7.3 Del proyecto
+- El **stack tecnológico** y las **pasarelas de pago** ya están definidos en la constitución (PRINCIPIO-002). El Product Manager trabaja dentro de ese marco.
+- Fundador único, emprendedor independiente; el proyecto parte desde cero.
+- ❓ Capital inicial y fecha de lanzamiento sin definir.
+
+---
+
+## 8. Pendientes antes de pasar al Product Manager
+1. ❓ Precio por litro que Muuvi pagará a la finca (cierra el margen de la sección 4.3).
+2. ❓ Monto del depósito por botella.
+3. ❓ Rango de capital inicial.
+4. ❓ Número de fincas comprometidas y litros diarios disponibles.
+5. ❓ Fecha estimada de lanzamiento comercial.
+6. ❓ Análisis de la competencia directa (marcas de leche fresca con delivery en Lima).
+7. 📌 Hacer las ≥ 20 entrevistas de validación (KPI 5.3).
+8. ⚠️ Corregir el nombre "Muuuvi" a "Muuvi" en `00-constitucion.md`. Lo tiene que hacer un humano, porque el PRINCIPIO-008.10 prohíbe que un agente lo edite.
+
+---
+
+## Fuentes
+- [Midagri: en Perú existen más de 452 mil productores de leche — Agraria.pe (30/05/2025)](https://agraria.pe/noticias/midagri-en-peru-existen-mas-de-452-mil-productores-de-leche-39615)
+- [Estudio sobre el mercado de leche cruda en el Perú — Repositorio PUCP](https://repositorio.pucp.edu.pe/bitstreams/bf05f38a-1c40-422e-839b-c9051206ea9a/download)
+- [Piura produjo más de 51 millones de litros de leche en el 2025 — Agraria.pe (01/04/2026)](https://agraria.pe/noticias/piura-produjo-mas-de-51-millones-de-litros-de-leche-en-el-20-41971)
+
+</formato>
+
+---
+# Constitución del Proyecto Muuvi
+**Versión:** 1.0.0
+**Fecha:** 07/11/2026
+**Ámbito:** Obligatorio y vinculante para todos los desarrolladores humanos y agentes de inteligencia artificial que colaboren en el proyecto. Es el primer archivo que cualquier agente de IA debe leer antes de trabajar en el proyecto.
+
+---
+
+### PRINCIPIO-001: Uniformidad Lingüística
+Todo el código fuente (variables, funciones, componentes, tablas, endpoints), los comentarios, los mensajes de commit, los ADR y la documentación se redactan en español. La interfaz de usuario es bilingüe: español (`es-PE`, idioma por defecto) e inglés (`en`). Todo texto visible se carga desde archivos de traducción y nunca se escribe directamente en el código.
+- **Ejemplo de cumplimiento:** Una función `calcularProximaEntrega()` con su comentario en español, y un componente que muestra `t('pedido.titulo')` resuelto desde `src/locales/es-PE.json` y `src/locales/en.json`.
+- **Ejemplo de violación:** Una función `getNextDelivery()`, un commit "fix delivery bug" o un JSX con texto fijo como `<h1>Tu pedido</h1>`.
+
+### PRINCIPIO-002: Inmutabilidad del Stack Tecnológico Base
+El stack aprobado es:
+- **Frontend:** React 18+ como Aplicación Web Progresiva (PWA).
+- **Backend:** Node.js 20+ con Express.
+- **Base de datos:** PostgreSQL 16+.
+- **Pasarelas de pagos:** Culqi, Niubiz, Izipay y Mercado Pago, más las billeteras Yape y Plin. Todas se integran detrás de un único módulo `pagos` con una interfaz común, de modo que ninguna otra parte del sistema dependa directamente de una pasarela concreta.
+
+Ningún componente del stack puede modificarse ni sustituirse sin aprobación explícita y documentada del equipo humano titular, registrada en un ADR (`docs/adr/ADR-NNN-*.md`).
+- **Ejemplo de cumplimiento:** Desarrollar la pantalla de suscripciones en React 18+ y su endpoint en Express sobre Node.js 20.
+- **Ejemplo de violación:** Reemplazar Express por otro framework web, usar Flutter o introducir una base de datos NoSQL sin un ADR aprobado.
+
+### PRINCIPIO-003: Cifrado de Datos Personales
+Los datos personales (DNI, nombres completos, fecha de nacimiento, teléfono, correo, dirección exacta y coordenadas de geolocalización) se cifran en reposo **a nivel de campo con AES-256-GCM**, y sus claves se guardan en un gestor de secretos (KMS), nunca en el repositorio. Toda comunicación entre la PWA, el backend y los servicios de terceros usa **TLS 1.3**. Ningún dato personal puede aparecer en texto plano en logs, mensajes de error ni analítica.
+- **Ejemplo de cumplimiento:** Transmitir los datos por un canal TLS 1.3 y guardar el DNI del cliente cifrado con AES-256-GCM en la columna `dni_cifrado` de PostgreSQL; los logs solo registran `cliente_id`.
+- **Ejemplo de violación:** Guardar el DNI o el teléfono del cliente en texto plano en tablas o logs, o registrar `Error al entregar en Av. Larco 123, tel. 987654321`.
+
+### PRINCIPIO-004: Pagos sin Datos de Tarjeta (PCI-DSS SAQ-A)
+Los datos de tarjeta (número de tarjeta o PAN, CVV y fecha de vencimiento) **nunca** llegan al backend ni a la base de datos de Muuuvi. Se capturan con el formulario o SDK de la pasarela, que devuelve un token; el sistema solo guarda ese token y los 4 últimos dígitos. Un test automatizado falla si algún esquema SQL, DTO o validador contiene campos como `numero_tarjeta`, `cvv` o `pan`.
+- **Ejemplo de cumplimiento:** La PWA envía al backend solo `{ "token_pasarela": "tkn_…", "ultimos_4": "4242" }` para cobrar la suscripción mensual.
+- **Ejemplo de violación:** Un endpoint `POST /pagos` que recibe `{ "numero_tarjeta": "4111…", "cvv": "123" }`.
+
+### PRINCIPIO-005: Ciclo de Vida de los Datos Personales (Ley N.° 29733 y D.S. 016-2024-JUS)
+1. **Inscripción ante la ANPDP:** los bancos de datos de clientes están inscritos ante la ANPDP. Ningún banco de datos nuevo (por ejemplo, una nueva tabla o servicio con datos personales) entra en producción sin su inscripción o actualización previa.
+2. **Solo mayores de edad:** el registro exige fecha de nacimiento y rechaza a quien tenga menos de 18 años.
+3. **Consentimiento:** se pide consentimiento expreso, separado y sin casillas premarcadas para (a) el tratamiento de datos y (b) el envío de datos a terceros, incluidos los proveedores de IA.
+4. **Datos enviados a IA:** el DNI y los datos de pago nunca se envían a un proveedor de IA. Los demás datos solo se envían si el cliente dio su consentimiento y el proveedor figura en `docs/proveedores-datos.md`.
+5. **Eliminación:** al darse de baja una cuenta, sus datos se eliminan o anonimizan en un plazo máximo de **30 días**. Solo se conservan los comprobantes que SUNAT obliga a guardar.
+- **Ejemplo de cumplimiento:** Un job diario anonimiza las cuentas cuya `fecha_baja` tiene más de 30 días y deja la ejecución registrada en la tabla de auditoría.
+- **Ejemplo de violación:** Registrar a un usuario de 17 años, o enviar a un LLM un prompt que contiene el DNI del cliente.
+
+### PRINCIPIO-006: Cumplimiento Comercial, Tributario y Sanitario
+- Todo pago confirmado emite su **boleta o factura electrónica SUNAT**.
+- Ningún producto se publica sin su **registro sanitario DIGESA**.
+- Ningún producto o finca se rotula como "orgánico" sin una **certificación SENASA vigente**.
+- La PWA ofrece acceso al **Libro de Reclamaciones virtual** desde el menú principal (Ley 29571).
+- Los productos que lo requieran muestran las **advertencias octogonales** (Ley 30021).
+- **Ejemplo de cumplimiento:** El catálogo rechaza guardar un yogurt artesanal si `registro_digesa` está vacío.
+- **Ejemplo de violación:** Mostrar la etiqueta "Orgánico" en una finca cuya certificación SENASA está vencida.
+
+### PRINCIPIO-007: Accesibilidad Universal de Interfaz (WCAG 2.1 AA)
+Todas las interfaces cumplen como mínimo el nivel AA de WCAG 2.1:
+- Contraste mínimo de **4.5:1** para texto normal y **3:1** para texto grande y componentes.
+- Navegación completa mediante teclado, con foco visible.
+- Texto alternativo (`alt` o `aria-label`) en toda imagen e ícono interactivo.
+- Áreas táctiles de al menos **48×48 px**.
+- Texto que escala hasta **200 %** sin cortarse.
+- Compatibilidad con TalkBack y VoiceOver.
+- **Dispositivos soportados:** Android 9 (API 28, Pie) o superior con Chrome actualizado, e iOS 15 o superior con Safari 15 o superior.
+- **Ejemplo de cumplimiento:** El botón "Programar entrega" tiene contraste de 5.2:1, mide 48×48 px, recibe foco con Tab y el lector de pantalla lo anuncia como "Programar entrega, botón".
+- **Ejemplo de violación:** Un botón de acción crítico con contraste inferior a 4.5:1, que no responde al foco del teclado, o un ícono de botella sin texto alternativo.
+
+### PRINCIPIO-008: Restricciones Absolutas y Líneas Rojas para Agentes de IA
+Ningún agente de IA, autónomo o asistido, puede bajo ninguna circunstancia:
+1. **Modificar el stack tecnológico:** cambiar, actualizar o introducir librerías o frameworks fuera del stack aprobado (React PWA, Node.js con Express, PostgreSQL), ni añadir o quitar dependencias sin aprobación humana.
+2. **Eliminar datos críticos:** borrar o anular registros de ventas, pedidos, pagos, abonos, suscripciones, comprobantes o auditorías sin la doble confirmación explícita del administrador titular de Muuuvi.
+3. **Alterar límites de crédito:** modificar por su cuenta los topes de crédito, descuentos o saldos de garantía de botellas retornables asignados a los clientes.
+4. **Violar ventanas de comunicación:** enviar recordatorios o notificaciones por WhatsApp, SMS o push fuera del horario permitido (**09:00–20:00, America/Lima, UTC-5**).
+5. **Saltarse los controles de integración:** hacer push o merge directo a `main` o a producción, o desplegar a producción sin aprobación humana.
+6. **Tocar secretos:** leer, crear o modificar secretos (`.env`, claves de API, credenciales de la pasarela o del KMS).
+7. **Ejecutar operaciones destructivas:** correr migraciones destructivas (`DROP`, `TRUNCATE`, `DELETE` o `UPDATE` sin `WHERE`) o acceder a datos reales de clientes.
+8. **Manipular tests:** modificar, saltar (`skip`) o borrar tests para que pasen.
+9. **Cambiar lo comercial o legal:** cambiar precios, lógica de cobro, tarifas de entrega o textos legales (términos, privacidad, consentimientos) sin revisión humana.
+10. **Modificar esta constitución:** editar este archivo.
+
+Ante cualquier duda o inconsistencia, el agente se detiene y solicita intervención humana.
+- **Ejemplo de cumplimiento:** El agente detecta suscripciones duplicadas en la base de datos, no las borra, y genera una alerta que pide intervención humana obligatoria.
+- **Ejemplo de violación:** El agente decide por su cuenta purgar registros antiguos de la tabla de pedidos, instala un ORM alternativo en el backend sin aprobación, o programa un recordatorio de renovación a las 22:30.
+
+### PRINCIPIO-009: Garantía de Calidad y Cobertura de Pruebas Automatizadas
+- Todo cambio en la lógica del sistema debe mantener al menos **80 % de cobertura en reglas de negocio** y **60 % de cobertura general**. El CI bloquea el merge si no se alcanza.
+- Cada regla de `03-reglas-de-negocio.md` está respaldada por al menos un test unitario que cita su ID.
+- Son obligatorias las pruebas unitarias, de integración, E2E de los flujos críticos (registro, suscripción, pago y entrega) y de accesibilidad automatizadas.
+- Cada PR requiere **2 aprobaciones humanas**, linter y SAST en verde, y commits en formato **Conventional Commits** en español.
+- **Ejemplo de cumplimiento:** Un PR que implementa la regla de pausa de suscripción incluye `test_RN012_pausar_suscripcion_antes_del_corte`, deja el módulo en 85 % de cobertura y tiene 2 aprobaciones.
+- **Ejemplo de violación:** Mergear con una sola aprobación, o con la cobertura del módulo de negocio por debajo del 80 %.
+
+### PRINCIPIO-010: Documentación como Código
+- Toda la documentación vive en el repositorio en formato **Markdown**.
+- Cada decisión técnica relevante se registra como **ADR** en `docs/adr/ADR-NNN-titulo.md`.
+- La API se documenta con **OpenAPI 3.x** en `docs/api/openapi.yaml`, y el CI valida que el contrato coincide con la implementación.
+- Todo diagrama se escribe en **Mermaid** dentro del propio Markdown.
+- **Ejemplo de cumplimiento:** El endpoint `GET /fincas/{id}/trazabilidad` se añade a `openapi.yaml` en el mismo PR, junto con un diagrama de secuencia en Mermaid.
+- **Ejemplo de violación:** Documentar la arquitectura en un PNG exportado de otra herramienta, o publicar un endpoint que no figura en OpenAPI.
+
+### PRINCIPIO-011: Estandarización de Formatos de Localización Peruana
+Montos, fechas y números se muestran según las convenciones del Perú:
+- Moneda en soles con el formato `S/ 1,250.50` (punto decimal y coma de miles).
+- Fechas en formato `DD/MM/AAAA` cuando la interfaz está en español.
+- Zona horaria `America/Lima` (UTC-5) para ventanas de entrega, cortes de suscripción y notificaciones.
+
+En la base de datos, los timestamps se guardan en UTC y los montos como `NUMERIC(12,2)`, nunca como `FLOAT`.
+- **Ejemplo de cumplimiento:** La suscripción semanal se muestra como `S/ 32.90 · próxima entrega 12/11/2026, 07:00–09:00`.
+- **Ejemplo de violación:** Mostrar `$32.9` o `11/12/2026`, o guardar el precio en una columna `FLOAT`.
+
+
+---
+<rol>
+Eres un Agente Constitucional especializado en gobernanza de proyectos de software AI-First. Tu trabajo es ayudar a un equipo a definir los principios no negociables de su proyecto: las reglas que NINGÚN agente de IA ni humano puede violar bajo ninguna circunstancia.
+</rol>
+
+<contexto>
+Muuvi es una app móvil directa al consumidor que digitaliza y comercializa la venta de leche orgánica y lácteos artesanales provenientes de vacas en libre pastoreo, conectando fincas sostenibles directamente con hogares urbanos en Lima, Perú.
+Permite al consumidor programar entregas recurrentes de leche fresca en botellas retornables ecológicas, conocer la trazabilidad y el bienestar del ganado, y gestionar pagos y suscripciones de manera ágil.
+Este documento será el primer archivo que cualquier agente de IA lea antes de trabajar en el proyecto.
+País de operación: Perú.
+</contexto>
+
+<tarea>
+1. Hazme preguntas clave para entender las restricciones del proyecto. Pregunta sobre:
+   - Idioma del código y la documentación
+   - Stack tecnológico preferido (si lo tienen)
+   - Regulaciones legales aplicables
+   - Políticas de privacidad y seguridad de datos
+   - Restricciones de accesibilidad
+   - Acciones prohibidas para agentes de IA
+   - Estándares de calidad y testing
+   - Formato de documentación
+
+2. Con mis respuestas, propón entre 8 y 12 principios constitucionales.
+
+3. Cada principio debe seguir este formato:
+   PRINCIPIO-[NNN]: [Título corto]
+   [Descripción en una o dos frases, con valores concretos donde aplique]
+   Ejemplo de cumplimiento: [...]
+   Ejemplo de violación: [...]
+</tarea>
+
+<restricciones>
+- NO asumas nada: si no sabes algo, PREGUNTA.
+- Sé específico: nada de "el sistema debe ser seguro". Dime QUÉ debe estar cifrado y con QUÉ algoritmo.
+- Incluye al menos un principio sobre qué NO puede hacer un agente de IA.
+- Cada principio debe ser verificable por un revisor humano o por un test automatizado.
+</restricciones>
+
+<formato>
+Entrega los principios en Markdown con el formato indicado, listos para copiar al archivo 00-constitucion.md.
+</formato>
+---
+
+</contexto>
+
+<tarea>
+Con base en el Project Brief y la constitución, ayúdame a definir:
+
+1. **IN-SCOPE** — Funcionalidades que SÍ construimos. Para cada una: nombre, descripción de una frase, y prioridad MoSCoW.
+
+2. **OUT-OF-SCOPE** — Funcionalidades que explícitamente NO construimos en esta versión. Para cada una: nombre y razón por la que está fuera.
+
+3. **MVP (Minimum Viable Product)** — Solo los Must have. Describe en un párrafo qué puede hacer un usuario con solo el MVP.
+
+4. **Supuestos** — Lo que asumimos como verdadero sin haberlo validado.
+
+5. **Restricciones** — Limitaciones técnicas, legales o de recursos.
+
+6. **Dependencias** — Sistemas o servicios externos de los que depende el producto.
+
+Priorización MoSCoW:
+- M (Must): sin esto, el producto no funciona. Máximo 5-6 funcionalidades.
+- S (Should): valioso, se construye después del MVP. Máximo 4-5.
+- C (Could): nice-to-have. Máximo 3-4.
+- W (Won't): explícitamente fuera de esta versión.
+</tarea>
+
+<restricciones>
+- Sé estricto con los Must: si puedes vivir sin ello en la primera versión, no es Must.
+- El out-of-scope es TAN IMPORTANTE como el in-scope. Mínimo 5 items en out-of-scope.
+- Todos los items deben ser consistentes con la constitución.
+</restricciones>
+
+<formato>
+Documento en Markdown para el archivo 02-alcance.md.
+</formato>
