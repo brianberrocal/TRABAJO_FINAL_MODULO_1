@@ -1,0 +1,1396 @@
+<agente>
+Eres el Agente Spec Finalizer del framework BMAD.
+Tu rol: auditar el Spec Pack completo y garantizar que está listo para que un agente de IA lo use como contexto para implementar el proyecto.
+</agente>
+
+<contexto>
+-----00-constitucion.md-----
+# Constitución del Proyecto FiaYa
+**Versión:** 1.0.1  
+**Ámbito:** Obligatorio y vinculante para todos los desarrolladores humanos y agentes de inteligencia artificial que colaboren en el proyecto.
+
+---
+
+### PRINCIPIO-001: Uniformidad Lingüística Total
+Todo el código fuente, nombres de variables, funciones, comentarios, documentación técnica y de usuario debe redactarse estrictamente en español latinoamericano.
+- **Ejemplo de cumplimiento:** Una variable llamada `limite_credito_cliente` y documentación explicativa íntegramente en español.
+- **Ejemplo de violación:** Una función nombrada `fetchCreditLimit()` o comentarios en inglés dentro del código base.
+
+### PRINCIPIO-002: Inmutabilidad del Stack Tecnológico Base
+El stack tecnológico compuesto por React 18+ estructurado como Aplicación Web Progresiva / PWA (frontend), Node.js 20+ con Express (backend) y PostgreSQL 16+ (base de datos) no puede ser modificado ni sustituido sin aprobación explícita y documentada del equipo humano titular.
+- **Ejemplo de cumplimiento:** Desarrollar la PWA cliente en React 18+ y un nuevo módulo backend utilizando Express sobre Node.js 20.
+- **Ejemplo de violación:** Reemplazar Express por otro framework web, utilizar Flutter o introducir una base de datos NoSQL sin autorización explícita.
+
+### PRINCIPIO-003: Cumplimiento Riguroso de Protección de Datos Personales
+Toda recolección y tratamiento de datos personales debe alinearse con la Ley N.° 29733 de Protección de Datos Personales del Perú. Los datos sensibles (nombre, DNI, teléfono, dirección) deben cifrarse en reposo mediante AES-256 y en tránsito con TLS 1.3.
+- **Ejemplo de cumplimiento:** Transmitir los datos mediante un canal TLS 1.3 y almacenar el campo del DNI del cliente cifrado con el algoritmo AES-256 en la base de datos PostgreSQL.
+- **Ejemplo de violación:** Guardar el número de DNI o el teléfono del cliente en texto plano dentro de tablas o logs del sistema.
+
+### PRINCIPIO-004: Aislamiento Multitenant Estricto entre Bodegas
+El sistema debe garantizar la segregación lógica absoluta de la información, permitiendo que cada bodeguero consulte y manipule únicamente los registros pertenecientes a su propia bodega.
+- **Ejemplo de cumplimiento:** Incluir la condición `WHERE bodega_id = $1` extraída del token autenticado en cada consulta SQL.
+- **Ejemplo de violación:** Un endpoint de búsqueda de clientes o inserción de registros que omita la validación e inclusión del identificador de la bodega.
+
+### PRINCIPIO-005: Accesibilidad Universal de Interfaz (WCAG 2.1 AA)
+Las interfaces de usuario deben cumplir estrictamente como mínimo con el nivel AA del estándar WCAG 2.1, garantizando un ratio de contraste para texto de al menos 4.5:1 y navegabilidad completa mediante teclado.
+- **Ejemplo de cumplimiento:** Utilizar colores que mantengan una relación de contraste superior a 4.5:1 y proveer etiquetas de texto alternativo (`alt`) en todas las imágenes interactivas.
+- **Ejemplo de violación:** Diseñar botones de acción críticos cuyo contraste de color respecto al fondo sea inferior a 4.5:1 o que no respondan al foco del teclado.
+
+### PRINCIPIO-006: Restricciones Absolutas y Líneas Rojas para Agentes de IA
+Los agentes de inteligencia artificial tienen categóricamente prohibido tomar decisiones estructurales, destruir datos o eludir validaciones humanas. Ningún agente autónomo o asistido puede bajo ninguna circunstancia:
+1. **Modificar el stack tecnológico:** Cambiar, actualizar o introducir librerías o frameworks fuera del stack aprobado (React PWA, Node.js, PostgreSQL).
+2. **Eliminar datos críticos:** Borrar o anular registros de ventas, pagos, abonos o auditorías sin la doble confirmación explícita del bodeguero titular.
+3. **Alterar límites de crédito:** Modificar de forma autónoma los topes de crédito asignados a los clientes de las bodegas.
+4. **Violar ventanas de comunicación:** Enviar recordatorios o notificaciones por WhatsApp fuera del horario permitido (09:00–20:00 UTC-5).
+- **Ejemplo de cumplimiento:** El agente detecta una inconsistencia en la base de datos, se detiene y genera una alerta solicitando intervención humana obligatoria.
+- **Ejemplo de violación:** El agente decide unilateralmente purgar registros antiguos de la tabla de fiados o instala un ORM alternativo en el backend sin aprobación.
+
+### PRINCIPIO-007: Garantía de Calidad y Cobertura de Pruebas Automatizadas
+Todo cambio en la lógica del sistema debe contar con un mínimo de 80% de cobertura de código en reglas de negocio y un 60% de cobertura general. Adicionalmente, cada regla definida en `03-reglas-de-negocio.md` debe estar respaldada por al menos un test unitario.
+- **Ejemplo de cumplimiento:** Un pull request que incorpora la regla de cálculo de morosidad e incluye una suite de pruebas unitarias que otorga un 85% de cobertura sobre el módulo.
+- **Ejemplo de violación:** Mergear código a la rama principal que reduzca la cobertura del módulo de negocio por debajo del 80% o carezca de un test específico para una regla documentada.
+
+### PRINCIPIO-008: Estandarización de Formatos de Localización Peruana
+Todos los montos monetarios, fechas y números mostrados o procesados por la aplicación deben formatearse de acuerdo con las convenciones locales del Perú: moneda en Soles (PEN / S/), fechas en formato `DD/MM/AAAA`, zona horaria `America/Lima` (UTC-5), con punto (`.`) como separador decimal y coma (`,`) como separador de miles.
+- **Ejemplo de cumplimiento:** Formatear una deuda registrada como `S/ 1,250.50` con fecha de emisión `15/04/2026`.
+- **Ejemplo de violación:** Desplegar en la interfaz un monto con formato en dólares `$1250.50` o una fecha en formato anglosajón `04/15/2026`.
+-----00-constitucion.md-----
+
+-----01-project-brief.md-----
+# Project Brief — FiaYa
+
+**Versión:** 1.0.1  
+**Fecha:** 28/10/2026  
+**Estado:** Aprobado para Fase de Arquitectura y Especificación  
+
+---
+
+## 1. Problema y Oportunidad
+
+### Problema Real
+En el Perú existen más de 400,000 bodegas de barrio, de las cuales la gran mayoría utiliza un cuaderno físico o la memoria para gestionar las ventas al fiado (crédito directo al cliente del vecindario). El fiado representa entre el **20% y el 40% de las ventas diarias** de una bodega típica en Lima Metropolitana.
+
+Esta gestión analógica genera tres problemas críticos:
+1. **Falta de liquidez y morosidad acumulada:** Tasa de cobro cercana al 60% debido a olvidos de anotación, disputas por montos no registrados y falta de seguimiento estructurado de cobro.
+2. **Ineficiencia operativa y pérdida de tiempo:** El bodeguero invierte tiempo considerable al día hojeando cuadernos, sumando deudas a mano y realizando cobranzas presenciales incómodas.
+3. **Ceguera de flujo de caja:** Imposibilidad de prever el capital de trabajo disponible para reabastecimiento con distribuidores mayoristas.
+
+### Oportunidad
+Digitalizar el cuaderno de fiados mediante una aplicación web progresiva (PWA) optimizada para dispositivos móviles Android enfocada en el bodeguero, conectada con WhatsApp para la interacción de cobro y consulta con el cliente final. Esto permite profesionalizar el canal tradicional minorista más importante del Perú sin romper la relación de confianza interpersonal del barrio.
+
+---
+
+## 2. Usuarios y Segmentos Objetivo
+
+### A. Bodeguero / Dueño (Usuario Primario - Administrador)
+- **Perfil:** Dueño de bodega de barrio en Lima Metropolitana, entre 30 y 55 años. Sin formación técnica avanzada, usuario habitual de WhatsApp y Yape/Plin. Opera dispositivos smartphone Android de gama baja/media.
+- **Necesidad:** Registrar fiados en menos de 30 segundos durante la atención en mostrador, controlar el tope de deuda por vecino y automatizar el cobro sin deteriorar la relación vecinal.
+
+### B. Ayudante de Bodega (Usuario Primario - Operador)
+- **Perfil:** Familiar o empleado contratado para atender por turnos.
+- **Necesidad:** Registrar ventas al crédito de forma rápida sin acceso a la configuración financiera global de la bodega ni a los reportes consolidados del dueño.
+
+### C. Cliente Vecino (Usuario Secundario - Pasivo / Interactivo vía WhatsApp)
+- **Perfil:** Residente del barrio que compra insumos diarios al crédito.
+- **Necesidad:** Transparencia en sus cuentas, resúmenes claros de compras y facilidades de pago digital (Yape/Plin) sin necesidad de instalar apps adicionales.
+
+---
+
+## 3. Propuesta de Valor
+
+- **Agilidad Operativa:** Registro de ventas al crédito en menos de 30 segundos, adaptado a la dinámica acelerada del mostrador.
+- **Cobranza Automatizada y Empática:** Recordatorios periódicos por WhatsApp con detalle de compras e integración de enlaces directos para pago vía Yape/Plin.
+- **Control de Riesgo de Crédito:** Configuración de límites máximos de fiado por cliente con alertas automáticas ante sobreendeudamiento.
+- **Garantía de Privacidad y Continuidad:** Aislamiento total de datos entre bodegas, cifrado estricto de información personal (DNI, teléfono) y tolerancia a caídas temporales de conectividad (modo offline básico PWA).
+
+---
+
+## 4. Modelo de Negocio Preliminar
+
+1. **Freemium (Adopción Inicial):**
+   * Gratuito hasta 30 clientes registrados con crédito activo.
+2. **Suscripción Plan Pro:**
+   * **S/ 19.90 / mes:** Clientes ilimitados, reportes analíticos de flujo de caja, recordatorios automatizados masivos y soporte prioritario.
+3. **Monetización Secundaria (Fase Posterior):**
+   * Comisión del 1% por la facilitación e integración directa de pasarela de pagos digitales (Yape/Plin).
+   * Generación de reportes agregados y anónimos de tendencias de consumo para marcas de consumo masivo y distribuidores mayoristas.
+
+---
+
+## 5. Métricas de Éxito (KPIs Medibles)
+
+| Indicador | Meta Inicial (Piloto) | Método de Medición |
+| :--- | :--- | :--- |
+| **Bodegas Activas** | 500 bodegas registradas con al menos 5 fiados/semana | Telemetría de la plataforma |
+| **Penetración del Registro** | >70% de las ventas al fiado registradas en FiaYa vs. cuaderno | Auditoría por muestreo en bodegas piloto |
+| **Efectividad de Cobro** | Tasa de cobro exitoso >85% (vs. ~60% histórico) | Promedio mensual de facturas saldadas sobre emitidas |
+| **Velocidad de Registro** | Tiempo de registro por transacción <30 segundos | Pruebas de usabilidad y logs de interfaz |
+| **Satisfacción del Usuario** | NPS del bodeguero > 40 | Encuestas de satisfacción in-app / WhatsApp |
+
+---
+
+## 6. Riesgos Identificados y Supuestos
+
+### Riesgos Principales
+1. **Resistencia a la Digitalización:** Preferencia por el cuaderno tradicional por hábito o desconfianza técnica.
+   * *Mitigación:* Interfaz ultra-simplificada que imite la estructura mental del cuaderno.
+2. **Temor a la Fiscalización Tributaria (SUNAT):** Percepción de que registrar datos de crédito expone sus ingresos a auditorías impositivas.
+   * *Mitigación:* Garantía explícita de privacidad y aislamiento de datos; el sistema funciona como herramienta interna de gestión privada.
+3. **Dependencia de WhatsApp Business API:** Cambios unilaterales en costos de mensajería o políticas de uso por parte de Meta.
+   * *Mitigación:* Diseño de plantilla de mensajes optimizado para minimizar conversaciones tarifadas e integración con SMS/fallback.
+4. **Sensibilidad de Datos de Deuda:** Fugas de información de saldos adeudados por vecinos que generen conflictos comunitarios.
+   * *Mitigación:* Cifrado AES-256 en reposo y estricto aislamiento *multi-tenant*.
+
+### Supuestos Clave
+- La penetración de Yape y Plin en Lima Metropolitana continuará facilitando la adopción de cobranza digital.
+- Los bodegueros cuentan con al menos un dispositivo smartphone Android operativo en la tienda capaz de ejecutar una PWA moderna.
+
+---
+
+## 7. Restricciones Conocidas
+
+- **Normativa Legal:** Cumplimiento obligatorio con la Ley N.° 29733 de Protección de Datos Personales del Perú (Cifrado AES-256 en reposo, TLS 1.3 en tránsito).
+- **Restricciones Hardware/SW:** Compatibilidad obligatoria con Android 10+ (navegadores basados en Chromium/Firefox con soporte de Service Workers y almacenamiento local PWA en dispositivos de 2GB RAM o superior).
+- **Restricciones de Red:** Soporte para funcionamiento con conectividad intermitente (almacenamiento local temporal PWA y sincronización posterior).
+- **Localización Peruana:**
+  * **Moneda:** Soles peruanos (`PEN` / `S/`).
+  * **Formato de Fechas:** `DD/MM/AAAA`.
+  * **Zona Horaria:** `America/Lima` (UTC-5).
+  * **Formato Numérico:** Punto (`.`) para decimales y coma (`,`) para separador de miles.
+-----01-project-brief.md-----
+
+-----02-alcance.md-----
+# Documento de Alcance: FiaYa
+
+## 1. IN-SCOPE (Priorización MoSCoW)
+
+### Must-have (M) — Imprescindibles para el MVP
+- **M-01: Registro de Clientes:** Creación de perfiles básicos de clientes con nombre, DNI cifrado y número de teléfono móvil de 9 dígitos, vinculados explícitamente a la bodega activa.
+- **M-02: Registro de Fiados (Ventas al Crédito):** Asignar monto, fecha y concepto de texto libre (ej. "Arroz y aceite") a la cuenta de un cliente.
+- **M-03: Límite de Crédito por Cliente:** Definir un tope máximo de endeudamiento; alerta visual en la interfaz que requiera confirmación si se supera el límite.
+- **M-04: Recordatorios de Cobro por WhatsApp:** Generación automática de un enlace de WhatsApp con un mensaje pre-redactado y profesional para cobrar el saldo pendiente al cliente.
+- **M-05: Resumen de Cuenta Individual:** Visualización rápida del saldo total adeudado y el historial básico de transacciones por cliente.
+
+### Should-have (S) — Altamente valiosos (Post-MVP inicial)
+- **S-01: Registro de Abonos/Pagos:** Registrar pagos parciales o totales que realiza el cliente para disminuir su deuda.
+- **S-02: Dashboard de Cuentas por Cobrar:** Vista consolidada de todos los clientes con deudas pendientes, ordenados por monto adeudado.
+- **S-03: Autenticación Básica:** Ingreso seguro del bodeguero mediante número de celular y contraseña/PIN de 4 dígitos.
+- **S-04: Anulación/Corrección de Transacciones:** Permitir la anulación de un fiado o abono registrado por error mediante un flujo de doble confirmación.
+
+### Could-have (C) — Deseables (Si el tiempo lo permite)
+- **C-01: Exportación de Reportes:** Generación de un resumen básico en formato texto/PDF para el control personal del bodeguero.
+- **C-02: Filtros por Antigüedad:** Identificar qué clientes tienen deudas con mayor tiempo de retraso.
+
+---
+
+## 2. OUT-OF-SCOPE (Exclusiones Explícitas)
+
+1. **Control de Inventario de Productos:** FiaYa no gestionará stock, precios de catálogo de productos ni merma de la bodega. Es strictly un cuaderno de fiados, no un ERP.
+2. **Pasarela de Pagos Transaccional Integrada:** No procesaremos pagos directos (Yape, Plin o tarjetas) dentro de la aplicación. El cobro y su validación ocurren por fuera o se registran de forma manual como "Abono".
+3. **Multi-cajero o Múltiples Usuarios:** La aplicación está diseñada para un único usuario por bodega (el dueño o bodeguero principal).
+4. **Historial de Compras por SKU:** No se registrarán marcas, cantidades exactas ni códigos de barras de los productos fiados; solo importes y notas de texto libre.
+5. **Programas de Fidelización o Puntos:** Quedan totalmente fuera herramientas de marketing, descuentos automáticos o recompensas para clientes cumplidos.
+
+---
+
+## 3. Descripción del MVP (Minimum Viable Product)
+
+El MVP de FiaYa permite al bodeguero de barrio registrarse en la aplicación web progresiva (PWA) y gestionar su libreta de fiados digitalmente desde su smartphone Android. Con solo los elementos *Must-have*, el bodeguero podrá dar de alta a sus clientes habituales asignándoles un límite de crédito de seguridad, registrar rápidamente los fiados diarios con una nota corta, revisar en segundos quiénes le deben más dinero y enviar un recordatorio formal de cobro directamente por WhatsApp con un solo toque, reduciendo la fricción y la pena al cobrar.
+
+---
+
+## 4. Supuestos (Assumptions)
+
+- Los bodegueros disponen de un teléfono inteligente (Android preferentemente) con navegador web moderno con soporte PWA.
+- Los clientes de las bodegas utilizan WhatsApp activamente y están acostumbrados a recibir comunicaciones comerciales o de cobranza por este medio.
+- Los bodegueros están dispuestos a migrar su libreta de papel tradicional a una interfaz digital móvil si esta es más rápida y evita pérdidas de información.
+
+---
+
+## 5. Restricciones (Constraints)
+
+- **Legales:** Cumplimiento de los principios de la Ley de Protección de Datos Personales (Ley N° 29733 de Perú) en el tratamiento de nombres, DNI y números telefónicos de terceros.
+- **Técnicas / UX:** La interfaz debe ser extremadamente ligera, intuitiva y rápida, optimizada para ser operada con una sola mano en medio de la atención en el mostrador.
+- **Proyecto:** Restricción de tiempo y alcance derivada del contexto del Diploma en AI-First Software Architecture.
+
+---
+
+## 6. Dependencias (Dependencies)
+
+- Aplicación de WhatsApp (o WhatsApp Business) instalada en el dispositivo del bodeguero para ejecutar el protocolo de envío de mensajes de cobro.
+- Infraestructura backend y base de datos PostgreSQL en la nube para la persistencia segura de los registros de clientes y transacciones.
+-----02-alcance.md-----
+
+-----03-reglas-de-negocio.md-----
+# Catálogo de Reglas de Negocio — Proyecto FiaYa
+
+---
+**RN-001** | Categoría: Autenticación y Seguridad | Prioridad: MUST  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero registre una nueva cuenta de cliente, el sistema DEBE asociar obligatoriamente la cuenta al `bodega_id` del usuario autenticado y almacenar el número de DNI cifrado con el algoritmo AES-256 en la base de datos PostgreSQL.  
+
+✅ Ejemplo: Registrar el cliente Juan Pérez asociándolo a la bodega `b_98765` con DNI `45678912` guardando el valor cifrado en la columna correspondiente.  
+❌ Contraejemplo: Almacenar el número de DNI `45678912` en texto plano o crear la cuenta de cliente sin asociarle el identificador `bodega_id`.  
+---
+
+---
+**RN-002** | Categoría: Aislamiento de Datos | Prioridad: MUST  
+Patrón EARS: Ubiquitous  
+
+El sistema DEBE incluir la condición `WHERE bodega_id = $1` en cada consulta SQL ejecutada, utilizando el identificador extraído del token de autenticación del bodeguero.  
+
+✅ Ejemplo: Ejecutar la consulta `SELECT * FROM clientes WHERE bodega_id = 'b_98765'` tras autenticar al usuario de la bodega correspondiente.  
+❌ Contraejemplo: Ejecutar una consulta `SELECT * FROM clientes` que devuelva los registros de clientes pertenecientes a múltiples bodegas sin filtrar por el identificador.  
+---
+
+---
+**RN-003** | Categoría: Localización | Prioridad: MUST  
+Patrón EARS: Ubiquitous  
+
+El sistema DEBE formatear todos los montos monetarios utilizando la moneda Soles (`S/`), punto (`.`) como separador decimal y coma (`,`) como separador de miles.  
+
+✅ Ejemplo: Mostrar el saldo pendiente de un cliente como `S/ 1,250.50` en la interfaz de la aplicación.  
+❌ Contraejemplo: Mostrar el saldo pendiente de un cliente utilizando un formato extranjero como `$1250.50` o `1,250.50 USD`.  
+---
+
+---
+**RN-004** | Categoría: Localización | Prioridad: MUST  
+Patrón EARS: Ubiquitous  
+
+El sistema DEBE registrar y mostrar todas las fechas bajo el formato `DD/MM/AAAA` utilizando la zona horaria `America/Lima` (UTC-5).  
+
+✅ Ejemplo: Guardar la fecha de un fiado realizado el 28 de octubre de 2026 como `28/10/2026`.  
+❌ Contraejemplo: Mostrar la fecha de la transacción utilizando el formato anglosajón `10/28/2026`.  
+---
+
+---
+**RN-005** | Categoría: Gestión de Clientes | Prioridad: MUST  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero ingrese un nuevo cliente, el sistema DEBE validar que el número de teléfono móvil tenga exactamente 9 dígitos numéricos correspondientes al formato móvil peruano.  
+
+✅ Ejemplo: Registrar un cliente con el número de teléfono móvil `987654321`.  
+❌ Contraejemplo: Registrar un cliente omitiendo dígitos o ingresando un número de 7 cifras como `1234567`.  
+---
+
+---
+**RN-006** | Categoría: Gestión de Fiados | Prioridad: MUST  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero registre una nueva venta al crédito, el sistema DEBE asociar obligatoriamente un monto numérico positivo mayor a `0.00` expresado en Soles.  
+
+✅ Ejemplo: Registrar un fiado por un monto de `S/ 45.00` para un cliente existente.  
+❌ Contraejemplo: Registrar un fiado con un monto de `S/ 0.00` o un valor negativo en la cuenta del cliente.  
+---
+
+---
+**RN-007** | Categoría: Gestión de Fiados | Prioridad: MUST  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero registre un fiado, el sistema DEBE permitir ingresar una nota de texto libre con un máximo de `150` caracteres para describir el concepto.  
+
+✅ Ejemplo: Registrar el fiado con la nota descriptiva `1 kilo de arroz y una botella de aceite`.  
+❌ Contraejemplo: Registrar un fiado ingresando una cadena de texto descriptiva que supere los 150 caracteres permitidos.  
+---
+
+---
+**RN-008** | Categoría: Límite de Crédito | Prioridad: MUST  
+Patrón EARS: Event-driven  
+
+Cuando el saldo adeudado actual más el nuevo fiado supere el límite de crédito configurado para el cliente, el sistema DEBE desplegar una alerta visual requerida que exija al bodeguero confirmar explícitamente la sobreescritura antes de guardar la transacción.  
+
+✅ Ejemplo: Intentar registrar un fiado de `S/ 50.00` a un cliente con saldo de `S/ 260.00` y límite de `S/ 300.00`, mostrando una alerta donde el bodeguero debe presionar "Confirmar Sobreescritura de Límite" para proceder.  
+❌ Contraejemplo: Guardar directamente la transacción excedida sin advertencia o bloquear la venta automáticamente sin opción de aprobación por parte del bodeguero.  
+---
+
+---
+**RN-009** | Categoría: Notificaciones y Cobranza | Prioridad: MUST  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero seleccione la opción de cobrar a un cliente, el sistema DEBE generar un enlace de WhatsApp con un mensaje pre-redactado que incluya el nombre del cliente y el saldo total adeudado.  
+
+✅ Ejemplo: Generar el enlace `https://wa.me/51987654321?text=Hola%20Juan,%20tu%20saldo%20pendiente%20es%20S/%20150.00` al pulsar el botón de cobro.  
+❌ Contraejemplo: Abrir un canal de mensajería genérico sin incluir el monto adeudado ni el nombre del cliente en el mensaje automático.  
+---
+
+---
+**RN-010** | Categoría: Notificaciones y Cobranza | Prioridad: MUST  
+Patrón EARS: Unwanted  
+
+El sistema NO DEBE enviar ni permitir el envío automático de recordatorios de cobro por WhatsApp fuera del horario permitido comprendido entre las `09:00` y las `20:00` UTC-5.  
+
+✅ Ejemplo: Bloquear el intento de envío masivo automático de recordatorios programados a las `22:30` UTC-5.  
+❌ Contraejemplo: Enviar una notificación automática de cobranza por WhatsApp a las `23:15` UTC-5.  
+---
+
+---
+**RN-011** | Categoría: Resumen de Cuenta | Prioridad: MUST  
+Patrón EARS: Ubiquitous  
+
+El sistema DEBE calcular y mostrar el saldo total adeudado de un cliente sumando la totalidad de los fiados registrados menos la sumatoria de todos sus abonos aprobados.  
+
+✅ Ejemplo: Calcular un saldo adeudado de `S/ 85.00` para un cliente con fiados acumulados de `S/ 120.00` y abonos previos de `S/ 35.00`.  
+❌ Contraejemplo: Mostrar únicamente el monto del último fiado registrado omitiendo los saldos anteriores acumulados.  
+---
+
+---
+**RN-012** | Categoría: Registro de Abonos | Prioridad: SHOULD  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero registre un pago parcial o total realizado por un cliente, el sistema DEBE disminuir el saldo adeudado total en una cantidad exactamente igual al monto del abono ingresado.  
+
+✅ Ejemplo: Registrar un abono de `S/ 50.00` a un cliente con una deuda de `S/ 150.00`, actualizando su saldo adeudado a `S/ 100.00`.  
+❌ Contraejemplo: Registrar un abono de `S/ 50.00` y mantener el saldo adeudado del cliente intacto en `S/ 150.00`.  
+---
+
+---
+**RN-013** | Categoría: Dashboard Financiero | Prioridad: SHOULD  
+Patrón EARS: Ubiquitous  
+
+El sistema DEBE mostrar en el Dashboard de Cuentas por Cobrar la lista completa de clientes con deudas pendientes ordenada de manera descendente según el monto total adeudado.  
+
+✅ Ejemplo: Listar en primer lugar al cliente con una deuda de `S/ 450.00`, seguido por el cliente con `S/ 200.00` y finalmente el de `S/ 50.00`.  
+❌ Contraejemplo: Mostrar la lista de clientes con deudas pendientes ordenada de forma aleatoria o alfabética sin atender al criterio de mayor monto adeudado.  
+---
+
+---
+**RN-014** | Categoría: Autenticación y Acceso | Prioridad: SHOULD  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero ingrese a la aplicación por primera vez en el día o la sesión haya expirado tras 15 minutos de inactividad, el sistema DEBE solicitar la autenticación mediante número de celular y un PIN de 4 dígitos. TRAS 3 intentos fallidos consecutivos, el sistema DEBE bloquear la sesión por 15 minutos.  
+
+✅ Ejemplo: Requerir el PIN de 4 dígitos al abrir la app e inhabilitar el acceso tras 3 intentos erróneos.  
+❌ Contraejemplo: Permitir accesos ilimitados por fuerza bruta o dejar la sesión abierta indefinidamente sin solicitar PIN.  
+---
+
+---
+**RN-015** | Categoría: Reportes y Exportación | Prioridad: COULD  
+Patrón EARS: Event-driven  
+
+Cuando el bodeguero solicite la exportación de su información, el sistema PUEDE generar un reporte en formato texto o PDF que consolide el listado de clientes y sus saldos adeudados.  
+
+✅ Ejemplo: Generar un archivo exportable en formato PDF que contenga el resumen de cuentas de los clientes activos de la bodega al finalizar el mes.  
+❌ Contraejemplo: Denegar por completo cualquier tipo de consulta externa o reporte textual impidiendo al bodeguero obtener un respaldo de su información.  
+---
+
+---
+**RN-016** | Categoría: Gestión de Riesgo | Prioridad: MUST  
+Patrón EARS: Unwanted  
+
+El sistema NO DEBE permitir que ningún agente de inteligencia artificial modifique de forma autónoma los límites de crédito asignados a los clientes de las bodegas sin la validación del bodeguero.  
+
+✅ Ejemplo: Un agente de IA detecta un patrón de consumo y genera una sugerencia en pantalla requiriendo que el bodeguero apruebe manualmente el cambio del límite de crédito.  
+❌ Contraejemplo: Un agente de IA modifica automáticamente y sin aviso previo el límite de crédito de un cliente de `S/ 200.00` a `S/ 500.00`.  
+---
+
+---
+**RN-017** | Categoría: Integridad y Corrección de Datos | Prioridad: MUST  
+Patrón EARS: Unwanted  
+
+El sistema NO DEBE permitir la eliminación definitiva ni la anulación de registros históricos de ventas, pagos, abonos o auditorías sin la doble confirmación explícita del bodeguero titular. Toda anulación DEBE dejar un registro en la tabla de auditoría.  
+
+✅ Ejemplo: Solicitar una confirmación adicional para anular un fiado mal digitado y registrar el motivo de anulación en la auditoría.  
+❌ Contraejemplo: Permitir la eliminación directa de registros de fiados en la base de datos sin dejar rastro ni requerir doble confirmación.  
+---
+
+---
+**RN-018** | Categoría: Accesibilidad de Interfaz | Prioridad: MUST  
+Patrón EARS: Ubiquitous  
+
+La interfaz de usuario del sistema DEBE mantener un ratio de contraste para todo el texto de al menos `4.5:1` cumpliendo con el nivel AA del estándar WCAG 2.1.  
+
+✅ Ejemplo: Utilizar combinaciones de colores tipográficos y de fondo que alcancen un contraste verificado de `5.0:1` en los botones principales.  
+❌ Contraejemplo: Diseñar botones de acción crítica con un texto gris claro sobre fondo blanco cuyo ratio de contraste sea de `2.1:1`.  
+---
+
+---
+**RN-019** | Categoría: Cobertura de Pruebas | Prioridad: MUST  
+Patrón EARS: Ubiquitous  
+
+Todo cambio en el código fuente del sistema DEBE contar con al menos un `80%` de cobertura de código en reglas de negocio y estar respaldado por pruebas unitarias específicas para cada regla.  
+
+✅ Ejemplo: Adjuntar una suite de tests unitarios que asegure el `85%` de cobertura sobre el módulo de cálculo de saldos y morosidad.  
+❌ Contraejemplo: Integrar código nuevo en la rama principal con una cobertura del módulo de negocio del `65%` y sin tests asociados.  
+---
+
+---
+**RN-020** | Categoría: Tecnologías Base | Prioridad: MUST  
+Patrón EARS: Unwanted  
+
+El sistema NO DEBE utilizar librerías, frameworks o motores de base de datos ajenos al stack tecnológico aprobado compuesto por React (PWA), Node.js con Express y PostgreSQL.  
+
+✅ Ejemplo: Desarrollar el frontend React PWA y el backend con Node.js y Express sobre PostgreSQL 16.  
+❌ Contraejemplo: Introducir una base de datos NoSQL como MongoDB o reemplazar Express por otro framework web sin autorización explícita.  
+---
+-----03-reglas-de-negocio.md-----
+
+-----04-glosario.md-----
+# Glosario del Dominio — Proyecto FiaYa
+
+1. **Abono:** Pago parcial o total realizado por un cliente para disminuir el monto total de su deuda pendiente en la bodega.
+2. **Bodega de Barrio:** Establecimiento minorista tradicional de comercio de proximidad ubicado en zonas urbanas de Lima Metropolitana, operado por un microempresario.
+3. **Bodeguero:** Dueño o administrador principal de la bodega, usuario primario y administrador de la plataforma FiaYa.
+4. **DNI (Documento Nacional de Identidad):** Documento oficial de identidad emitido por el RENIEC en la República del Perú, cuyos datos sensibles deben cifrarse obligatoriamente mediante AES-256.
+5. **Cliente Vecino:** Residente de la comunidad circundante que adquiere productos de consumo diario al crédito en la bodega de barrio.
+6. **Cuaderno de Fiados:** Libreta de apuntes en papel utilizada tradicionalmente por los bodegueros para registrar de forma analógica las ventas al crédito.
+7. **Dashboard de Cuentas por Cobrar:** Vista consolidada de la interfaz que muestra de manera ordenada el estado de las deudas pendientes de los clientes.
+8. **EARS (Easy Approach to Requirements Syntax):** Notación formal estructurada utilizada para la especificación clara, atómica y libre de ambigüedad de requerimientos y reglas de negocio.
+9. **FiaYa:** Aplicación web progresiva (PWA) optimizada para bodegueros peruanos para la digitalización de la libreta de fiados y la gestión empática de cobranzas por WhatsApp.
+10. **Fiado:** Venta de productos al crédito directo otorgado por el bodeguero a un cliente del vecindario sin intermediación de entidades financieras formales.
+11. **Límite de Crédito:** Tope máximo de endeudamiento financiero expresado en Soles que un cliente puede acumular en su cuenta antes de requerir un abono.
+12. **Morosidad:** Estado de retraso prolongado en el cumplimiento del pago de los créditos otorgados a los clientes de la bodega.
+13. **Multitenant:** Arquitectura de software que garantiza la segregación lógica absoluta de la información para que cada bodega acceda exclusivamente a sus propios datos.
+14. **Soles (PEN / S/):** Unidad monetaria oficial de la República del Perú, empleada obligatoriamente para la representación de montos en la aplicación.
+15. **WCAG 2.1 AA:** Estándar internacional de accesibilidad web y móvil que establece los criterios de contraste y usabilidad para interfaces inclusivas.
+16. **Yape / Plin:** Billeteras digitales de pago móvil interoperables de alta penetración en el mercado peruano, utilizadas como referencia para la liquidación de abonos.
+-----04-glosario.md-----
+
+-----05-preguntas-abiertas.md-----
+# Preguntas Abiertas y Puntos de Decisión Pendientes
+
+Este documento consolida las inconsistencias de arquitectura, vacíos normativos y decisiones de negocio que no se pueden asumir de manera autónoma por un agente de IA ni un desarrollador, y requieren una decisión formal por parte del equipo humano del proyecto **FiaYa**.
+
+---
+
+### PREG-01: Protocolo de Sincronización y Resolución de Conflictos Offline
+- **Contexto:** En el Project Brief y el Documento de Alcance se especifica que la aplicación PWA debe funcionar con "conectividad intermitente / modo offline básico".
+- **Incógnita:** ¿Cuál es la estrategia de sincronización autorizada cuando se recupera la red? Si dos ayudantes de bodega ingresan fiados al mismo tiempo sin conexión para el mismo cliente superando el límite de crédito, ¿cuál transacción tiene prioridad?
+- **Opciones:**
+  1. *First-write-wins* (la primera transacción procesada localmente prevalece).
+  2. *Last-write-wins* con timestamp del cliente.
+  3. Rechazo de transacciones offline que afecten el saldo contable sin previo handshake con PostgreSQL.
+- **Acción requerida:** Definir la regla de negocio explícita (`RN-021`) para la sincronización PWA offline.
+
+---
+
+### PREG-02: Manejo de DNI Duplicados entre Bodegas
+- **Contexto:** La regla `RN-001` exige cifrar el DNI con AES-256 (cifrado simétrico).
+- **Incógnita:** ¿Un cliente (representado por su DNI) puede ser registrado en dos bodegas distintas? Dado que el cifrado es reversible pero no directo para búsquedas indexadas a menos que se use un hash ciego (*blind index*), ¿debe permitirse que dos bodegas registren al mismo cliente independientemente, o el sistema debe detectar duplicados globales?
+- **Opciones:**
+  1. Aislamiento total: El DNI es único solo dentro de la misma bodega (`bodega_id`, `dni_hash`).
+  2. Detección global: Usar un HMAC / Hash determinista para evitar re-crear clientes globales sin violar la privacidad.
+- **Acción requerida:** Determinar la política de unicidad de clientes a nivel de base de datos multitenant.
+
+---
+
+### PREG-03: Flujo y Política de Anulación/Eliminación de Transacciones
+- **Contexto:** La regla `RN-017` prohíbe la eliminación definitiva sin doble confirmación y exige auditoría.
+- **Incógnita:** ¿Se permitirá el borrado físico (*hard delete*) bajo algún escenario, o el sistema funcionará estrictamente como un libro contable inmutable (*soft delete* / nota de crédito de anulación)?
+- **Opciones:**
+  1. Implementar exclusivamente *soft deletes* mediante una columna `estado` (`ACTIVO`, `ANULADO`) para preservar trazabilidad.
+  2. Permitir *hard delete* únicamente al usuario con rol "Dueño" ingresando su PIN de confirmación.
+- **Acción requerida:** Aprobar el modelo de persistencia para anulación de transacciones.
+-----05-preguntas-abiertas.md-----
+
+-----06-user-stories.md-----
+# Historias de Usuario — FiaYa (Enriquecidas por QA)
+
+**Versión:** 1.1.0  
+**Ámbito:** Módulos *Must-have* y *Should-have* del MVP  
+
+---
+
+## Módulo 1: Gestión de Clientes
+
+### HU-001: Registro de Nuevo Cliente
+**Prioridad:** Must  
+
+Como bodeguero, quiero registrar un nuevo cliente con su nombre y número de teléfono móvil, para poder asignarle ventas al crédito y llevar un control individualizado de sus deudas.  
+
+**Criterios de aceptación:**  
+- DADO QUE el bodeguero se encuentra en la pantalla de clientes, CUANDO ingresa un nombre válido ("Juan Pérez") y un número de celular de 9 dígitos ("987654321"), ENTONCES el sistema guarda el perfil del cliente asociado exclusivamente a la `bodega_id` autenticada y cifrado con AES-256.  
+- DADO QUE el número de celular ingresado no cumple con el formato peruano (ej. "98765432" de 8 dígitos o "123456789" que no empieza con 9), CUANDO el bodeguero intenta guardar el registro, ENTONCES el sistema muestra un mensaje de error "El número de celular debe ser de 9 dígitos y comenzar con 9" y rechaza el registro.  
+- [NUEVO] **(Escenario Negativo - Red/Offline):** DADO QUE la aplicación no tiene conectividad a internet al momento del registro, CUANDO el bodeguero guarda un nuevo cliente con celular "912345678", ENTONCES el sistema almacena temporalmente el registro en la memoria local y muestra el indicador "Guardado localmente. Pendiente de sincronización".  
+- [NUEVO] **(Escenario Borde - Duplicidad):** DADO QUE ya existe un cliente activo registrado con el celular "987654321" en la misma `bodega_id`, CUANDO el bodeguero intenta registrar un segundo cliente con el mismo número, ENTONCES el sistema bloquea el registro mostrando la alerta "Ya existe un cliente registrado con este número telefónico".  
+
+**Reglas de negocio relacionadas:** RN-001, RN-004  
+**Notas:** El número de teléfono debe almacenarse cifrado en reposo con AES-256 (Cumplimiento PRINCIPIO-003).
+
+---
+
+## Módulo 2: Registro de Fiados (Ventas al Crédito)
+
+### HU-002: Registro Rápido de Venta al Crédito
+**Prioridad:** Must  
+
+Como bodeguero, quiero registrar una venta al crédito asignando un monto en Soles, una fecha y una nota de texto libre, para registrar rápidamente el fiado durante la atención en el mostrador en menos de 30 segundos.  
+
+**Criterios de aceptación:**  
+- DADO QUE el bodeguero selecciona un cliente existente, CUANDO ingresa un monto positivo de `S/ 25.50` y una nota descriptiva ("Arroz 1kg y Aceite"), ENTONCES el sistema registra el fiado y actualiza de manera inmediata el saldo total adeudado del cliente en Soles.  
+- [NUEVO] **(Escenario Negativo - Monto inválido):** DADO QUE el bodeguero ingresa un monto igual a `S/ 0.00` o negativo (`-S/ 10.00`), CUANDO presiona "Registrar Fiado", ENTONCES el sistema rechaza la operación y muestra la alerta "El monto del fiado debe ser estrictamente mayor a S/ 0.00".  
+- [NUEVO] **(Escenario Borde - Monto Máximo Transaccional):** DADO QUE el bodeguero intenta registrar un fiado por `S/ 1,000.00` (monto superior al límite por transacción de `S/ 500.00`), CUANDO intenta guardar, ENTONCES el sistema requiere una doble confirmación en pantalla antes de registrar la deuda.  
+- DADO QUE el tiempo transcurrido en la transacción se mide en pruebas de usabilidad, CUANDO se ejecuta el registro completo, ENTONCES el flujo no debe tomar más de 30 segundos ni requerir más de 3 toques en pantalla.  
+
+**Reglas de negocio relacionadas:** RN-002, RN-008  
+**Notas:** Monto monetario formateado obligatoriamente en Soles (`S/ 0.00`) con punto decimal.
+
+---
+
+## Módulo 3: Control de Límites de Crédito
+
+### HU-003: Configuración y Validación de Límite de Crédito
+**Prioridad:** Must  
+
+Como bodeguero, quiero configurar un límite máximo de endeudamiento por cliente para recibir una alerta visual automática cuando un vecino se acerque o supere dicho tope de crédito.  
+
+**Criterios de aceptación:**  
+- DADO QUE el cliente tiene un límite de crédito de `S/ 200.00` y una deuda acumulada de `S/ 150.00`, CUANDO se intenta registrar un fiado por `S/ 15.00` (alcanzando `S/ 165.00`, 82.5% del tope), ENTONCES el sistema registra la deuda y activa una alerta visual amarilla de advertencia (alcanzó o superó el 80%).  
+- DADO QUE la deuda actual es `S/ 190.00` sobre un límite de `S/ 200.00`, CUANDO el bodeguero intenta registrar un fiado de `S/ 20.00` (superando el 100%), ENTONCES el sistema bloquea la acción con un modal rojo exigiendo la aprobación manual del bodeguero para proceder.  
+- [NUEVO] **(Escenario Borde - Límite en cero):** DADO QUE un cliente tiene configurado un límite de crédito de `S/ 0.00` (crédito bloqueado), CUANDO el bodeguero intenta asignarle cualquier venta al fiado mayores a `S/ 0.00`, ENTONCES el sistema deniega la transacción notificando "El cliente tiene el crédito suspendido (Límite: S/ 0.00)".  
+
+**Reglas de negocio relacionadas:** RN-003, RN-006  
+**Notas:** Los agentes de IA tienen prohibido alterar autónomamente los límites de crédito (PRINCIPIO-006).
+
+---
+
+## Módulo 4: Cobranza y Notificaciones por WhatsApp
+
+### HU-004: Envío de Recordatorio de Cobro por WhatsApp
+**Prioridad:** Must  
+
+Como bodeguero, quiero generar y enviar un enlace directo a WhatsApp con un mensaje pre-redactado y profesional, para cobrar el saldo pendiente al cliente sin deteriorar la relación vecinal.  
+
+**Criterios de aceptación:**  
+- DADO QUE un cliente posee un saldo deudor de `S/ 85.50` entre las 09:00 y las 20:00 UTC-5, CUANDO el bodeguero presiona "Cobrar por WhatsApp", ENTONCES el sistema abre la aplicación de WhatsApp con el mensaje: "Hola [Nombre], te recordamos que tu saldo en [Nombre Bodega] es de S/ 85.50. ¡Gracias!".  
+- DADO QUE se intenta generar o enviar una notificación a las 21:30 UTC-5 (fuera de la ventana 09:00 - 20:00 UTC-5), CUANDO el bodeguero presiona el botón, ENTONCES el sistema desactiva la función y despliega la notificación "Los recordatorios solo pueden enviarse entre las 09:00 y las 20:00 hrs".  
+- [NUEVO] **(Escenario Borde - Cliente sin Deuda):** DADO QUE un cliente tiene un saldo adeudado de exactamente `S/ 0.00`, CUANDO el bodeguero visualiza su perfil, ENTONCES el botón "Cobrar por WhatsApp" permanece deshabilitado.  
+
+**Reglas de negocio relacionadas:** RN-005, RN-006, RN-008  
+**Notas:** Estricto cumplimiento del PRINCIPIO-006 (Línea roja de agentes de IA sobre ventanas de comunicación).
+
+---
+
+## Módulo 5: Resumen de Cuenta Individual
+
+### HU-005: Visualización de Estado de Cuenta del Cliente
+**Prioridad:** Must  
+
+Como bodeguero, quiero visualizar rápidamente el saldo total adeudado y el historial básico de transacciones por cliente, para ofrecer transparencia absoluta durante las consultas presenciales.  
+
+**Criterios de aceptación:**  
+- DADO QUE el bodeguero selecciona un cliente con deudas registradas, CUANDO ingresa a su detalle, ENTONCES la pantalla despliega en la parte superior el saldo adeudado total (ej. `S/ 120.00`) y la lista de transacciones ordenadas cronológicamente de la más reciente a la más antigua.  
+- [NUEVO] **(Escenario Negativo - Intento de Acceso Inter-Bodega):** DADO QUE un usuario autenticado intenta consultar el estado de cuenta de un `cliente_id` perteneciente a otra bodega mediante URL/API, CUANDO se procesa la consulta, ENTONCES la base de datos ejecuta el filtro `WHERE bodega_id = $1` y retorna un error 404/403.  
+- DADO QUE un cliente no registra ningún fiado activo ni historial, CUANDO se accede a su resumen, ENTONCES el saldo mostrado es `S/ 0.00` acompañado del mensaje "Sin registros de fiados pendientes".  
+
+**Reglas de negocio relacionadas:** RN-001, RN-008  
+**Notas:** Verificación estricta del PRINCIPIO-004 (Aislamiento Multi-tenant).
+
+---
+
+## Módulo 6: Registro de Abonos y Pagos (Post-MVP Inicial)
+
+### HU-006: Registro de Abonos Parciales o Totales
+**Prioridad:** Should  
+
+Como bodeguero, quiero registrar los pagos o abonos parciales realizados por el cliente, para disminuir de manera precisa su deuda pendiente en tiempo real.  
+
+**Criterios de aceptación:**  
+- DADO QUE un cliente tiene una deuda de `S/ 150.00`, CUANDO el bodeguero registra un abono de `S/ 50.00`, ENTONCES el sistema actualiza el saldo deudor a `S/ 100.00` en tiempo real y guarda la transacción de abono.  
+- DADO QUE un cliente debe `S/ 80.00`, CUANDO el bodeguero ingresa un abono por `S/ 100.00` (monto superior a la deuda actual), ENTONCES el sistema bloquea el registro indicando "El abono (S/ 100.00) no puede ser mayor que la deuda pendiente (S/ 80.00)".  
+- [NUEVO] **(Escenario Borde - Pago Total Exacto):** DADO QUE un cliente debe `S/ 45.50`, CUANDO se ingresa un abono exacto de `S/ 45.50`, ENTONCES el sistema registra la liquidación completa de la deuda, cambia el saldo a `S/ 0.00` y marca la cuenta como "Al día".  
+
+**Reglas de negocio relacionadas:** RN-002, RN-008  
+
+---
+
+## Módulo 7: Dashboard de Cuentas por Cobrar
+
+### HU-007: Consolidado de Deudores
+**Prioridad:** Should  
+
+Como bodeguero, quiero visualizar una lista consolidada de todos los clientes con deudas pendientes ordenados por monto adeudado, para priorizar mis gestiones de cobranza de manera eficiente.  
+
+**Criterios de aceptación:**  
+- DADO QUE existen 5 clientes con deudas activas (`S/ 300.00`, `S/ 50.00`, `S/ 120.00`, `S/ 10.00`, `S/ 500.00`), CUANDO el bodeguero entra al dashboard, ENTONCES la lista muestra a los 5 clientes ordenados descendentemente (primero el de `S/ 500.00` y al final el de `S/ 10.00`).  
+- [NUEVO] **(Escenario Borde - Sin Deudores):** DADO QUE todos los clientes de la bodega han pagado sus saldos y la deuda total acumulada es `S/ 0.00`, CUANDO se accede al dashboard, ENTONCES la pantalla muestra el mensaje "¡Excelente! No tienes cuentas por cobrar pendientes".  
+- [NUEVO] **(Escenario Negativo - Paginación/Carga Masiva):** DADO QUE una bodega registra más de 100 clientes con deuda, CUANDO se visualiza el dashboard, ENTONCES la interfaz realiza una carga diferida (paginación) en bloques de 20 clientes para mantener la respuesta de la pantalla por debajo de 2 segundos.  
+
+**Reglas de negocio relacionadas:** RN-004, RN-008  
+
+---
+
+## Módulo 8: Autenticación y Seguridad de Acceso
+
+### HU-008: Autenticación Segura del Bodeguero
+**Prioridad:** Should  
+
+Como bodeguero, quiero ingresar a la aplicación mediante mi número de celular y una credencial segura (PIN de 4 dígitos), para garantizar que terceros no accedan a los datos financieros de mis vecinos.  
+
+**Criterios de aceptación:**  
+- DADO QUE el bodeguero ingresa su celular "999888777" y el PIN de 4 dígitos correcto ("1234"), CUANDO presiona "Ingresar", ENTONCES el sistema valida las credenciales y redirige a la vista principal de la bodega autenticada.  
+- DADO QUE el bodeguero introduce un PIN incorrecto 3 veces consecutivas en menos de 5 minutos, CUANDO intenta el cuarto ingreso, ENTONCES el sistema bloquea la cuenta por 15 minutos y muestra la notificación "Cuenta bloqueada temporalmente por intentos fallidos".  
+- [NUEVO] **(Escenario Borde - Estructura de PIN):** DADO QUE el bodeguero intenta registrar un PIN de 3 dígitos ("123") o de 5 dígitos ("12345"), CUANDO presiona guardar, ENTONCES la aplicación exige estrictamente un formato numérico exacto de 4 dígitos.  
+
+**Reglas de negocio relacionadas:** RN-004, RN-006  
+**Notas:** En tránsito, la autenticación debe procesarse obligatoriamente bajo TLS 1.3 (PRINCIPIO-003).
+
+---
+
+## HUs Sugeridas (Cobertura de Reglas No Mapeadas)
+
+### HU-009: Sincronización Offline de Transacciones (Módulo Red y Resiliencia)
+**Prioridad:** Must  
+Como bodeguero que opera en zonas de conectividad inestable en Lima, quiero que mis fiados y abonos registrados sin internet se sincronicen automáticamente cuando recupere la señal, para no perder información ni interrumpir las ventas.  
+
+**Criterios de aceptación:**  
+- [NUEVO] **(Positivo):** DADO QUE la app se encuentra sin conexión a internet y se registran 3 fiados locales, CUANDO el dispositivo detecta conexión a la red (3G/4G/Wi-Fi), ENTONCES el sistema envía silenciosamente los 3 registros en segundo plano y actualiza el estado a "Sincronizado".  
+- [NUEVO] **(Negativo/Conflicto):** DADO QUE existe un registro local pendiente de sincronización cuyo cliente fue modificado en el servidor, CUANDO se restaura la conexión, ENTONCES el sistema prioriza el registro de la transacción más reciente por fecha/hora y notifica cualquier discrepancia al bodeguero.  
+
+---
+
+### Verificación INVEST del Catálogo Enriquecido
+- **Independent (Independientes):** Se mantiene la independencia funcional entre los módulos de clientes, fiados, cobro y autenticación.  
+- **Negotiable (Negociables):** El diseño UX de los modals de alerta por exceso de crédito o bloqueo horaria sigue siendo flexible.  
+- **Valuable (Valiosas):** Cada HU enriquecida previene fallas de seguridad, fugas de privacidad o inconsistencias financieras en la atención diaria.  
+- **Estimable (Estimables):** Los escenarios definidos con datos concretos facilitan la estimación por puntos de historia o tiempo.  
+- **Small (Pequeñas):** Mantienen una dimensionalidad acotada para completarse en un único sprint.  
+- **Testable (Verificables):** 100% verificables mediante pruebas unitarias, de integración y end-to-end (E2E) con los criterios explícitos añadidos.  
+-----06-user-stories.md-----
+
+-----07-architecture.md-----
+# Documento de Arquitectura del Sistema — FiaYa
+
+**Versión:** 1.0.1  
+**Fecha:** 28/10/2026  
+**Estado:** Aprobado para Fase de Especificación e Implementación Técnica  
+
+---
+
+## 1. Overview del Sistema
+
+### Descripción del sistema
+FiaYa es una Aplicación Web Progresiva (PWA) móvil y servidor backend descentralizado que digitaliza el cuaderno de fiados de las bodegas de barrio en Lima, Perú. El sistema permite al bodeguero registrar ventas al crédito, controlar límites de endeudamiento por cliente y generar recordatorios de cobro estructurados por WhatsApp bajo estrictas normativas de privacidad de datos y localización peruana. Está diseñado para operar con alta resiliencia ante conectividad intermitente en dispositivos móviles Android de gama baja y media.
+
+### Diagrama de arquitectura de alto nivel (Descripción textual)
+```
+[ Dispositivo Móvil Android (PWA - React 18+) ]
+         │
+         │ (HTTPS / TLS 1.3 + JWT con bodega_id)
+         ▼
+[ API Gateway / Servidor Node.js 20+ con Express ]
+         │
+         ├────────────────────────────────────────┐
+         │                                        │
+         ▼                                        ▼
+[ Motor de Base de Datos PostgreSQL 16+ ]   [ Proveedor Externo de Mensajería ]
+ (Aislamiento Multi-Tenant por bodega_id)     (WhatsApp Web / Business API Links)
+```
+
+### Principios de diseño (Alineados con la Constitución)
+- **Aislamiento Multi-Tenant Absoluto:** Toda consulta y mutación de datos verifica de forma innegociable la cláusula de pertenencia a la bodega (`bodega_id`) extraída del token de sesión autenticado.
+- **Privacidad y Cifrado por Diseño:** Los datos sensibles de los clientes (DNI, teléfono, nombres) se almacenan cifrados en reposo mediante AES-256 y se transmiten exclusivamente bajo canales seguros TLS 1.3.
+- **Simplicidad Operativa y Resiliencia Offline:** Arquitectura ligera orientada a maximizar la velocidad de respuesta en mostrador (<30 segundos por transacción) con soporte de persistencia local temporal en el navegador móvil.
+- **Uniformidad Lingüística y Localización:** Todo el código fuente, artefactos técnicos, comentarios, montos en Soles (`S/`), zonas horarias (`America/Lima`) y formatos de fecha (`DD/MM/AAAA`) se adhieren estrictamente a los estándares de localización peruana y al idioma español latinoamericano.
+
+---
+
+## 2. Componentes Principales
+
+### A. Frontend PWA (`faya-client`)
+- **Responsabilidad:** Proveer una interfaz de usuario optimizada para dispositivos móviles Android de gama baja, garantizando accesibilidad WCAG 2.1 AA, operaciones rápidas en mostrador y gestión offline temporal mediante Service Workers.
+- **Tecnología:** React 18+ (PWA).
+- **HUs que implementa:** HU-001, HU-002, HU-003, HU-004, HU-005, HU-006, HU-007, HU-008, HU-009.
+
+### B. API Backend de Gestión y Negocio (`faya-api`)
+- **Responsabilidad:** Exponer servicios REST robustos para la lógica de transacciones, validación de topes de crédito, aplicación de reglas de negocio y control de sesiones multi-tenant.
+- **Tecnología:** Node.js 20+ con Express.
+- **HUs que implementa:** HU-001, HU-002, HU-003, HU-004, HU-005, HU-006, HU-007, HU-008, HU-009.
+
+### C. Capa de Persistencia y Cifrado (`faya-db`)
+- **Responsabilidad:** Almacenar de forma relacional y segura la información de bodegas, clientes, transacciones y abonos, asegurando la integridad referencial y el aislamiento de datos entre inquilinos.
+- **Tecnología:** PostgreSQL 16+.
+- **HUs que implementa:** HU-001, HU-002, HU-003, HU-005, HU-006, HU-007, HU-008, HU-009.
+
+### Interfaces entre componentes
+- El **Frontend PWA** realiza peticiones HTTP/S cifradas con TLS 1.3 hacia la **API Backend**, enviando en cada cabecera de autorización un token JWT con la identidad y el identificador de la bodega (`bodega_id`).
+- La **API Backend** valida estrictamente el token y ejecuta consultas SQL parametrizadas filtrando por `bodega_id` hacia la **Capa de Persistencia (PostgreSQL)**.
+
+---
+
+## 3. Modelo de Datos
+
+### Entidades Principales
+
+#### 1. `bodegas`
+Representa al inquilino (bodega) registrado en la plataforma.
+- `bodega_id` (UUID, Primary Key)
+- `nombre_bodega` (VARCHAR(150), Not Null)
+- `telefono_contacto` (VARCHAR(256), Not Null — *Cifrado AES-256*)
+- `pin_acceso_hash` (VARCHAR(255), Not Null — *Hash bcrypt*)
+- `fecha_creacion` (TIMESTAMP WITH TIME ZONE, Default NOW())
+
+#### 2. `clientes`
+Representa a los vecinos de la bodega con acceso a crédito.
+- `cliente_id` (UUID, Primary Key)
+- `bodega_id` (UUID, Foreign Key a `bodegas`, Not Null)
+- `nombre_cliente` (VARCHAR(150), Not Null — *Cifrado AES-256*)
+- `telefono_movil` (VARCHAR(256), Not Null — *Cifrado AES-256*, Formato: 9 dígitos)
+- `dni_cliente` (VARCHAR(256), Nullable — *Cifrado AES-256*, Formato: 8 dígitos)
+- `limite_credito` (NUMERIC(10,2), Default 0.00)
+- `saldo_actual` (NUMERIC(10,2), Default 0.00)
+- `fecha_registro` (TIMESTAMP WITH TIME ZONE, Default NOW())
+
+#### 3. `transacciones`
+Registra las ventas al crédito (fiados) y abonos realizados.
+- `transaccion_id` (UUID, Primary Key)
+- `cliente_id` (UUID, Foreign Key a `clientes`, Not Null)
+- `bodega_id` (UUID, Foreign Key a `bodegas`, Not Null)
+- `tipo_transaccion` (VARCHAR(20), Not Null — *Valores: 'CREDITO', 'ABONO', 'ANULACION'*)
+- `monto` (NUMERIC(10,2), Not Null, Chequeo: `monto > 0.00`)
+- `concepto` (TEXT, Nullable — *Notas descriptivas de la venta*)
+- `fecha_transaccion` (TIMESTAMP WITH TIME ZONE, Default NOW())
+
+---
+
+### Relaciones entre entidades
+- **`bodegas` (1) a `clientes` (N):** Una bodega administra múltiples clientes de manera exclusiva.
+- **`clientes` (1) a `transacciones` (N):** Un cliente acumula múltiples transacciones de crédito o abono a lo largo del tiempo.
+- **`bodegas` (1) a `transacciones` (N):** Relación directa para auditoría y restricciones multi-tenant.
+
+---
+
+### Notas de seguridad y cumplimiento normativo (Ley N.° 29733)
+- **Cifrado en Reposo (AES-256):** Los campos sensibles como nombres, números telefónicos (`telefono_contacto`, `telefono_movil`) y DNI (`dni_cliente`) se almacenan cifrados mediante AES-256 en la base de datos PostgreSQL.
+- **Aislamiento Multi-Tenant:** Todas las consultas SQL ejecutadas por el backend deben incorporar obligatoriamente el filtro `WHERE bodega_id = $1`.
+
+---
+
+## 4. API Contracts
+
+### Endpoint 1: Registrar Nuevo Cliente
+- **Método HTTP:** `POST`
+- **Ruta:** `/api/v1/clientes`
+- **Descripción:** Crea un perfil de cliente nuevo asociado a la bodega autenticada.
+- **Autenticación requerida:** Sí (Bearer Token JWT con `bodega_id`)
+- **Rate Limiting:** 30 solicitudes por minuto por IP/Bodega.
+- **Request Body (JSON):**
+```json
+{
+  "nombre_cliente": "Juan Pérez",
+  "telefono_movil": "987654321",
+  "dni_cliente": "45678912",
+  "limite_credito": 200.00
+}
+```
+- **Response Body (JSON - 201 Created):**
+```json
+{
+  "estado": "exito",
+  "codigo": 201,
+  "mensaje": "Cliente registrado correctamente",
+  "datos": {
+    "cliente_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "nombre_cliente": "Juan Pérez",
+    "limite_credito": 200.00,
+    "saldo_actual": 0.00
+  }
+}
+```
+- **Códigos de Error:**
+  - `400 Bad Request`: Formato de teléfono inválido o datos faltantes.
+  - `401 Unauthorized`: Token JWT ausente o expirado.
+
+---
+
+### Endpoint 2: Registrar Venta al Crédito (Fiado)
+- **Método HTTP:** `POST`
+- **Ruta:** `/api/v1/transacciones/credito`
+- **Descripción:** Registra una venta al crédito para un cliente específico y actualiza su saldo adeudado.
+- **Autenticación requerida:** Sí (Bearer Token JWT)
+- **Rate Limiting:** 60 solicitudes por minuto.
+- **Request Body (JSON):**
+```json
+{
+  "cliente_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+  "monto": 45.50,
+  "concepto": "Arroz extra y aceite 1L"
+}
+```
+- **Response Body (JSON - 201 Created):**
+```json
+{
+  "estado": "exito",
+  "codigo": 201,
+  "mensaje": "Fiado registrado exitosamente",
+  "datos": {
+    "transaccion_id": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+    "cliente_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "monto": 45.50,
+    "nuevo_saldo_deudor": 45.50,
+    "alerta_limite": false,
+    "fecha_transaccion": "15/04/2026 14:30:22"
+  }
+}
+```
+- **Códigos de Error:**
+  - `400 Bad Request`: Monto menor o igual a `S/ 0.00`.
+  - `403 Forbidden`: Intento de manipulación de cliente perteneciente a otra bodega.
+  - `409 Conflict`: Superación del límite de crédito sin confirmación explícita.
+
+---
+
+### Endpoint 3: Consultar Resumen de Cuenta Individual
+- **Método HTTP:** `GET`
+- **Ruta:** `/api/v1/clientes/{cliente_id}/cuenta`
+- **Descripción:** Obtiene el saldo total adeudado y el historial cronológico inverso de transacciones del cliente.
+- **Autenticación requerida:** Sí (Bearer Token JWT)
+- **Rate Limiting:** 120 solicitudes por minuto.
+- **Request Body (JSON):** Ninguno (Parámetro de ruta `{cliente_id}`).
+- **Response Body (JSON - 200 OK):**
+```json
+{
+  "estado": "exito",
+  "codigo": 200,
+  "datos": {
+    "cliente_id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "nombre_cliente": "Juan Pérez",
+    "saldo_total": 120.50,
+    "limite_credito": 200.00,
+    "estado_cuenta": "ADVERTENCIA_80_POR_CIENTO",
+    "transacciones": [
+      {
+        "transaccion_id": "f81d4fae-7dec-11d0-a765-00a0c91e6bf6",
+        "tipo": "CREDITO",
+        "monto": 45.50,
+        "concepto": "Arroz extra y aceite 1L",
+        "fecha": "15/04/2026"
+      }
+    ]
+  }
+}
+```
+- **Códigos de Error:**
+  - `404 Not Found`: Cliente no encontrado o no pertenece a la bodega autenticada.
+
+---
+
+## 5. Decisiones Técnicas (ADRs)
+
+### ADR-001: Adopción de React 18+ como Progressive Web App (PWA)
+- **Contexto:** Los bodegueros operan con teléfonos Android de gama baja y media en entornos con conectividad móvil intermitente. Se requiere una solución instalable sin fricción de tiendas de aplicaciones nativas y con funcionamiento offline básico.
+- **Decisión Tomada:** Desarrollar el cliente web utilizando React 18+ configurado como Aplicación Web Progresiva (PWA) con Service Workers y almacenamiento local en IndexedDB.
+- **Alternativas Consideradas:** Aplicación nativa en Kotlin/Flutter (descartada por complejidad de distribución inicial y costos de mantenimiento) y Web App tradicional sin soporte offline (descartada por dependencia absoluta de red).
+- **Consecuencias:**
+  - *Positivas:* Instalación rápida directamente desde el navegador móvil, menor consumo de recursos y capacidad de registro local temporal ante cortes de internet.
+  - *Negativas:* Limitaciones de acceso a APIs de hardware profundo en comparación con apps nativas puras (no aplicable al alcance de FiaYa).
+
+### ADR-002: Cifrado en Reposo de Datos Sensibles con AES-256
+- **Contexto:** El sistema recopila datos de identificación personal (DNI y números de teléfono móvil) de los vecinos de las bodegas, debiendo cumplir rigurosamente con la Ley N.° 29733 de Protección de Datos Personales del Perú.
+- **Decisión Tomada:** Implementar cifrado simétrico AES-256 a nivel de columna o aplicación para los campos de nombres, teléfonos y DNI antes de su persistencia en PostgreSQL, combinados con TLS 1.3 en tránsito.
+- **Alternativas Consideradas:** Almacenamiento en texto plano (violación directa de la constitución del proyecto y la ley peruana) y cifrado completo de disco base de datos (insuficiente para segregación granular de inquilinos).
+- **Consecuencias:**
+  - *Positivas:* Cumplimiento legal estricto y protección efectiva de la privacidad de los vecinos ante accesos no autorizados a la base de datos.
+  - *Negativas:* Ligera sobrecarga computacional en consultas de búsqueda por nombre o teléfono, mitigada mediante índices de hash deterministas específicos para filtrado.
+
+### ADR-003: Aislamiento Multi-Tenant Lógico mediante `bodega_id`
+- **Contexto:** Múltiples bodegas independientes utilizarán la misma instancia del sistema backend y base de datos compartida, siendo imperativo evitar cualquier fuga de información financiera entre negocios competidores o vecinos.
+- **Decisión Tomada:** Emplear una arquitectura de base de datos multi-tenant lógica basada en la inclusión estricta de la columna `bodega_id` en todas las tablas transaccionales y validación obligatoria en los middlewares de la API Express.
+- **Alternativas Consideradas:** Esquema de base de datos separada por cliente (costos operativos excesivos para el modelo freemium) y aislamiento basado exclusivamente en la interfaz de usuario (inseguro y vulnerable).
+- **Consecuencias:**
+  - *Positivas:* Alta eficiencia de costos de infraestructura y facilidad de mantenimiento centralizado.
+  - *Negativas:* Riesgo de vulnerabilidades por omisión accidental de filtros SQL, mitigado mediante auditorías automáticas de código y tests unitarios obligatorios.
+
+---
+
+## 6. Restricciones Técnicas y Dependencias Externas
+
+### Restricciones Alineadas con la Constitución
+- **Stack Tecnológico Inmutable:** React 18+ PWA (Frontend), Node.js 20+ con Express (Backend) y PostgreSQL 16+ (Base de datos). Ningún componente externo ni ORM no autorizado puede ser introducido.
+- **Restricción Horaria para Agentes y Automatizaciones:** El envío de recordatorios de cobro por WhatsApp está estrictamente limitado a la ventana horaria de **09:00 a 20:00 UTC-5**.
+- **Localización Peruana Obligatoria:** Formato de moneda en Soles (`S/`), formato de fecha `DD/MM/AAAA`, zona horaria `America/Lima`, separador decimal por punto (`.`) y separador de miles por coma (`,`).
+
+### Servicios Externos Necesarios
+- **WhatsApp Business API / Enlaces Web Intents (`wa.me`):** Utilizados para generar y disparar los recordatorios de cobro personalizados directamente desde el dispositivo del bodeguero sin incurrir en pasarelas de pago complejas en la fase MVP.
+
+### Consideraciones de Infraestructura para el Contexto Peruano
+- **Optimización de Ancho de Banda:** Los payloads JSON de las respuestas del backend deben mantenerse minimizados para operar de forma fluida sobre redes móviles 4G inestables en zonas urbanas periféricas de Lima.
+- **Soporte de Dispositivos:** Compatibilidad probada con navegadores basados en Chromium sobre dispositivos Android con al menos 2GB de memoria RAM.
+-----07-architecture.md-----
+
+-----08-backlog.md-----
+# Product Backlog — FiaYa (Sprint 1 & 2: MVP & Core Features)
+
+**Versión:** 1.0.0  
+**Fecha:** 28/10/2026  
+**Estado:** Aprobado para Ejecución de Desarrollo  
+
+---
+
+## ÉPICA 1: Infraestructura Base, Seguridad y Multi-Tenant (`faya-db` / `faya-api`)
+
+### TSK-001: Configuración Inicial de Base de Datos y Esquema Multi-Tenant
+- **Historia Asociada:** HU-005, HU-008
+- **Prioridad:** Alta (Must)
+- **Descripción:** Crear el esquema relacional inicial en PostgreSQL 16+ para las entidades `bodegas`, `clientes` y `transacciones`, incorporando claves foráneas, restricciones de montos (`> 0.00`) y la columna obligatoria `bodega_id` en todas las tablas transaccionales.
+- **Criterios de Aceptación:**
+  - El script SQL de migración se encuentra redactado íntegramente en español latinoamericano.
+  - Se definen índices por `bodega_id` en las tablas `clientes` y `transacciones` para garantizar el aislamiento multi-tenant eficiente.
+  - La base de datos rechaza cualquier inserción que omita el campo `bodega_id`.
+
+### TSK-002: Implementación de Middleware de Cifrado AES-256 en Reposo
+- **Historia Asociada:** HU-001, HU-005
+- **Prioridad:** Alta (Must)
+- **Descripción:** Desarrollar un módulo de utilidad en Node.js que aplique cifrado simétrico AES-256 antes de persistir y desencriptar al consultar campos sensibles (`nombre_cliente`, `telefono_movil`, `dni_cliente`, `telefono_contacto`), cumpliendo la Ley N.° 29733.
+- **Criterios de Aceptación:**
+  - Las funciones de encriptación y desencriptación cuentan con tests unitarios con cobertura superior al 80% (PRINCIPIO-007).
+  - Ningún registro de DNI o teléfono se almacena en texto plano en las tablas de PostgreSQL.
+
+### TSK-003: Configuración del Servidor Express y Middleware de Autenticación JWT Multi-Tenant
+- **Historia Asociada:** HU-008
+- **Prioridad:** Alta (Must)
+- **Descripción:** Configurar el servidor backend en Node.js 20+ con Express, estableciendo cabeceras de seguridad TLS 1.3 y un middleware de validación de tokens JWT que extraiga e inyecte el `bodega_id` en el contexto de cada petición HTTP.
+- **Criterios de Aceptación:**
+  - El middleware intercepta las peticiones protegidas, valida el token y rechaza con código `401 Unauthorized` si está ausente o expirado.
+  - El `bodega_id` extraído se propaga automáticamente al objeto de request (`req.bodegaId`) para su uso en consultas SQL.
+
+---
+
+## ÉPICA 2: Módulo de Gestión de Clientes y Credenciales (`faya-api` / `faya-client`)
+
+### TSK-004: Endpoint Backend POST `/api/v1/clientes` (Registro de Cliente)
+- **Historia Asociada:** HU-001
+- **Prioridad:** Alta (Must)
+- **Descripción:** Implementar el endpoint REST para registrar un nuevo cliente validando el formato peruano de celular (9 dígitos comenzando con 9), aplicando el cifrado AES-256 y asociándolo a la `bodega_id` autenticada.
+- **Criterios de Aceptación:**
+  - Validación estricta del cuerpo de la petición (`nombre_cliente`, `telefono_movil` de 9 dígitos).
+  - Control de duplicidad: si el número de celular ya existe para la misma `bodega_id`, retorna código `400 Bad Request` o `409 Conflict` con mensaje explicativo en español.
+  - Cobertura de pruebas unitarias y de integración mayor al 80%.
+
+### TSK-005: Pantalla de Registro de Clientes en PWA (`faya-client`)
+- **Historia Asociada:** HU-001
+- **Prioridad:** Alta (Must)
+- **Descripción:** Crear el componente de interfaz en React 18+ accesible por teclado y con contraste WCAG 2.1 AA (contraste $\ge 4.5:1$) para que el bodeguero ingrese nombre y celular del cliente.
+- **Criterios de Aceptación:**
+  - Validación en tiempo cliente del número celular (9 dígitos, prefijo 9).
+  - Manejo de estados de carga y visualización de errores claros ante fallos de red.
+
+---
+
+## ÉPICA 3: Módulo de Registro de Fiados y Límites de Crédito (`faya-api` / `faya-client`)
+
+### TSK-006: Endpoint Backend POST `/api/v1/transacciones/credito` (Registro de Fiado)
+- **Historia Asociada:** HU-002, HU-003
+- **Prioridad:** Alta (Must)
+- **Descripción:** Implementar la lógica backend para registrar una venta al crédito, validar que el monto sea mayor a `S/ 0.00`, actualizar el `saldo_actual` del cliente y verificar las alertas de límite de crédito (80% y 100%).
+- **Criterios de Aceptación:**
+  - Si el saldo resultante supera el 100% del `limite_credito`, la API retorna una advertencia o requiere confirmación explícita según las reglas de negocio (RN-003).
+  - Todas las operaciones monetarias se procesan con precisión numérica de dos decimales en Soles (`PEN`).
+
+### TSK-007: Interfaz de Registro Rápido de Fiados en Mostrador (<30s)
+- **Historia Asociada:** HU-002, HU-003
+- **Prioridad:** Alta (Must)
+- **Descripción:** Desarrollar el flujo optimizado en la PWA de React para que el bodeguero seleccione al cliente, introduzca el monto en Soles (`S/`) y una nota corta en un máximo de 3 pasos operativos.
+- **Criterios de Aceptación:**
+  - Alertas visuales dinámicas (amarilla al superar el 80% del crédito, modal rojo bloqueante al superar el 100%).
+  - Formateo automático de montos según la localización peruana (punto decimal, separador de miles por coma).
+
+---
+
+## ÉPICA 4: Módulo de Cobranza y Notificaciones por WhatsApp (`faya-client`)
+
+### TSK-008: Generación de Enlace Web Intent de WhatsApp con Restricción Horaria
+- **Historia Asociada:** HU-004
+- **Prioridad:** Alta (Must)
+- **Descripción:** Implementar la lógica en la PWA para generar el enlace `https://wa.me/...` con el mensaje pre-redactado en español incluyendo el saldo exacto en Soles, validando strictly la ventana horaria permitida (**09:00 a 20:00 UTC-5**).
+- **Criterios de Aceptación:**
+  - Si la hora local del dispositivo se encuentra fuera del rango permitido, el botón de cobro se desactiva y muestra una notificación clara.
+  - El mensaje respeta los datos del cliente y el saldo adeudado formateado correctamente.
+
+---
+
+## ÉPICA 5: Módulo de Resumen de Cuenta y Dashboard (`faya-api` / `faya-client`)
+
+### TSK-009: Endpoint Backend GET `/api/v1/clientes/{cliente_id}/cuenta`
+- **Historia Asociada:** HU-005, HU-007
+- **Prioridad:** Alta (Must) / Media (Should)
+- **Descripción:** Exponer el servicio de consulta de estado de cuenta individual y la lista consolidada de deudores ordenada de mayor a menor saldo adeudado, aplicando el filtro estricto multi-tenant (`bodega_id`).
+- **Criterios de Aceptación:**
+  - Retorno de transacciones en orden cronológico inverso (más recientes primero).
+  - Protección ante accesos cruzados entre bodegas (retorna 404 si el cliente no pertenece al inquilino autenticado).
+
+### TSK-010: Vista de Dashboard de Cuentas por Cobrar en PWA
+- **Historia Asociada:** HU-007
+- **Prioridad:** Media (Should)
+- **Descripción:** Implementar la pantalla consolidada de deudores en React 18+, mostrando el listado ordenado por deuda y estados vacíos cuando no existan pendientes de cobro.
+- **Criterios de Aceptación:**
+  - Interfaz adaptada a dispositivos móviles con cumplimiento WCAG 2.1 AA.
+  - Tiempos de renderizado inferiores a 2 segundos con paginación o carga diferida de registros.
+
+---
+
+## ÉPICA 6: Autenticación, Seguridad y Resiliencia Offline (`faya-client` / `faya-api`)
+
+### TSK-011: Autenticación de Bodeguero por Celular y PIN de 4 Dígitos
+- **Historia Asociada:** HU-008
+- **Prioridad:** Media (Should)
+- **Descripción:** Desarrollar el flujo de inicio de sesión basado en número de celular y hash bcrypt de PIN de 4 dígitos, emitiendo un JWT seguro con el `bodega_id`.
+- **Criterios de Aceptación:**
+  - Bloqueo temporal de cuenta por 15 minutos tras 3 intentos fallidos consecutivos.
+  - Transmisión de credenciales cifrada mediante TLS 1.3.
+
+### TSK-012: Configuración de Service Workers y Sincronización Offline (HU-009)
+- **Historia Asociada:** HU-009
+- **Prioridad:** Alta (Must)
+- **Descripción:** Configurar los Service Workers en la PWA y almacenamiento local temporal (IndexedDB) para permitir el registro de clientes y fiados sin conexión, sincronizando automáticamente los datos al recuperar conectividad de red.
+- **Criterios de Aceptación:**
+  - Indicador visual en pantalla de "Guardado localmente / Pendiente de sincronización" cuando la red no esté disponible.
+  - Sincronización en segundo plano exitosa al restablecerse la conexión a internet.
+-----08-backlog.md-----
+
+-----09-ui-spec.md-----
+# Especificación de Interfaz de Usuario (UI Specification) — FiaYa
+
+**Versión:** 1.0.0  
+**Proyecto:** FiaYa  
+**Ámbito:** Must-have y Should-have del MVP  
+
+---
+
+## 1. Inventario de Pantallas
+
+| ID de Pantalla | Nombre de la Pantalla | Actor Principal | HUs que Implementa | Prioridad MoSCoW |
+| :--- | :--- | :--- | :--- | :--- |
+| **P-001** | Pantalla de Autenticación (Login / PIN) | Bodeguero | HU-008 | Should |
+| **P-002** | Dashboard Principal / Listado de Deudores | Bodeguero | HU-007 | Should |
+| **P-003** | Listado y Gestión de Clientes | Bodeguero | HU-001, HU-005 | Must |
+| **P-004** | Formulario de Registro de Nuevo Cliente | Bodeguero | HU-001 | Must |
+| **P-005** | Perfil y Estado de Cuenta del Cliente | Bodeguero | HU-003, HU-004, HU-005, HU-006 | Must / Should |
+| **P-006** | Modal / Formulario de Registro de Fiado (Venta al Crédito) | Bodeguero | HU-002, HU-003 | Must |
+| **P-007** | Modal / Formulario de Registro de Abono / Pago | Bodeguero | HU-006 | Should |
+
+---
+
+## 2. User Flows
+
+### Flujo 1: Autenticación e Ingreso a la Bodega (HU-008)
+1. **P-001 (Login):** El bodeguero ingresa su número celular y su PIN de 4 dígitos. Presiona "Ingresar".
+2. **Sistema:** Valida credenciales bajo TLS 1.3. Si son correctas, redirige al Dashboard.
+
+### Flujo 2: Registro Rápido de un Nuevo Fiado (HU-001, HU-002, HU-003)
+1. **P-002 (Dashboard) o P-003 (Clientes):** El bodeguero selecciona al cliente objetivo.
+2. **P-005 (Perfil del Cliente):** Visualiza el saldo actual y hace clic en el botón flotante o de acción "Registrar Fiado".
+3. **P-006 (Modal de Fiado):** Ingresa el monto (ej. `S/ 25.50`) y la nota descriptiva ("Arroz y aceite"). Presiona "Guardar".
+4. **Sistema:** Valida reglas de negocio (monto > 0, límite de crédito). Si alcanza o supera el 80%/100%, muestra alerta visual o requiere doble confirmación. Actualiza el saldo en tiempo real y retorna a **P-005**.
+
+### Flujo 3: Cobranza por WhatsApp (HU-004)
+1. **P-005 (Perfil del Cliente):** El bodeguero visualiza el saldo adeudado (mayor a `S/ 0.00`) y presiona el botón "Cobrar por WhatsApp".
+2. **Sistema:** Valida la ventana horaria permitida (09:00 - 20:00 UTC-5). Si es válida, abre la aplicación de WhatsApp con el mensaje pre-redactado.
+
+---
+
+## 3. Screen Specs
+
+### P-001: Pantalla de Autenticación (Login / PIN)
+* **Propósito:** Permitir el acceso seguro del bodeguero mediante su celular y PIN de 4 dígitos.
+* **Actor Principal:** Bodeguero.
+* **HUs Relacionadas:** HU-008.
+* **Datos que Muestra:** Campo de número celular (9 dígitos), teclado numérico o inputs ocultos para PIN de 4 dígitos, y mensajes de error por intentos fallidos.
+* **Acciones Disponibles:** Ingresar número, digitar PIN, presionar "Ingresar".
+* **Reglas de Negocio:** RN-004, RN-006; bloqueo temporal de 15 minutos tras 3 intentos fallidos.
+* **Wireframe Textual:**
+```text
++--------------------------------------------------+
+| [Logo FiaYa]                                     |
+| Control de Fiados para Bodegas                   |
+|                                                  |
+| Ingresa tu celular:                              |
+| [ 999 888 777                                  ] |
+|                                                  |
+| Ingresa tu PIN de seguridad (4 dígitos):         |
+| [ * ] [ * ] [ * ] [ * ]                          |
+|                                                  |
+| [       INGRESAR A MI BODEGA (Primary)         ] |
+|                                                  |
+| Nota: Acceso protegido bajo normativas de        |
+| protección de datos (Ley N.° 29733).             |
++--------------------------------------------------+
+```
+
+---
+
+### P-002: Dashboard Principal / Listado de Deudores
+* **Propósito:** Mostrar el consolidado de clientes con deudas pendientes ordenados de mayor a menor monto.
+* **Actor Principal:** Bodeguero.
+* **HUs Relacionadas:** HU-007.
+* **Datos que Muestra:** Deuda total acumulada de la bodega, lista de clientes deudores (nombre y saldo en Soles con formato `S/ 0.00`), paginación en bloques de 20.
+* **Acciones Disponibles:** Buscar cliente, ordenar lista, hacer clic en un cliente para ir a su perfil (P-005), navegar al listado completo de clientes (P-003).
+* **Reglas de Negocio:** RN-004, RN-008; visualización de mensaje alternativo si no hay deudores (`S/ 0.00`).
+* **Wireframe Textual:**
+```text
++--------------------------------------------------+
+| FiaYa - Mi Bodega                  [⚙️ Config]   |
++--------------------------------------------------+
+| Deuda Total Acumulada:                           |
+| S/ 1,250.50                                      |
++--------------------------------------------------+
+| Cuentas por Cobrar (Deudores)                    |
+| [🔍 Buscar vecino por nombre o celular...]       |
++--------------------------------------------------+
+| 1. Juan Pérez                                    |
+|    Deuda: S/ 500.00          [Cobrar WhatsApp]   |
++--------------------------------------------------+
+| 2. María Gómez                                   |
+|    Deuda: S/ 350.00          [Cobrar WhatsApp]   |
++--------------------------------------------------+
+| 3. Carlos López                                  |
+|    Deuda: S/ 120.50          [Cobrar WhatsApp]   |
++--------------------------------------------------+
+| [ < Página 1 de 5 > ]                            |
++--------------------------------------------------+
+| [ 🏠 Inicio ]  [ 👥 Clientes ]  [ ➕ Nuevo Fiado]|
++--------------------------------------------------+
+```
+
+---
+
+### P-003: Listado y Gestión de Clientes
+* **Propósito:** Administrar la libreta de vecinos/clientes registrados en la bodega.
+* **Actor Principal:** Bodeguero.
+* **HUs Relacionadas:** HU-001, HU-005.
+* **Datos que Muestra:** Listado alfabético de clientes con su teléfono y saldo actual.
+* **Acciones Disponibles:** Registrar nuevo cliente (ir a P-004), seleccionar cliente para ver detalle (ir a P-005).
+* **Reglas de Negocio:** RN-001, RN-003, RN-004; aislamiento multi-tenant estricto (`bodega_id`).
+* **Wireframe Textual:**
+```text
++--------------------------------------------------+
+| < Volver              Mis Clientes               |
++--------------------------------------------------+
+| [🔍 Buscar cliente...]        [ + Nuevo Cliente ]|
++--------------------------------------------------+
+| * Ana Torres                                     |
+|   Celular: 987****** | Deuda: S/ 0.00            |
++--------------------------------------------------+
+| * Juan Pérez                                     |
+|   Celular: 987****** | Deuda: S/ 120.50          |
++--------------------------------------------------+
+| * Rosa Quispe                                    |
+|   Celular: 912****** | Deuda: S/ 45.00           |
++--------------------------------------------------+
+| [ 🏠 Inicio ]  [ 👥 Clientes ]  [ ➕ Nuevo Fiado]|
++--------------------------------------------------+
+```
+
+---
+
+### P-004: Formulario de Registro de Nuevo Cliente
+* **Propósito:** Dar de alta un nuevo cliente con validaciones de formato peruano y cifrado AES-256.
+* **Actor Principal:** Bodeguero.
+* **HUs Relacionadas:** HU-001.
+* **Datos que Muestra:** Campos de entrada para Nombre, Celular (9 dígitos), DNI opcional (8 dígitos), y Límite de Crédito inicial.
+* **Acciones Disponibles:** Cancelar, Guardar Cliente.
+* **Reglas de Negocio:** RN-001, RN-003, RN-004; validación estricta de celular que comience con 9 y tenga 9 dígitos; manejo de estado offline temporal.
+* **Wireframe Textual:**
+```text
++--------------------------------------------------+
+| < Cancelar          Registrar Nuevo Cliente      |
++--------------------------------------------------+
+| Nombre del Cliente (Vecino):                     |
+| [ Juan Pérez                                   ] |
+|                                                  |
+| Celular (9 dígitos, ej. 987654321):              |
+| [ 987654321                                    ] |
+|                                                  |
+| DNI (Opcional - 8 dígitos):                      |
+| [ 45678912                                     ] |
+|                                                  |
+| Límite de Crédito Inicial (S/):                  |
+| [ 200.00                                       ] |
+|                                                  |
+| [          GUARDAR Y ASIGNAR CLIENTE           ] |
++--------------------------------------------------+
+```
+
+---
+
+### P-005: Perfil y Estado de Cuenta del Cliente
+* **Propósito:** Mostrar el saldo actual, el historial cronológico inverso de transacciones y permitir acciones directas como cobrar por WhatsApp o registrar fiados/abonos.
+* **Actor Principal:** Bodeguero.
+* **HUs Relacionadas:** HU-003, HU-004, HU-005, HU-006.
+* **Datos que Muestra:** Nombre del cliente, saldo total en Soles (`S/ 0.00`), límite de crédito configurado, indicador visual de alerta (si supera el 80% o 100%), e historial de transacciones (créditos y abonos) ordenados de más reciente a más antiguo.
+* **Acciones Disponibles:** Registrar Fiado (abre P-006), Registrar Abono (abre P-007), Cobrar por WhatsApp (abre enlace `wa.me` si está en horario permitido).
+* **Reglas de Negocio:** RN-001, RN-002, RN-003, RN-005, RN-008; verificación de ventana horaria (09:00 - 20:00 UTC-5) para WhatsApp.
+* **Wireframe Textual:**
+```text
++--------------------------------------------------+
+| < Clientes          Detalle de Cuenta            |
++--------------------------------------------------+
+| Cliente: Juan Pérez                              |
+| Saldo Deudor Total: S/ 120.50                    |
+| Límite de Crédito:  S/ 200.00 (60% utilizado)    |
+| [⚠️ Alerta: Próximo al límite de crédito (80%)]  |
++--------------------------------------------------+
+| [ 💬 Cobrar por WhatsApp ]                       |
+| [ ➕ Registrar Fiado ]   [ 💰 Registrar Abono ]  |
++--------------------------------------------------+
+| Historial de Transacciones:                      |
+|--------------------------------------------------+
+| 15/04/2026 | CREDITO | S/ 45.50                  |
+| Concepto: Arroz extra y aceite 1L                |
++--------------------------------------------------+
+| 10/04/2026 | ABONO   | -S/ 50.00                 |
+| Concepto: Pago parcial en efectivo               |
++--------------------------------------------------+
+```
+
+---
+
+### P-006: Modal / Formulario de Registro de Fiado (Venta al Crédito)
+* **Propósito:** Registrar rápidamente una venta al crédito durante la atención en mostrador en menos de 30 segundos.
+* **Actor Principal:** Bodeguero.
+* **HUs Relacionadas:** HU-002, HU-003.
+* **Datos que Muestra:** Monto en Soles (`S/ 0.00`) y nota de texto libre para concepto.
+* **Acciones Disponibles:** Cancelar, Registrar Fiado.
+* **Reglas de Negocio:** RN-002, RN-003, RN-008; monto > `S/ 0.00`; doble confirmación si supera el monto transaccional de `S/ 500.00` o excede el límite de crédito del cliente.
+* **Wireframe Textual:**
+```text
++--------------------------------------------------+
+| Registrar Venta al Crédito (Fiado)           [X] |
++--------------------------------------------------+
+| Cliente seleccionado: Juan Pérez                 |
+|                                                  |
+| Monto del Fiado (S/):                            |
+| [ 25.50                                        ] |
+|                                                  |
+| Nota / Concepto (Ej. Azúcar y fideos):           |
+| [ Arroz 1kg y Aceite Primor                    ] |
+|                                                  |
+| [ Cancelar ]          [ REGISTRAR FIADO (Primary)|
++--------------------------------------------------+
+```
+
+---
+
+### P-007: Modal / Formulario de Registro de Abono / Pago
+* **Propósito:** Registrar pagos parciales o totales realizados por el cliente para disminuir su deuda pendiente.
+* **Actor Principal:** Bodeguero.
+* **HUs Relacionadas:** HU-006.
+* **Datos que Muestra:** Deuda actual pendiente del cliente y campo de monto de abono.
+* **Acciones Disponibles:** Cancelar, Guardar Abono.
+* **Reglas de Negocio:** RN-002, RN-008; validación de que el abono no puede ser mayor que la deuda actual; liquidación total si el abono es exacto.
+* **Wireframe Textual:**
+```text
++--------------------------------------------------+
+| Registrar Abono / Pago de Deuda              [X] |
++--------------------------------------------------+
+| Cliente: Juan Pérez                              |
+| Deuda Pendiente Actual: S/ 120.50                |
+|                                                  |
+| Monto del Abono (S/):                            |
+| [ 50.00                                        ] |
+|                                                  |
+| [ Cancelar ]          [ GUARDAR ABONO (Primary)  |
++--------------------------------------------------+
+```
+
+---
+
+## 4. Design Tokens
+
+### Paleta de Colores
+* **Primario (`primary`):** `#1E40AF` (Azul Bodega Profesional - Confianza y Solidez Financiera).
+* **Secundario (`secondary`):** `#059669` (Verde Soles / Éxito / Pagos al día).
+* **Acento (`accent`):** `#D97706` (Ámbar / Alerta visual de límite de crédito al 80%).
+* **Peligro / Alerta Crítica (`danger`):** `#DC2626` (Rojo / Exceso de límite o bloqueo).
+* **Fondo (`background`):** `#F3F4F6` (Gris claro optimizado para legibilidad en exteriores).
+* **Superficie / Tarjetas (`surface`):** `#FFFFFF` (Blanco puro).
+* **Texto Principal (`text-primary`):** `#111827` (Gris muy oscuro para alto contraste WCAG 2.1 AA).
+* **Texto Secundario (`text-secondary`):** `#4B5563` (Gris medio).
+
+### Tipografía
+* **Familia Tipográfica:** Inter, system-ui, -apple-system, sans-serif.
+* **Escala de Tamaños:**
+  * `Heading 1`: 24px / Bold (Títulos de pantalla)
+  * `Heading 2`: 20px / SemiBold (Subtítulos y nombres de tarjetas)
+  * `Body`: 16px / Regular (Texto general y montos)
+  * `Caption`: 14px / Regular (Notas, fechas y metadatos)
+  * `Small`: 12px / Medium (Etiquetas de estado y ayudas)
+
+### Tamaños de Componentes y Accesibilidad
+* **Altura mínima de elementos interactivos (botones/inputs):** `48px` (Garantiza usabilidad táctil en mostrador).
+* **Ratio de Contraste de Texto:** Estrictamente superior a `4.5:1` para cumplir con **WCAG 2.1 AA** (PRINCIPIO-005).
+
+---
+
+## 5. Navigation Map
+
+```text
+[P-001: Autenticación / Login]
+       │ (PIN Correcto)
+       ▼
+[P-002: Dashboard / Consolidado de Deudores]
+       ├──► [P-003: Listado de Clientes]
+       │          ├──► [P-004: Registro de Nuevo Cliente]
+       │          └──► [P-005: Perfil y Estado de Cuenta]
+       │                     ├──► [P-006: Modal Registrar Fiado]
+       │                     └──► [P-007: Modal Registrar Abono]
+       │
+       └──► [P-005: Perfil y Estado de Cuenta] (Directo desde deudor en Dashboard)
+```
+-----09-ui-spec.md-----
+
+-----10-validation-log.md-----
+# Log de Validación Consolidado (10-validation-log) — FiaYa
+
+**Versión:** 1.1.0  
+**Proyecto:** FiaYa  
+**Rol Consolidador:** Agente Consolidador de Validación (BMAD)  
+**Alcance Evaluado:** Consolidación de revisiones de prototipo visual (Pantallas P-001 a P-007) frente al Catálogo de Historias de Usuario y Reglas de Negocio.
+
+---
+
+## 1. Tabla Consolidada de Observaciones y Gaps Visuales
+
+| # | Observación | Fuente | Tipo | Severidad | Acción Sugerida | HU / RN Afectada |
+|:-:|:---|:---|:---|:---:|:---|:---:|
+| 1 | Falta modal de confirmación por exceso de límite de crédito | Agente Reviewer | Gap | **Alta** | Implementar un modal emergente de advertencia (color rojo/ámbar) cuando el fiado supere el límite, requiriendo confirmación explícita. | HU-003 / RN-008 |
+| 2 | Ausencia de deshabilitación y tooltip por restricción horaria en WhatsApp | Agente Reviewer | Gap | **Alta** | Deshabilitar el botón "Cobrar por WhatsApp" fuera de las 09:00 - 20:00 hrs y mostrar el mensaje "Disponible solo de 09:00 a 20:00". | HU-004 / RN-010 |
+| 3 | Sin validación que impida abonos mayores a la deuda pendiente | Agente Reviewer | Gap | **Media** | Bloquear el botón "Registrar Abono" en P-007 si el monto ingresado es mayor al saldo actual y mostrar alerta. | HU-006 / RN-012 |
+| 4 | Falta mensaje y pantalla de bloqueo tras 3 intentos fallidos de PIN | Agente Reviewer | Gap | **Media** | Diseñar la variante de la P-001 mostrando el banner "Cuenta bloqueada por 15 minutos". | HU-008 / RN-014 |
+| 5 | Falta indicador de cifrado / privacidad de datos en el campo DNI | Agente Reviewer | Mejora | **Baja** | Agregar un icono de candado y texto secundario "Datos protegidos y cifrados (Ley N.° 29733)". | HU-001 / RN-001 |
+| 6 | Ausencia de badge de estado de conexión (Online / Offline) | Agente Reviewer | Mejora | **Baja** | Incluir en el header general un pequeño indicador visual de sincronización (Verde: En línea / Naranja: Guardado local). | HU-009 |
+
+---
+
+## 2. Decisiones Tomadas (Acciones Inmediatas y Backlog)
+
+Para garantizar la viabilidad antes de pasar a la fase de construcción de código (Frontend React / Backend Express):
+
+* **[⏳ PENDIENTE]** — **T-001 (Severidad Alta):** Incorporar en la especificación y diseño del prototipo el modal de confirmación obligatoria para sobreescritura de límite de crédito en la P-006 (**RN-008**).
+* **[⏳ PENDIENTE]** — **T-002 (Severidad Alta):** Especificar el comportamiento condicional del botón de WhatsApp en la P-005 según la ventana horaria UTC-5 de 09:00 a 20:00 hrs (**RN-010**).
+* **[⏳ PENDIENTE]** — **T-003 (Severidad Media):** Agregar la validación interactiva en la P-007 para impedir abonos mayores a la deuda actual (**RN-012**).
+* **[⏳ BACKLOG]** — **T-004 (Severidad Media):** Diseñar el estado visual de cuenta bloqueada por 15 minutos en la P-001 tras 3 intentos fallidos de PIN (**RN-014**).
+* **[⏳ BACKLOG]** — **T-005 (Severidad Baja):** Incluir leyendas de cifrado AES-256 / Ley N.° 29733 en el formulario de clientes (**RN-001**) y el indicador de estado de red PWA (**HU-009**).
+
+---
+
+## 3. Archivos del Spec Pack Actualizados
+
+Los artefactos del Spec Pack que requieren actualización tras esta consolidación son:
+1. **`09-ui-spec.md`**: Actualizar las especificaciones de las pantallas **P-005**, **P-006** y **P-007** para reflejar las restricciones de horario en WhatsApp, los modales de confirmación por exceso de crédito y la validación de montos máximos en abonos.
+2. **Backlog del Proyecto (`11-backlog.md` o equivalente)**: Registrar las tareas de refinanciamiento visual **T-004** y **T-005** para iteraciones posteriores al MVP inicial.
+-----10-validation-log.md-----
+
+</contexto>
+
+<tarea>
+Realiza una auditoría integral del Spec Pack v1.0:
+
+1. **Trazabilidad completa**: ¿Cada regla de negocio tiene al menos una HU? ¿Cada HU tiene al menos una pantalla? ¿Cada pantalla tiene tareas en el backlog?
+2. **Consistencia de IDs**: ¿Los IDs de reglas (RN-XXX), HUs (HU-XXX), pantallas (P-XXX) y tareas (T-XXX) son consistentes entre archivos?
+3. **Cobertura de la constitución**: ¿Los principios de la constitución se respetan en toda la especificación?
+4. **Glosario**: ¿Todos los términos técnicos y de dominio usados en los archivos están definidos en el glosario?
+5. **Preguntas abiertas**: ¿Quedan preguntas sin resolver? ¿Alguna bloquea la implementación?
+6. **Calidad del Documento de Arquitectura**: ¿Las 6 secciones están completas? ¿Los ADRs son coherentes?
+7. **Calidad del backlog**: ¿Las tareas son atómicas? ¿Tienen estimación, prioridad y dependencias?
+8. **Calidad de la UI Spec**: ¿Todos los flujos están documentados? ¿Los wireframes textuales son suficientemente detallados?
+9. **Score general**: evalúa el Spec Pack en los 3 criterios del módulo (Operatividad, Utilidad, Orden) de 1 a 5.
+
+Entrega un reporte Markdown con cada sección y un resumen ejecutivo al inicio.
+</tarea>
+
+<restricciones>
+- Sé estricto: si algo falta, dilo claramente con la corrección sugerida.
+- Prioriza gaps que bloquearían la implementación por un agente de IA.
+- No inventes información: si falta algo, indica qué falta y dónde debería estar.
+</restricciones>

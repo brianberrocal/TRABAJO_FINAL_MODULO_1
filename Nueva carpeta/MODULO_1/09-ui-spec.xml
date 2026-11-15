@@ -1,0 +1,1452 @@
+<agente>
+Eres el Agente UI Designer del framework BMAD.
+Tu rol: transformar Historias de Usuario y el Documento de Arquitectura en una UI Specification completa.
+</agente>
+
+<contexto>
+Estoy construyendo Muuvi, descrito en estos archivos del Spec Pack:
+
+--- CONSTITUCIÓN ---
+# Constitución del Proyecto Muuvi
+**Versión:** 1.0.0 
+**Ámbito:** Obligatorio y vinculante para todos los desarrolladores humanos y agentes de inteligencia artificial que colaboren en el proyecto.
+
+---
+### PRINCIPIO-001: Uniformidad Lingüística
+Todo el código fuente (variables, funciones, componentes, tablas, endpoints), los comentarios, los mensajes de commit, los ADR y la documentación se redactan en español. La interfaz de usuario es bilingüe: español (`es-PE`, idioma por defecto) e inglés (`en`). Todo texto visible se carga desde archivos de traducción y nunca se escribe directamente en el código.
+- **Ejemplo de cumplimiento:** Una función `calcularProximaEntrega()` con su comentario en español, y un componente que muestra `t('pedido.titulo')` resuelto desde `src/locales/es-PE.json` y `src/locales/en.json`.
+- **Ejemplo de violación:** Una función `getNextDelivery()`, un commit "fix delivery bug" o un JSX con texto fijo como `<h1>Tu pedido</h1>`.
+
+### PRINCIPIO-002: Inmutabilidad del Stack Tecnológico Base
+El stack aprobado es:
+- **Frontend:** React 18+ como Aplicación Web Progresiva (PWA).
+- **Backend:** Node.js 20+ con Express.
+- **Base de datos:** PostgreSQL 16+.
+- **Pasarelas de pagos:** Culqi, Niubiz, Izipay y Mercado Pago, más las billeteras Yape y Plin. Todas se integran detrás de un único módulo `pagos` con una interfaz común, de modo que ninguna otra parte del sistema dependa directamente de una pasarela concreta.
+
+Ningún componente del stack puede modificarse ni sustituirse sin aprobación explícita y documentada del equipo humano titular, registrada en un ADR (`docs/adr/ADR-NNN-*.md`).
+- **Ejemplo de cumplimiento:** Desarrollar la pantalla de suscripciones en React 18+ y su endpoint en Express sobre Node.js 20.
+- **Ejemplo de violación:** Reemplazar Express por otro framework web, usar Flutter o introducir una base de datos NoSQL sin un ADR aprobado.
+
+### PRINCIPIO-003: Cifrado de Datos Personales
+Los datos personales (DNI, nombres completos, fecha de nacimiento, teléfono, correo, dirección exacta y coordenadas de geolocalización) se cifran en reposo **a nivel de campo con AES-256-GCM**, y sus claves se guardan en un gestor de secretos (KMS), nunca en el repositorio. Toda comunicación entre la PWA, el backend y los servicios de terceros usa **TLS 1.3**. Ningún dato personal puede aparecer en texto plano en logs, mensajes de error ni analítica.
+- **Ejemplo de cumplimiento:** Transmitir los datos por un canal TLS 1.3 y guardar el DNI del cliente cifrado con AES-256-GCM en la columna `dni_cifrado` de PostgreSQL; los logs solo registran `cliente_id`.
+- **Ejemplo de violación:** Guardar el DNI o el teléfono del cliente en texto plano en tablas o logs, o registrar `Error al entregar en Av. Larco 123, tel. 987654321`.
+
+### PRINCIPIO-004: Pagos sin Datos de Tarjeta (PCI-DSS SAQ-A)
+Los datos de tarjeta (número de tarjeta o PAN, CVV y fecha de vencimiento) **nunca** llegan al backend ni a la base de datos de Muuvi. Se capturan con el formulario o SDK de la pasarela, que devuelve un token; el sistema solo guarda ese token y los 4 últimos dígitos. Un test automatizado falla si algún esquema SQL, DTO o validador contiene campos como `numero_tarjeta`, `cvv` o `pan`.
+- **Ejemplo de cumplimiento:** La PWA envía al backend solo `{ "token_pasarela": "tkn_…", "ultimos_4": "4242" }` para cobrar la suscripción mensual.
+- **Ejemplo de violación:** Un endpoint `POST /pagos` que recibe `{ "numero_tarjeta": "4111…", "cvv": "123" }`.
+
+### PRINCIPIO-005: Ciclo de Vida de los Datos Personales (Ley N.° 29733 y D.S. 016-2024-JUS)
+1. **Inscripción ante la ANPDP:** los bancos de datos de clientes están inscritos ante la ANPDP. Ningún banco de datos nuevo (por ejemplo, una nueva tabla o servicio con datos personales) entra en producción sin su inscripción o actualización previa.
+2. **Solo mayores de edad:** el registro exige fecha de nacimiento y rechaza a quien tenga menos de 18 años.
+3. **Consentimiento:** se pide consentimiento expreso, separado y sin casillas premarcadas para (a) el tratamiento de datos y (b) el envío de datos a terceros, incluidos los proveedores de IA.
+4. **Datos enviados a IA:** el DNI y los datos de pago nunca se envían a un proveedor de IA. Los demás datos solo se envían si el cliente dio su consentimiento y el proveedor figura en `docs/proveedores-datos.md`.
+5. **Eliminación:** al darse de baja una cuenta, sus datos se eliminan o anonimizan en un plazo máximo de **30 días**. Solo se conservan los comprobantes que SUNAT obliga a guardar.
+- **Ejemplo de cumplimiento:** Un job diario anonimiza las cuentas cuya `fecha_baja` tiene más de 30 días y deja la ejecución registrada en la tabla de auditoría.
+- **Ejemplo de violación:** Registrar a un usuario de 17 años, o enviar a un LLM un prompt que contiene el DNI del cliente.
+
+### PRINCIPIO-006: Cumplimiento Comercial, Tributario y Sanitario
+- Todo pago confirmado emite su **boleta o factura electrónica SUNAT**.
+- Ningún producto se publica sin su **registro sanitario DIGESA**.
+- Ningún producto o finca se rotula como "orgánico" sin una **certificación SENASA vigente**.
+- La PWA ofrece acceso al **Libro de Reclamaciones virtual** desde el menú principal (Ley 29571).
+- Los productos que lo requieran muestran las **advertencias octogonales** (Ley 30021).
+- **Ejemplo de cumplimiento:** El catálogo rechaza guardar un yogurt artesanal si `registro_digesa` está vacío.
+- **Ejemplo de violación:** Mostrar la etiqueta "Orgánico" en una finca cuya certificación SENASA está vencida.
+
+### PRINCIPIO-007: Accesibilidad Universal de Interfaz (WCAG 2.1 AA)
+Todas las interfaces cumplen como mínimo el nivel AA de WCAG 2.1:
+- Contraste mínimo de **4.5:1** para texto normal y **3:1** para texto grande y componentes.
+- Navegación completa mediante teclado, con foco visible.
+- Texto alternativo (`alt` o `aria-label`) en toda imagen e ícono interactivo.
+- Áreas táctiles de al menos **48×48 px**.
+- Texto que escala hasta **200 %** sin cortarse.
+- Compatibilidad con TalkBack y VoiceOver.
+- **Dispositivos soportados:** Android 9 (API 28, Pie) o superior con Chrome actualizado, e iOS 15 o superior con Safari 15 o superior.
+- **Ejemplo de cumplimiento:** El botón "Programar entrega" tiene contraste de 5.2:1, mide 48×48 px, recibe foco con Tab y el lector de pantalla lo anuncia como "Programar entrega, botón".
+- **Ejemplo de violación:** Un botón de acción crítico con contraste inferior a 4.5:1, que no responde al foco del teclado, o un ícono de botella sin texto alternativo.
+
+### PRINCIPIO-008: Restricciones Absolutas y Líneas Rojas para Agentes de IA
+Ningún agente de IA, autónomo o asistido, puede bajo ninguna circunstancia:
+1. **Modificar el stack tecnológico:** cambiar, actualizar o introducir librerías o frameworks fuera del stack aprobado (React PWA, Node.js con Express, PostgreSQL), ni añadir o quitar dependencias sin aprobación humana.
+2. **Eliminar datos críticos:** borrar o anular registros de ventas, pedidos, pagos, abonos, suscripciones, comprobantes o auditorías sin la doble confirmación explícita del administrador titular de Muuuvi.
+3. **Alterar límites de crédito:** modificar por su cuenta los topes de crédito, descuentos o saldos de garantía de botellas retornables asignados a los clientes.
+4. **Violar ventanas de comunicación:** enviar recordatorios o notificaciones por WhatsApp, SMS o push fuera del horario permitido (**09:00–20:00, America/Lima, UTC-5**).
+5. **Saltarse los controles de integración:** hacer push o merge directo a `main` o a producción, o desplegar a producción sin aprobación humana.
+6. **Tocar secretos:** leer, crear o modificar secretos (`.env`, claves de API, credenciales de la pasarela o del KMS).
+7. **Ejecutar operaciones destructivas:** correr migraciones destructivas (`DROP`, `TRUNCATE`, `DELETE` o `UPDATE` sin `WHERE`) o acceder a datos reales de clientes.
+8. **Manipular tests:** modificar, saltar (`skip`) o borrar tests para que pasen.
+9. **Cambiar lo comercial o legal:** cambiar precios, lógica de cobro, tarifas de entrega o textos legales (términos, privacidad, consentimientos) sin revisión humana.
+10. **Modificar esta constitución:** editar este archivo.
+
+Ante cualquier duda o inconsistencia, el agente se detiene y solicita intervención humana.
+- **Ejemplo de cumplimiento:** El agente detecta suscripciones duplicadas en la base de datos, no las borra, y genera una alerta que pide intervención humana obligatoria.
+- **Ejemplo de violación:** El agente decide por su cuenta purgar registros antiguos de la tabla de pedidos, instala un ORM alternativo en el backend sin aprobación, o programa un recordatorio de renovación a las 22:30.
+
+### PRINCIPIO-009: Garantía de Calidad y Cobertura de Pruebas Automatizadas
+- Todo cambio en la lógica del sistema debe mantener al menos **80 % de cobertura en reglas de negocio** y **60 % de cobertura general**. El CI bloquea el merge si no se alcanza.
+- Cada regla de `03-reglas-de-negocio.md` está respaldada por al menos un test unitario que cita su ID.
+- Son obligatorias las pruebas unitarias, de integración, E2E de los flujos críticos (registro, suscripción, pago y entrega) y de accesibilidad automatizadas.
+- Cada PR requiere **2 aprobaciones humanas**, linter y SAST en verde, y commits en formato **Conventional Commits** en español.
+- **Ejemplo de cumplimiento:** Un PR que implementa la regla de pausa de suscripción incluye `test_RN012_pausar_suscripcion_antes_del_corte`, deja el módulo en 85 % de cobertura y tiene 2 aprobaciones.
+- **Ejemplo de violación:** Mergear con una sola aprobación, o con la cobertura del módulo de negocio por debajo del 80 %.
+
+### PRINCIPIO-010: Documentación como Código
+- Toda la documentación vive en el repositorio en formato **Markdown**.
+- Cada decisión técnica relevante se registra como **ADR** en `docs/adr/ADR-NNN-titulo.md`.
+- La API se documenta con **OpenAPI 3.x** en `docs/api/openapi.yaml`, y el CI valida que el contrato coincide con la implementación.
+- Todo diagrama se escribe en **Mermaid** dentro del propio Markdown.
+- **Ejemplo de cumplimiento:** El endpoint `GET /fincas/{id}/trazabilidad` se añade a `openapi.yaml` en el mismo PR, junto con un diagrama de secuencia en Mermaid.
+- **Ejemplo de violación:** Documentar la arquitectura en un PNG exportado de otra herramienta, o publicar un endpoint que no figura en OpenAPI.
+
+### PRINCIPIO-011: Estandarización de Formatos de Localización Peruana
+Montos, fechas y números se muestran según las convenciones del Perú:
+- Moneda en soles con el formato `S/ 1,250.50` (punto decimal y coma de miles).
+- Fechas en formato `DD/MM/AAAA` cuando la interfaz está en español.
+- Zona horaria `America/Lima` (UTC-5) para ventanas de entrega, cortes de suscripción y notificaciones.
+
+En la base de datos, los timestamps se guardan en UTC y los montos como `NUMERIC(12,2)`, nunca como `FLOAT`.
+- **Ejemplo de cumplimiento:** La suscripción semanal se muestra como `S/ 32.90 · próxima entrega 12/11/2026, 07:00–09:00`.
+- **Ejemplo de violación:** Mostrar `$32.9` o `11/12/2026`, o guardar el precio en una columna `FLOAT`.
+
+
+--- HISTORIAS DE USUARIO ---
+# Historias de Usuario — Muuvi (Enriquecidas por QA)
+
+**Versión:** 1.1.0  
+**Ámbito:** Módulos *Must-have* y *Should-have* del MVP  
+
+---
+
+## E1 · Cuenta y consentimiento (F-M01)
+
+### HU-001: Registrarme como cliente
+**Prioridad:** Must
+
+Como **persona que vive en Miraflores, San Isidro o La Molina**, quiero **crear mi cuenta en Muuvi**, para **poder suscribirme a la leche de finca**.
+
+**Validación INVEST:** ✅ Cumple todos. Es la base del resto del flujo del cliente.
+**Revisión de los criterios existentes:** tienen valores concretos y son verificables. Falta un camino feliz completo con todos los datos y faltan los casos de error de red y de fecha vacía.
+
+**Criterios de aceptación:**
+- DADO QUE hoy es 12/11/2026, CUANDO me registro con fecha de nacimiento 13/11/2008 (17 años), ENTONCES el sistema rechaza el registro.
+- DADO QUE hoy es 12/11/2026, CUANDO me registro con fecha de nacimiento 12/11/2008 (18 años) y marco el consentimiento principal, ENTONCES el sistema crea mi cuenta.
+- DADO QUE abro el formulario, CUANDO se carga, ENTONCES las casillas del consentimiento principal y del envío a terceros aparecen separadas y desmarcadas.
+- DADO QUE no marco el consentimiento principal, CUANDO envío el formulario, ENTONCES el sistema rechaza el registro.
+- DADO QUE marco el consentimiento principal y no marco el de envío a terceros, CUANDO envío el formulario, ENTONCES el sistema crea mi cuenta igual.
+- DADO QUE ingreso una dirección en Santiago de Surco, CUANDO envío el formulario, ENTONCES el sistema rechaza la dirección.
+- **[NUEVO][Positivo]** DADO QUE ingreso nombre, correo, teléfono, fecha de nacimiento 15/03/1990, una dirección en San Isidro y marco el consentimiento principal, CUANDO envío el formulario, ENTONCES se crea mi cuenta, y en la base de datos el nombre, el correo, el teléfono, la fecha de nacimiento y la dirección quedan cifrados con AES-256-GCM (columnas `*_cifrado`).
+- **[NUEVO][Negativo]** DADO QUE dejo vacía la fecha de nacimiento, CUANDO envío el formulario, ENTONCES el sistema no crea la cuenta (RN-002).
+- **[NUEVO][Negativo]** DADO QUE envío el formulario con un dato inválido, CUANDO el sistema registra el error, ENTONCES el log contiene solo identificadores técnicos y ningún dato personal en texto plano (RN-007).
+- **[NUEVO][Borde]** DADO QUE hoy es 12/11/2026, CUANDO me registro con fecha de nacimiento 11/11/2008 (18 años y 1 día), ENTONCES el sistema crea mi cuenta.
+- **[NUEVO][Borde]** DADO QUE ingreso una dirección en La Molina, el tercer distrito atendido, CUANDO envío el formulario, ENTONCES el sistema la acepta.
+- **[NUEVO][Negativo] ❓ Sin RN** DADO QUE se corta la conexión mientras envío el formulario, CUANDO reintento, ENTONCES *(propuesta)* no se crea una cuenta duplicada.
+- **[NUEVO][Negativo]** DADO QUE ya existe una cuenta con `ana@example.com`, CUANDO intento registrarme con `Ana@Example.com`, ENTONCES el sistema rechaza el registro con el mensaje "Este correo ya tiene una cuenta" y no crea una cuenta nueva (RN-154; decisión del fundador del 14/11/2026, que reemplaza la propuesta de no revelar si el correo existe).
+- **[NUEVO][Borde] ❓ Sin RN (QA-057)** DADO QUE nací el 29/02/2008, CUANDO me registro el 28/02/2026, ENTONCES *(propuesta)* se definirá si ya cumplí 18 años.
+
+**Reglas de negocio relacionadas:** RN-001, RN-002, RN-003, RN-004, RN-005, RN-006, RN-007, RN-114, RN-115, RN-116, RN-118, RN-154
+**Notas:** se mantienen las notas originales (texto legal redactado por un humano, encargados nombrados en el consentimiento, ANPDP y DPA antes de producción).
+
+---
+
+### HU-002: Darme de baja
+**Prioridad:** Must
+
+Como **cliente**, quiero **dar de baja mi cuenta**, para **que Muuvi deje de tratar mis datos personales**.
+
+**Validación INVEST:** ✅ Cumple todos.
+**Revisión de los criterios existentes:** son correctos. Falta cubrir los demás bloqueos de RN-098 (suscripción activa, reclamo abierto), el permiso del rol y el borde del plazo de 30 días.
+
+**Criterios de aceptación:**
+- DADO QUE tengo una entrega en estado `en_ruta`, CUANDO pido la baja, ENTONCES el sistema la rechaza y muestra "Tienes una entrega en curso".
+- DADO QUE no tengo suscripción activa, entregas `programada` o `en_ruta` ni reclamos sin respuesta, pero tengo 2 botellas sin devolver, CUANDO pido la baja, ENTONCES el sistema la acepta.
+- DADO QUE pedí la baja el 12/11/2026 a las 10:00, CUANDO llega el 12/12/2026 a las 10:00 (2 592 000 s después), ENTONCES mis datos personales ya están anonimizados y mis boletas siguen guardadas.
+- DADO QUE tengo S/ 14.50 de saldo a favor, CUANDO se acepta mi baja a las 10:00, ENTONCES antes de las 11:00 se solicita el reembolso de S/ 14.50 al medio de pago con que pagué el ciclo que generó ese saldo.
+- **[NUEVO][Negativo]** DADO QUE tengo una suscripción `activa`, CUANDO pido la baja, ENTONCES el sistema la rechaza e indica que primero debo cancelar la suscripción.
+- **[NUEVO][Negativo]** DADO QUE tengo un reclamo sin respuesta, CUANDO pido la baja, ENTONCES el sistema la rechaza e indica el reclamo pendiente.
+- **[NUEVO][Negativo]** DADO QUE soy operador, CUANDO intento pedir la baja de la cuenta de un cliente, ENTONCES el sistema lo rechaza, porque solo el cliente gestiona su propia cuenta (RN-099).
+- **[NUEVO][Borde]** DADO QUE pedí la baja el 12/11/2026 a las 10:00, CUANDO reviso el 12/12/2026 a las 09:59:59, ENTONCES el proceso de anonimización puede no haber corrido aún, pero a las 10:00:00 ya debe haber terminado.
+- **[NUEVO][Borde]** DADO QUE tengo S/ 0.00 de saldo a favor, CUANDO se acepta mi baja, ENTONCES no se solicita ningún reembolso.
+- **[NUEVO][Positivo]** DADO QUE mi cuenta ya se anonimizó, CUANDO SUNAT o el operador consulta mis boletas, ENTONCES siguen disponibles (RN-111).
+
+**Reglas de negocio relacionadas:** RN-008, RN-098, RN-099, RN-111, RN-124
+**Notas:** la anonimización es un proceso automático y no requiere doble confirmación (aclaración de QA-010).
+
+---
+
+## E2 · Catálogo (F-M02)
+
+### HU-003: Ver la leche disponible y su finca de origen
+**Prioridad:** Must
+
+Como **cliente**, quiero **ver la leche disponible, su precio y la finca certificada de la que viene**, para **decidir si me suscribo**.
+
+**Validación INVEST:** ✅ Cumple todos.
+**Revisión de los criterios existentes:** el tercer criterio prueba el día después del vencimiento, pero no el **día mismo**, que es el borde real (el glosario dice "vencimiento igual o posterior a la fecha actual").
+
+**Criterios de aceptación:**
+- DADO QUE `precio_litro = 14.50` en la configuración, CUANDO abro el catálogo, ENTONCES veo "Leche fresca 1 L · S/ 14.50 por litro".
+- DADO QUE un producto tiene `registro_digesa` vacío, CUANDO el operador intenta publicarlo, ENTONCES el sistema lo rechaza y el producto no aparece en el catálogo.
+- DADO QUE la certificación SENASA de la finca vence el 30/11/2026, CUANDO abro el catálogo el 01/12/2026, ENTONCES la etiqueta "Orgánico" no aparece en esa finca ni en sus productos.
+- DADO QUE abro la ficha de la finca, CUANDO se carga, ENTONCES veo su nombre, su provincia (Cañete o Huaral) y su certificación SENASA.
+- **[NUEVO][Borde]** DADO QUE la certificación SENASA vence el 30/11/2026, CUANDO abro el catálogo el 30/11/2026, ENTONCES la etiqueta "Orgánico" **sí** aparece, porque la certificación sigue vigente ese día.
+- **[NUEVO][Negativo]** DADO QUE soy repartidor, CUANDO intento publicar un producto o editar una finca, ENTONCES el sistema lo rechaza (RN-099).
+- **[NUEVO][Negativo]** DADO QUE un proceso automático intenta cambiar `precio_litro` de 14.50 a 15.00, CUANDO se ejecuta, ENTONCES el sistema lo rechaza y el catálogo sigue mostrando S/ 14.50 (RN-011).
+- **[NUEVO][Borde]** DADO QUE `precio_litro = 1250.50` en un entorno de prueba, CUANDO abro el catálogo, ENTONCES el precio se muestra como "S/ 1,250.50", con coma de miles (RN-037).
+- **[NUEVO][Borde] ❓ Sin RN** DADO QUE no hay ningún producto publicado, CUANDO abro el catálogo, ENTONCES *(propuesta)* veo un mensaje que dice que no hay leche disponible, cargado desde `es-PE.json`.
+
+**Reglas de negocio relacionadas:** RN-009, RN-010, RN-011, RN-037, RN-099
+**Notas:** el cambio de precio no tiene HU propia; ver la HU-013 sugerida.
+
+---
+
+## E3 · Suscripción (F-M03)
+
+### HU-004: Suscribirme a una entrega semanal
+**Prioridad:** Must
+
+Como **cliente**, quiero **suscribirme para recibir cierta cantidad de litros cada semana**, para **no tener que acordarme de comprar leche**.
+
+**Validación INVEST:** ⚠️ **I**: depende de HU-001. Se puede trabajar en paralelo con un cliente de prueba sembrado.
+**Revisión de los criterios existentes:** son correctos. Falta el borde exacto de la hora de corte al crear la suscripción y el mínimo de 1 litro.
+
+**Criterios de aceptación:**
+- DADO QUE elijo 3 litros los sábados, CUANDO confirmo la suscripción, ENTONCES el sistema me muestra un importe por ciclo de S/ 43.50 (3 × S/ 14.50) y la franja "07:00–10:00".
+- DADO QUE elijo el lunes como día de entrega, CUANDO confirmo, ENTONCES el sistema rechaza la suscripción e indica que los días de reparto son martes, jueves y sábado.
+- DADO QUE ingreso 0 litros o 1.5 litros, CUANDO confirmo, ENTONCES el sistema rechaza la suscripción.
+- DADO QUE creo una suscripción de los sábados el viernes 13/11/2026 a las 19:00, CUANDO se guarda, ENTONCES mi primera entrega es el sábado 21/11/2026 y mi primer cobro es el viernes 20/11/2026 a las 18:00:00.
+- DADO QUE recibo los martes y el martes 08/12/2026 es feriado nacional, CUANDO se acerca esa semana, ENTONCES mi entrega pasa al jueves 10/12/2026, con corte y cobro el miércoles 09/12/2026 a las 18:00:00.
+- **[NUEVO][Borde]** DADO QUE elijo 1 litro (el mínimo), CUANDO confirmo, ENTONCES la suscripción se crea con un importe de S/ 14.50 por ciclo.
+- **[NUEVO][Borde]** DADO QUE creo una suscripción de los sábados el viernes 13/11/2026 a las 17:59:59, CUANDO se guarda, ENTONCES mi primera entrega es el sábado 14/11/2026, porque el corte de las 18:00:00 todavía no ocurrió.
+- **[NUEVO][Borde]** DADO QUE creo una suscripción de los sábados el viernes 13/11/2026 a las 18:00:00 en punto, CUANDO se guarda, ENTONCES mi primera entrega es el sábado 21/11/2026.
+- **[NUEVO][Borde]** DADO QUE elijo 50 litros por semana, CUANDO confirmo, ENTONCES la suscripción se crea, porque en el PMV no hay máximo (RN-017). ⚠️ El tope por capacidad de la finca sigue abierto (QA-042).
+- **[NUEVO][Borde]** DADO QUE el corte de las 18:00 se evalúa en hora de Lima, CUANDO el servidor está en UTC, ENTONCES el corte del viernes 13/11/2026 ocurre a las 23:00:00 UTC (RN-039).
+- **[NUEVO][Negativo] ❓ Sin RN** DADO QUE no tengo ningún medio de pago registrado, CUANDO confirmo la suscripción, ENTONCES *(propuesta)* el sistema me pide registrar uno antes de crearla.
+
+**Reglas de negocio relacionadas:** RN-015, RN-016, RN-017, RN-018, RN-039, RN-061, RN-084, RN-123
+**Notas:** se mantienen las notas originales.
+
+---
+
+### HU-005: Pausar y reactivar mi suscripción
+**Prioridad:** Must
+
+Como **cliente**, quiero **pausar mi suscripción por un número de entregas o de forma indefinida, y reactivarla cuando quiera**, para **no recibir leche cuando viajo**.
+
+**Validación INVEST:** ⚠️ **I**: depende de HU-004.
+**Revisión de los criterios existentes:** el primero y el segundo cubren bien el borde del corte. Faltan el borde de la reactivación a las 18:00:00 y la pausa de 0 entregas.
+
+**Criterios de aceptación:**
+- DADO QUE mi entrega es el sábado 14/11/2026, CUANDO pauso el viernes 13/11/2026 a las 17:59:59, ENTONCES no se programa la entrega del sábado.
+- DADO QUE mi entrega es el sábado 14/11/2026, CUANDO pauso el viernes 13/11/2026 a las 18:00:00, ENTONCES la entrega del sábado se mantiene.
+- DADO QUE pido una pausa de 2 entregas el viernes 13/11/2026 a las 10:00, CUANDO pasan los sábados 14/11 y 21/11, ENTONCES la suscripción vuelve a `activa` y se programa la entrega del sábado 28/11/2026.
+- DADO QUE mi suscripción está en pausa indefinida, CUANDO la reactivo el viernes 20/11/2026 a las 11:00, ENTONCES se programa la entrega del sábado 21/11/2026.
+- **[NUEVO][Borde]** DADO QUE mi suscripción está en pausa indefinida, CUANDO la reactivo el viernes 20/11/2026 a las 18:00:00, ENTONCES no se programa la entrega del 21/11/2026 y la primera es la del sábado 28/11/2026.
+- **[NUEVO][Negativo]** DADO QUE pido una pausa de 0 entregas, CUANDO la confirmo, ENTONCES el sistema la rechaza, porque N debe ser un entero mayor o igual a 1 (RN-062).
+- **[NUEVO][Borde]** DADO QUE pido una pausa de 1 entrega el viernes 13/11/2026 a las 10:00, CUANDO pasa el sábado 14/11, ENTONCES la suscripción vuelve a `activa` y se programa la entrega del sábado 21/11/2026.
+- **[NUEVO][Negativo]** DADO QUE mi suscripción lleva 8 semanas en pausa indefinida, CUANDO pasa el tiempo sin que la reactive, ENTONCES el sistema no la reanuda por su cuenta (RN-063).
+- **[NUEVO][Borde]** DADO QUE estoy en pausa por 2 entregas y el sábado 21/11 cayera en feriado, CUANDO se traslada esa entrega, ENTONCES la entrega trasladada cuenta como una de las 2 omitidas. ❓ Sin RN: confirmar.
+- **[NUEVO][Negativo] ❓ Sin RN** DADO QUE mi suscripción está en `suspendida_por_pago`, CUANDO intento pausarla, ENTONCES *(propuesta)* el sistema lo rechaza, porque el diagrama de estados de la suscripción no tiene esa transición.
+
+**Reglas de negocio relacionadas:** RN-012, RN-013, RN-062, RN-063, RN-064
+**Notas:** el sistema nunca reanuda por su cuenta una pausa indefinida (RN-063).
+
+---
+
+### HU-006: Modificar o cancelar mi suscripción
+**Prioridad:** Must
+
+Como **cliente**, quiero **cambiar mis litros, mi día o mi dirección, o cancelar la suscripción**, para **ajustarla a lo que consume mi hogar**.
+
+**Validación INVEST:** ⚠️ **I**: depende de HU-004.
+**Revisión de los criterios existentes:** son correctos. Falta el borde de la modificación exactamente en el corte, el cambio a un día no permitido y la cancelación con saldo a favor.
+
+**Criterios de aceptación:**
+- DADO QUE recibo 2 L los sábados, CUANDO cambio a 3 L el viernes 13/11/2026 a las 19:00, ENTONCES la entrega del 14/11/2026 sale con 2 L y la del 21/11/2026 con 3 L.
+- DADO QUE cancelo el viernes 13/11/2026 a las 16:00, CUANDO llega el corte, ENTONCES no se crean entregas el 14/11/2026 ni después.
+- DADO QUE cancelo el viernes 13/11/2026 a las 20:00, CUANDO llega el sábado, ENTONCES recibo la entrega del 14/11/2026, la suscripción queda `cancelada` y no se crea la del 21/11/2026.
+- DADO QUE cambio mi dirección a una en Barranco, CUANDO guardo el cambio, ENTONCES el sistema rechaza la dirección durante el PMV.
+- **[NUEVO][Borde]** DADO QUE recibo 2 L los sábados, CUANDO cambio a 3 L el viernes 13/11/2026 a las 17:59:59, ENTONCES la entrega del 14/11/2026 ya sale con 3 L y su cobro es de S/ 43.50.
+- **[NUEVO][Negativo]** DADO QUE recibo los sábados, CUANDO cambio mi día al domingo, ENTONCES el sistema rechaza el cambio (RN-061).
+- **[NUEVO][Positivo]** DADO QUE recibo los sábados, CUANDO cambio mi día al jueves el lunes 16/11/2026, ENTONCES mi siguiente entrega es el jueves 19/11/2026, con corte el miércoles 18/11/2026 a las 18:00:00.
+- **[NUEVO][Positivo]** DADO QUE tengo S/ 14.50 de saldo a favor, CUANDO cancelo mi suscripción a las 10:00, ENTONCES antes de las 11:00 se solicita el reembolso de S/ 14.50 (RN-124).
+- **[NUEVO][Negativo] ❓ Sin RN** DADO QUE mi suscripción ya está `cancelada`, CUANDO intento cancelarla o modificarla otra vez, ENTONCES *(propuesta)* el sistema lo rechaza.
+
+**Reglas de negocio relacionadas:** RN-005, RN-014, RN-061, RN-081, RN-082, RN-083, RN-124
+**Notas:** se mantiene la nota original.
+
+---
+
+## E4 · Cobro, comprobantes y reembolsos (F-M04)
+
+### HU-007: Pagar cada ciclo automáticamente
+**Prioridad:** Must
+
+Como **cliente**, quiero **que cada ciclo se cobre solo a mi tarjeta, Yape o Plin**, para **recibir mi leche sin hacer nada cada semana**.
+
+**Validación INVEST:** ⚠️ **I**: depende de HU-004. ⚠️ **E** y **S**: tiene 9 criterios y 23 reglas.
+**Corrección sugerida:** partirla en **HU-007a** (cobro automático e idempotencia, criterios 1 a 3), **HU-007b** (rechazo, suspensión y regularización, criterios 4 y 5) y **HU-007c** (pago pendiente, pago tardío y elección, criterios 6 a 9).
+**Revisión de los criterios existentes:** el primero usa `ciclo-{id}-cliente-{id}`, que no es un valor concreto. Sugiero usar `ciclo-7781-cliente-4821`, como en RN-072.
+
+**Criterios de aceptación:**
+- DADO QUE tengo una suscripción activa de S/ 43.50 con entrega el sábado 14/11/2026, CUANDO llega el viernes 13/11/2026 a las 18:00:00, ENTONCES el sistema ejecuta el cobro con la clave de idempotencia `ciclo-{id}-cliente-{id}` *(sugerencia: `ciclo-7781-cliente-4821`)*.
+- DADO QUE el proceso de cobro de las 18:00 se ejecuta dos veces por error, CUANDO termina, ENTONCES tengo un solo cargo de S/ 43.50.
+- DADO QUE el primer cobro se rechaza a las 18:00:00, CUANDO pasan 60 s, ENTONCES el sistema hace 1 reintento a las 18:01:00 y no hace ningún otro en ese ciclo.
+- DADO QUE el cobro y el reintento se rechazan, CUANDO termina el reintento, ENTONCES la entrega del 14/11/2026 pasa a `suspendida` con motivo `pago`, mi suscripción pasa a `suspendida_por_pago` y recibo en 300 s como máximo un correo para actualizar mi medio de pago.
+- DADO QUE mi suscripción está en `suspendida_por_pago`, CUANDO registro una tarjeta nueva el miércoles 18/11/2026, ENTONCES vuelve a `activa` y el siguiente cobro se hace el viernes 20/11/2026 a las 18:00:00.
+- DADO QUE pago con Yape y a las 18:30:00 (1 800 s) el pago sigue pendiente, CUANDO se cumple el plazo, ENTONCES la entrega pasa a `suspendida` con motivo `pago`.
+- DADO QUE un pago pendiente se confirma a las 18:40:00, después de suspender la entrega, CUANDO llega la confirmación, ENTONCES la entrega sigue `suspendida`, mi suscripción vuelve a `activa` sin pedirme otro medio de pago y a las 18:45:00 como máximo recibo un correo para elegir entre reembolso y saldo a favor. ⚠️ C-02
+- DADO QUE elijo reembolso, CUANDO confirmo mi elección, ENTONCES se solicita el reembolso íntegro en 3 600 s como máximo; DADO QUE elijo saldo a favor, ENTONCES el importe se suma a mi saldo.
+- DADO QUE recibí el aviso el 13/11/2026 a las 18:42:00 y no elijo ninguna opción, CUANDO llega el 16/11/2026 a las 18:42:00 (72 h), ENTONCES se solicita automáticamente el reembolso íntegro a mi medio de pago original.
+- **[NUEVO][Negativo]** DADO QUE la PWA envía al backend `{ "numero_tarjeta": "4111111111111111", "cvv": "123" }`, CUANDO llega la petición, ENTONCES el backend la rechaza sin guardar su contenido (RN-020).
+- **[NUEVO][Negativo]** DADO QUE intento pagar con Niubiz durante el PMV, CUANDO confirmo, ENTONCES el sistema rechaza el medio de pago (RN-019, ADR-001).
+- **[NUEVO][Negativo]** DADO QUE la pasarela envía dos veces el mismo webhook de confirmación del ciclo 7781, CUANDO el sistema los procesa, ENTONCES registra un solo pago confirmado (RN-073).
+- **[NUEVO][Borde]** DADO QUE pago con Plin y la confirmación llega a las 18:29:59 (1 799 s), CUANDO se registra, ENTONCES el pago queda confirmado y la entrega del 14/11/2026 se mantiene `programada`.
+- **[NUEVO][Borde]** DADO QUE el reintento del ciclo también se rechaza, CUANDO pasan otros 60 s, ENTONCES no hay un tercer intento de cobro en ese ciclo (RN-080).
+- **[NUEVO][Borde]** DADO QUE mi suscripción está `pausada` el viernes 13/11/2026 a las 18:00:00, CUANDO se cumple el corte, ENTONCES no se ejecuta ningún cobro.
+- **[NUEVO][Positivo]** DADO QUE pago con Yape, CUANDO se confirma el pago, ENTONCES se guarda solo la referencia de la transacción (por ejemplo `YP-20261113-889120`) y `tipo_medio = yape`, sin el número de celular (RN-094 y RN-095).
+- **[NUEVO][Borde]** DADO QUE recibí el aviso a las 18:42:00 del 13/11/2026, CUANDO elijo saldo a favor el 16/11/2026 a las 18:41:59 (1 s antes de las 72 h), ENTONCES se respeta mi elección y no hay reembolso automático.
+- **[NUEVO][Negativo]** DADO QUE el cobro de las 18:00:00 recibe un error 503 de la pasarela, CUANDO se registra, ENTONCES el pago queda `en_verificacion`, no se hace el reintento de las 18:01:00 y el sistema consulta a la pasarela el estado del cargo `ciclo-7781-cliente-4821` (RN-135 a RN-137).
+- **[NUEVO][Positivo]** DADO QUE el pago está `en_verificacion`, CUANDO la consulta informa que el cargo fue confirmado, ENTONCES el pago pasa a `confirmado` y tengo un solo cargo de S/ 43.50 (RN-138).
+- **[NUEVO][Negativo]** DADO QUE el pago está `en_verificacion`, CUANDO la consulta informa que el cargo fue rechazado, ENTONCES se aplica el reintento único de RN-046.
+- **[NUEVO][Borde] ⛔ P23** DADO QUE el pago sigue `en_verificacion` a las 18:30:00 (1 800 s), CUANDO se cumple el plazo, ENTONCES *(pendiente: P23)*.
+
+**Reglas de negocio relacionadas:** RN-019, RN-020, RN-021, RN-045, RN-046, RN-047, RN-048, RN-049, RN-050, RN-051, RN-072, RN-073, RN-074, RN-075, RN-080, RN-094, RN-095, RN-119, RN-120, RN-121, RN-118, RN-129, RN-130, RN-131, RN-135, RN-136, RN-137, RN-138
+**Notas:** se mantienen las notas originales (PCI-DSS, sandbox antes de cerrar la HU).
+
+---
+
+### HU-008: Recibir mi comprobante electrónico
+**Prioridad:** Must
+
+Como **cliente**, quiero **recibir mi boleta o factura electrónica por cada pago**, para **tener el respaldo tributario de lo que pagué**.
+
+**Validación INVEST:** ⚠️ **I**: depende de HU-007. ⚠️ **E**: sujeta a la elección del OSE/PSE.
+**Revisión de los criterios existentes:** son correctos. Falta el RUC con letras, el RUC de persona natural, el reintento exitoso y el comprobante con saldo a favor.
+
+**Criterios de aceptación:**
+- DADO QUE no elegí factura, CUANDO se confirma mi pago de S/ 43.50, ENTONCES se emite una boleta electrónica de S/ 43.50.
+- DADO QUE elegí factura con el RUC `20123456789`, CUANDO se confirma mi pago, ENTONCES se emite una factura electrónica.
+- DADO QUE ingreso el RUC `2012345678` (10 dígitos), CUANDO lo guardo, ENTONCES el sistema lo rechaza.
+- DADO QUE mi pago con Plin quedó `pendiente`, CUANDO todavía no se confirma, ENTONCES no se emite ningún comprobante.
+- DADO QUE el OSE/PSE falla al emitir a las 18:00:05, CUANDO pasan los reintentos (18:01:05, 18:03:05, 18:07:05, 18:15:05 y 18:31:05) y todos fallan, ENTONCES el operador recibe una alerta crítica en 60 s como máximo.
+- **[NUEVO][Negativo]** DADO QUE ingreso el RUC `2012345678A` (11 caracteres, uno no numérico), CUANDO lo guardo, ENTONCES el sistema lo rechaza (RN-058).
+- **[NUEVO][Borde]** DADO QUE ingreso el RUC `201234567890` (12 dígitos), CUANDO lo guardo, ENTONCES el sistema lo rechaza.
+- **[NUEVO][Positivo]** DADO QUE elegí factura con el RUC `10456789012`, CUANDO lo guardo, ENTONCES se guarda cifrado con AES-256-GCM, porque contiene el DNI `45678901` (RN-060).
+- **[NUEVO][Borde]** DADO QUE el OSE/PSE falla a las 18:00:05 y el segundo reintento (18:03:05) emite con éxito, CUANDO termina, ENTONCES hay una sola boleta y el operador no recibe ninguna alerta.
+- **[NUEVO][Negativo]** DADO QUE la pasarela rechazó mi pago, CUANDO termina el proceso, ENTONCES no se emite ningún comprobante (RN-023).
+- **[NUEVO][Positivo]** DADO QUE mi ciclo de S/ 43.50 se cubrió con saldo a favor, CUANDO se registra el pago con origen `saldo_favor`, ENTONCES se emite una boleta de S/ 43.50 que dice "Forma de pago: aplicación de saldo a favor" (RN-125 y RN-126). ⚠️ Pendiente de validación por el contador.
+- **[NUEVO][Borde]** DADO QUE elegí factura pero no tengo RUC registrado, CUANDO se confirma mi pago, ENTONCES se emite una boleta (RN-059).
+
+**Reglas de negocio relacionadas:** RN-022, RN-023, RN-058, RN-059, RN-060, RN-104, RN-106, RN-125, RN-126
+**Notas:** se mantiene la nota original.
+
+---
+
+### HU-009: Recibir un reembolso cuando Muuvi falla
+**Prioridad:** Must
+
+Como **cliente**, quiero **que me devuelvan lo pagado si Muuvi no me entrega la leche**, para **no pagar por algo que no recibí**.
+
+**Validación INVEST:** ⚠️ **I**: depende de HU-007 y HU-011. ⚠️ **S**: tiene 7 criterios. ⚠️ **T**: el comprobante con saldo espera al contador.
+**Corrección sugerida:** partirla en **HU-009a** (importe a devolver, elección y reembolso) y **HU-009b** (saldo a favor y su aplicación).
+**Revisión de los criterios existentes:** el segundo criterio tiene dos DADO QUE en una línea. Sugiero separarlo en dos criterios para que cada uno sea un test.
+
+**Criterios de aceptación:**
+- DADO QUE mi entrega de S/ 43.50 queda `fallida` con causa `imputable_muuvi` a las 09:40:00, CUANDO se registra, ENTONCES a las 09:45:00 como máximo recibo un correo y un aviso en la PWA para elegir entre reembolso y saldo a favor por S/ 43.50. ⚠️ C-02
+- DADO QUE elijo reembolso a las 10:00, CUANDO confirmo, ENTONCES el reembolso de S/ 43.50 se solicita antes de las 11:00 y se emite una nota de crédito que referencia la boleta original; DADO QUE elijo saldo a favor, ENTONCES mi saldo sube en S/ 43.50.
+- DADO QUE mi entrega de 2 L (S/ 29.00) queda `suspendida` porque su lote se invalidó y no elijo nada, CUANDO pasan 72 h desde el aviso, ENTONCES se me reembolsan automáticamente S/ 29.00.
+- DADO QUE mi entrega reprogramada vuelve a fallar por mi causa y queda `cancelada`, CUANDO se cancela, ENTONCES se me reembolsa su importe íntegro sin pedirme que elija.
+- DADO QUE elegí saldo a favor, tengo S/ 14.50 de saldo y mi ciclo es de S/ 43.50, CUANDO llega el corte, ENTONCES se me cobran S/ 29.00.
+- DADO QUE la pasarela rechaza un reembolso a las 09:45:00, CUANDO falla, ENTONCES se reintenta a las 09:46:00 con backoff exponencial, y si se agotan los 5 reintentos el operador recibe una alerta crítica.
+- DADO QUE tengo S/ 58.00 de saldo y mi ciclo es de S/ 43.50, CUANDO llega el corte, ENTONCES no se envía cobro a la pasarela, se registra un pago confirmado de S/ 43.50 con origen `saldo_favor`, recibo una boleta de S/ 43.50 que dice "Forma de pago: aplicación de saldo a favor" y me quedan S/ 14.50 de saldo.
+- **[NUEVO][Borde]** DADO QUE tengo exactamente S/ 43.50 de saldo y mi ciclo es de S/ 43.50, CUANDO llega el corte, ENTONCES no se envía cobro a la pasarela y mi saldo queda en S/ 0.00 (RN-097, "mayor o igual").
+- **[NUEVO][Borde]** DADO QUE recibí el aviso el 14/11/2026 a las 09:42:00, CUANDO llega el 17/11/2026 a las 09:41:59 sin que yo elija, ENTONCES todavía no hay reembolso automático; a las 09:42:00 se solicita.
+- **[NUEVO][Negativo]** DADO QUE ya pasaron las 72 h y se solicitó el reembolso automático, CUANDO intento elegir saldo a favor, ENTONCES ❓ Sin RN: *(propuesta)* el sistema rechaza la elección e indica que el reembolso ya está en curso.
+- **[NUEVO][Positivo]** DADO QUE el reembolso falla a las 09:45:00 y el segundo reintento (09:48:00) tiene éxito, CUANDO termina, ENTONCES el reembolso queda hecho y el operador no recibe alerta.
+- **[NUEVO][Negativo]** DADO QUE mi entrega falla con causa `imputable_cliente`, CUANDO se registra la primera vez, ENTONCES no se genera importe a devolver, sino una reprogramación (RN-066).
+- **[NUEVO][Positivo]** DADO QUE en un día de escasez mi entrega de 3 L queda `fallida` con motivo `falla_abastecimiento_finca`, CUANDO se registra, ENTONCES se genera un importe a devolver de S/ 43.50 y recibo el aviso de elección (RN-092, RN-053 y RN-129).
+
+**Reglas de negocio relacionadas:** RN-053, RN-054, RN-055, RN-056, RN-057, RN-066, RN-079, RN-092, RN-096, RN-097, RN-105, RN-106, RN-108, RN-125, RN-126, RN-129, RN-130
+**Notas:** se mantienen las notas originales.
+
+---
+
+## E5 · Operación diaria (F-M05)
+
+### HU-010: Recibir los lotes de la finca con control de temperatura
+**Prioridad:** Must
+
+Como **operador**, quiero **saber cuántos litros pedir a la finca y registrar cada lote que llega con su temperatura**, para **repartir solo leche que cumple la cadena de frío**.
+
+**Validación INVEST:** ⚠️ **S**: tiene 9 criterios y 16 reglas.
+**Corrección sugerida:** partirla en **HU-010a** (demanda y pedido a la finca), **HU-010b** (registro de lote, temperatura y corrección) y **HU-010c** (revisión de 15 minutos, invalidación, reasignación y escasez).
+**Revisión de los criterios existentes:** son correctos. Falta el borde exacto de los 900 s, la precisión decimal, el empate en la escasez y los permisos.
+
+**Criterios de aceptación:**
+- DADO QUE el viernes 13/11/2026 a las 18:00:00 hay entregas `programada` que suman 96 L, más 2 reprogramadas de 4 L, CUANDO se cumple el corte, ENTONCES el sistema calcula una demanda de 100 L para el sábado 14/11/2026 y la registra como litros comprometidos del pedido a la finca.
+- DADO QUE registro un lote sin temperatura, CUANDO lo guardo, ENTONCES el sistema rechaza el registro.
+- DADO QUE registro un lote a 4.5 °C, CUANDO lo guardo, ENTONCES queda en estado `recibido`; DADO QUE lo registro a 4.6 °C a las 06:10:00, ENTONCES queda `en_revision`, el operador y el administrador reciben una alerta crítica en 60 s como máximo y sus botellas no se asignan a entregas nuevas. ✅ ADR-004
+- DADO QUE el lote L-2026-1114-01 pasó a `en_revision` a las 06:10:00 y nadie lo revierte, CUANDO llegan las 06:25:00 (900 s), ENTONCES queda `invalidado` y sus entregas `programada` pasan al lote L-2026-1114-02, que tiene 30 L libres.
+- DADO QUE quiero corregir una lectura de 5.1 °C, CUANDO intento sobrescribirla, ENTONCES el sistema lo rechaza; CUANDO registro una corrección a 4.1 °C con la justificación "error de digitación", ENTONCES quedan los dos registros con mi usuario y la hora.
+- DADO QUE llegan 5 L para tres entregas (A, alta 01/10/2026, 3 L; B, alta 05/10/2026, 3 L; C, alta 10/10/2026, 2 L), CUANDO registro el lote, ENTONCES se cubren A y C, y B queda `fallida` con motivo `falla_abastecimiento_finca`.
+- DADO QUE soy el operador y corrijo a 4.1 °C la lectura de un lote `en_revision`, CUANDO guardo la corrección, ENTONCES queda registrada pero el lote sigue `en_revision`.
+- DADO QUE el lote pasó a `en_revision` a las 05:50:00, CUANDO el administrador titular corrige la lectura a 3.8 °C con justificación a las 05:58, ENTONCES el lote vuelve a `recibido` y sus entregas siguen su curso.
+- DADO QUE el lote pasó a `en_revision` a las 05:50:00, CUANDO el administrador intenta revertirlo a las 06:10 (después de los 900 s), ENTONCES el lote ya está `invalidado` y el sistema rechaza la reversión.
+- **[NUEVO][Borde]** DADO QUE el lote pasó a `en_revision` a las 05:50:00, CUANDO el administrador corrige la lectura a 3.8 °C con justificación a las 06:04:59 (899 s), ENTONCES el lote vuelve a `recibido`; a las 06:05:00 (900 s) ya está `invalidado`.
+- **[NUEVO][Negativo]** DADO QUE registro una temperatura de `3.52` °C, CUANDO la guardo, ENTONCES el sistema la rechaza, porque debe tener exactamente 1 decimal (RN-087).
+- **[NUEVO][Negativo]** DADO QUE registro un lote sin litros comprometidos, CUANDO lo guardo, ENTONCES el sistema rechaza el registro (RN-028).
+- **[NUEVO][Negativo]** DADO QUE soy repartidor, CUANDO intento registrar un lote, ENTONCES el sistema lo rechaza (RN-099).
+- **[NUEVO][Negativo]** DADO QUE el administrador intenta revertir un lote `en_revision` sin escribir una justificación, CUANDO guarda la corrección, ENTONCES el sistema la rechaza (RN-127).
+- **[NUEVO][Borde]** DADO QUE llegan 3 L para dos entregas de 3 L cuyas suscripciones se crearon el mismo instante (identificadores 101 y 102), CUANDO registro el lote, ENTONCES se cubre la de identificador 101 y la 102 queda `fallida` (RN-122).
+- **[NUEVO][Borde]** DADO QUE un lote invalidado tiene 12 entregas `programada` y no hay ningún otro lote del día con litros libres, CUANDO se invalida, ENTONCES las 12 quedan `fallida` con causa `imputable_muuvi` y cada cliente recibe el aviso de elección (RN-054 y RN-129).
+- **[NUEVO][Borde] ❓ Sin RN** DADO QUE el viernes 13/11/2026 a las 18:00:00 no hay ninguna entrega `programada` para el sábado, CUANDO se cumple el corte, ENTONCES *(propuesta)* la demanda es de 0 L y no se pide leche a la finca.
+
+**Reglas de negocio relacionadas:** RN-024, RN-026, RN-027, RN-028, RN-054, RN-085, RN-087, RN-088, RN-089, RN-090, RN-091, RN-092, RN-093, RN-099, RN-122, RN-127, RN-128, RN-129, RN-134
+**Notas:** se mantienen las notas originales (umbral pendiente de validación sanitaria; 1 decimal).
+
+---
+
+### HU-011: Cerrar mis entregas del día en ruta
+**Prioridad:** Must
+
+Como **repartidor**, quiero **registrar cada entrega con su temperatura y las botellas que recojo**, para **que Muuvi sepa qué se entregó y en qué condiciones**.
+
+**Validación INVEST:** ⚠️ **I**: depende de HU-010. ⚠️ **S**: tiene 8 criterios y 20 reglas.
+**Corrección sugerida:** partirla en **HU-011a** (entrega normal y botellas), **HU-011b** (lectura alta y lote en revisión en ruta) y **HU-011c** (entrega fallida y reprogramación).
+**Revisión de los criterios existentes:** son correctos. Falta el borde de 4.5 °C exactos en la puerta, la devolución igual al saldo, el permiso sobre entregas ajenas y el trabajo sin conexión.
+
+**Criterios de aceptación:**
+- DADO QUE entrego 3 L a 4.1 °C y recojo 2 botellas de un cliente con saldo de 2, CUANDO cierro la entrega como `entregada`, ENTONCES el saldo del cliente queda en 3 botellas (2 − 2 + 3).
+- DADO QUE intento cerrar una entrega como `entregada` sin temperatura, CUANDO la envío, ENTONCES el sistema rechaza el cierre.
+- DADO QUE el cliente tiene saldo de 2 botellas, CUANDO registro 3 devueltas, ENTONCES el sistema rechaza el registro.
+- DADO QUE registro 5.1 °C en la puerta del cliente a las 08:20:00, CUANDO lo guardo, ENTONCES no puedo cerrar la entrega como `entregada`, la botella no se entrega, el lote pasa a `en_revision` y los demás repartidores con entregas de ese lote reciben en 60 s como máximo el aviso "Lote en revisión, no entregar". ✅ ADR-004
+- DADO QUE el lote sigue `en_revision` a las 08:35:00 (900 s), CUANDO se invalida, ENTONCES mis entregas `en_ruta` de ese lote pasan a `suspendida` y los clientes que ya recibieron leche de ese lote reciben un aviso de disculpa por correo en 3 600 s como máximo; DADO QUE el administrador lo revierte antes, ENTONCES puedo seguir entregando.
+- DADO QUE el cliente no estaba el sábado 14/11/2026, CUANDO marco la entrega como `fallida` con causa `imputable_cliente`, ENTONCES se reprograma para el martes 17/11/2026, 07:00–10:00, sin un cobro nuevo y con botellas de un lote de ese día.
+- DADO QUE la entrega reprogramada del 17/11/2026 vuelve a fallar por causa del cliente, CUANDO la marco, ENTONCES pasa a `cancelada` y no se reprograma de nuevo.
+- DADO QUE marco una entrega como `fallida` sin causa, CUANDO la envío, ENTONCES el sistema rechaza el registro.
+- **[NUEVO][Borde]** DADO QUE registro exactamente 4.5 °C en la puerta del cliente, CUANDO cierro la entrega, ENTONCES puedo cerrarla como `entregada` y el lote sigue `recibido`.
+- **[NUEVO][Borde]** DADO QUE el cliente tiene saldo de 2 botellas, CUANDO entrego 2 L y registro 2 devueltas, ENTONCES el sistema lo acepta y el saldo queda en 2 (2 − 2 + 2).
+- **[NUEVO][Borde]** DADO QUE el cliente tiene saldo de 0 botellas (primera entrega), CUANDO entrego 3 L y registro 0 devueltas, ENTONCES el saldo queda en 3.
+- **[NUEVO][Negativo]** DADO QUE intento cerrar una entrega asignada a otro repartidor, CUANDO la envío, ENTONCES el sistema lo rechaza y no me muestra la dirección de ese cliente (RN-099).
+- **[NUEVO][Negativo]** DADO QUE una entrega ya está `entregada`, CUANDO intento volver a pasarla a `en_ruta`, ENTONCES el sistema rechaza la transición (RN-071).
+- **[NUEVO][Negativo]** DADO QUE el lote está `en_revision`, CUANDO intento cerrar como `entregada` otra entrega de ese lote a 3.9 °C, ENTONCES el sistema lo rechaza con el aviso "Lote en revisión, no entregar" (RN-132).
+- **[NUEVO][Borde]** DADO QUE el sábado 05/12/2026 falla por causa del cliente una entrega cuya reprogramación caería el martes 08/12/2026 (feriado), CUANDO se reprograma, ENTONCES pasa al jueves 10/12/2026 y el cliente recibe el aviso de la nueva fecha por correo en 300 s como máximo (RN-139 y RN-140).
+- **[NUEVO][Negativo]** DADO QUE estoy en ruta sin datos móviles a las 08:15, CUANDO cierro la entrega 9930 como `entregada` a 4.1 °C con 2 botellas devueltas, ENTONCES la PWA guarda el cierre en el dispositivo sin datos personales del cliente (RN-141 y RN-145).
+- **[NUEVO][Positivo]** DADO QUE guardé cierres sin conexión a las 08:15 y a las 08:25, CUANDO recupero la señal a las 08:40, ENTONCES se envían en ese orden y cada entrega figura cerrada a su hora real (`2026-11-14T13:15:00Z` y `2026-11-14T13:25:00Z`) (RN-142 y RN-143).
+- **[NUEVO][Borde]** DADO QUE la señal se corta a mitad de la sincronización, CUANDO la PWA reenvía el cierre de la entrega 9930, ENTONCES queda registrado una sola vez y el saldo de botellas no se duplica (RN-144).
+- **[NUEVO][Negativo] ⛔ K8** DADO QUE cerré sin conexión una entrega de un lote que a esa hora ya estaba `en_revision`, CUANDO se sincroniza, ENTONCES *(pendiente: K8)*.
+
+**Reglas de negocio relacionadas:** RN-025, RN-029, RN-030, RN-031, RN-052, RN-065, RN-066, RN-067, RN-068, RN-070, RN-071, RN-076, RN-077, RN-078, RN-086, RN-099, RN-107, RN-113, RN-132, RN-133, RN-134, RN-139, RN-140, RN-141, RN-142, RN-143, RN-144, RN-145
+**Notas:** se mantienen las notas originales. ⚠️ El modo sin conexión tiene dos conflictos abiertos: K8 (aviso de lote en revisión) y K9 (dirección del cliente en el teléfono frente al PRINCIPIO-003).
+
+---
+
+## E6 · Libro de Reclamaciones (F-M06)
+
+### HU-012: Registrar un reclamo y recibir respuesta a tiempo
+**Prioridad:** Must
+
+Como **consumidor, tenga o no cuenta**, quiero **registrar un reclamo o una queja en el Libro de Reclamaciones virtual**, para **que Muuvi me responda dentro del plazo legal**.
+
+**Validación INVEST:** ✅ Cumple todos, pero la **V** (valor) queda incompleta mientras no exista una regla para registrar y enviar la **respuesta** al consumidor (ver HU-016 sugerida).
+**Revisión de los criterios existentes:** el quinto criterio ("cruza un feriado") no tiene valores concretos. Sugiero el ejemplo del [NUEVO][Borde] con el 08/12/2026.
+
+**Criterios de aceptación:**
+- DADO QUE no he iniciado sesión, CUANDO abro "Libro de Reclamaciones" desde el menú principal, ENTONCES puedo registrar mi reclamo sin que me pida iniciar sesión.
+- DADO QUE registro un reclamo, CUANDO se guarda, ENTONCES recibe un código correlativo (por ejemplo `LR-2026-000017`) y me llega la constancia con ese código al correo que indiqué.
+- DADO QUE un reclamo se registra el lunes 16/11/2026, CUANDO el operador lo abre, ENTONCES ve como fecha límite de respuesta el lunes 07/12/2026 (15 días hábiles).
+- DADO QUE el reclamo del 16/11/2026 sigue sin respuesta, CUANDO llega el lunes 30/11/2026 (10.º día hábil), ENTONCES el operador recibe una alerta.
+- DADO QUE el plazo cruza un feriado nacional cargado en el calendario, CUANDO se calcula la fecha límite, ENTONCES ese feriado no se cuenta como día hábil.
+- **[NUEVO][Borde]** DADO QUE un reclamo se registra el martes 24/11/2026 y el martes 08/12/2026 es feriado, CUANDO el operador lo abre, ENTONCES la fecha límite es el miércoles 16/12/2026, y no el martes 15/12/2026.
+- **[NUEVO][Positivo]** DADO QUE se registran dos reclamos seguidos, CUANDO se guardan, ENTONCES reciben códigos correlativos consecutivos, por ejemplo `LR-2026-000017` y `LR-2026-000018` (RN-034).
+- **[NUEVO][Borde]** DADO QUE un reclamo se registra el viernes 20/11/2026, CUANDO el operador lo abre, ENTONCES la fecha límite es el lunes 14/12/2026 (15 días hábiles, sin sábados, domingos ni el feriado del 08/12).
+- **[NUEVO][Negativo]** DADO QUE soy repartidor, CUANDO intento responder un reclamo, ENTONCES el sistema lo rechaza (RN-099).
+- **[NUEVO][Borde] ❓ Sin RN (QA-037)** DADO QUE un reclamo se registra el sábado 21/11/2026, CUANDO se calcula la fecha límite, ENTONCES *(propuesta)* se cuenta desde el lunes 23/11/2026 y el límite es el lunes 14/12/2026.
+- **[NUEVO][Negativo] ❓ Sin RN** DADO QUE dejo vacío el correo en el formulario, CUANDO lo envío, ENTONCES *(propuesta)* el sistema lo rechaza, porque la constancia se envía a ese correo (RN-112).
+
+**Reglas de negocio relacionadas:** RN-033, RN-034, RN-035, RN-036, RN-099, RN-100, RN-101, RN-109, RN-112
+**Notas:** se mantienen las notas originales.
+
+---
+
+## Resumen INVEST y correcciones
+
+| HU | I | N | V | E | S | T | Corrección sugerida |
+|---|---|---|---|---|---|---|---|
+| HU-001 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Ninguna. |
+| HU-002 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Ninguna. |
+| HU-003 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | Ninguna. |
+| HU-004 | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | Sembrar un cliente de prueba para trabajarla en paralelo. |
+| HU-005 | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | Sembrar una suscripción activa. |
+| HU-006 | ⚠️ | ✅ | ✅ | ✅ | ✅ | ✅ | Sembrar una suscripción activa. |
+| HU-007 | ⚠️ | ✅ | ✅ | ⚠️ | ❌ | ⚠️ | **Partir** en 007a, 007b y 007c. Concretar la clave de idempotencia del primer criterio. Un criterio espera P23. |
+| HU-008 | ⚠️ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | Elegir el OSE/PSE. El criterio de saldo espera al contador. |
+| HU-009 | ⚠️ | ✅ | ✅ | ⚠️ | ❌ | ⚠️ | **Partir** en 009a y 009b. Separar el segundo criterio en dos. |
+| HU-010 | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | **Partir** en 010a, 010b y 010c. C-01 ya está resuelto (ADR-004). |
+| HU-011 | ⚠️ | ✅ | ✅ | ✅ | ❌ | ⚠️ | **Partir** en 011a, 011b y 011c. El modo sin conexión espera K8 y K9. |
+| HU-012 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | La respuesta al reclamo queda cubierta por la HU-016 aprobada. |
+
+**❌ en S** significa que la historia no cabe razonablemente en un sprint tal como está. Con la partición sugerida pasan a ✅.
+
+---
+
+## Escenarios sin regla de negocio
+Estos escenarios aparecen en los criterios marcados con **❓ Sin RN**. El BA debe escribir la regla antes de que un agente los implemente (PRINCIPIO-008: ante la duda, detenerse).
+
+| # | Escenario | HU | Pregunta para el equipo |
+|---|---|---|---|
+| SR-01 | Corte de conexión al registrarse | HU-001 | ¿Cómo se evita una cuenta duplicada? |
+| ~~SR-02~~ | Correo ya registrado | HU-001 | ✅ Resuelto el 14/11/2026: se rechaza con mensaje explícito (RN-154). |
+| SR-03 | Nacido un 29/02 | HU-001 | ¿Cuándo cumple 18 años en un año no bisiesto? (QA-057) |
+| SR-04 | Catálogo vacío | HU-003 | ¿Qué ve el cliente si no hay productos publicados? |
+| SR-05 | Suscribirse sin medio de pago | HU-004 | ¿Se exige un medio de pago al suscribirse? |
+| SR-06 | Pausa con plazo y traslado por feriado | HU-005 | ¿La entrega trasladada cuenta como una de las omitidas? |
+| SR-07 | Pausar una suscripción `suspendida_por_pago` | HU-005 | ¿Está permitido? |
+| SR-08 | Modificar o cancelar una suscripción ya cancelada | HU-006 | ¿Se rechaza? |
+| ~~SR-09~~ | La pasarela no responde (timeout) | HU-007 | ✅ Resuelto: pago `en_verificacion` (RN-135 a RN-138). Falta P23. |
+| SR-10 | El cliente elige después de las 72 h | HU-009 | ¿Se rechaza la elección tardía? |
+| SR-11 | Demanda de 0 L | HU-010 | ¿Se le avisa algo a la finca? |
+| ~~SR-12~~ | Reprogramación a un día feriado | HU-011 | ✅ Resuelto (RN-139 y RN-140). |
+| ~~SR-13~~ | Repartidor sin conexión | HU-011 | ✅ Resuelto (RN-141 a RN-145). Quedan K8 y K9. |
+| SR-14 | Reclamo registrado en sábado | HU-012 | ¿Desde cuándo se cuenta el plazo? (QA-037) |
+| SR-15 | Reclamo sin correo | HU-012 | ¿El correo es obligatorio? |
+
+---
+
+## HUs sugeridas
+Reglas de negocio que no tienen una HU que las ejercite directamente:
+
+### HU-013: Cambiar el precio por litro ✅ Aprobada (14/11/2026) · Iteración 1
+**Prioridad:** Must ⛔ (un criterio depende de P14)
+**Nota (14/11/2026):** se adelanta a la iteración 1 porque es la única forma de cargar el precio inicial en producción (QA-C2-004). La carga inicial se hace sin suscripciones activas, así que no la bloquea P14.
+
+Como **operador**, quiero **proponer un nuevo precio por litro y que el administrador titular lo confirme**, para **ajustar el precio sin afectar ciclos ya cobrados**.
+
+**Criterios de aceptación propuestos:**
+- **[NUEVO][Positivo]** DADO QUE el operador propone S/ 15.00 el sábado 14/11/2026 a las 09:00, CUANDO el administrador titular reingresa su contraseña e ingresa a las 09:03 el código de 6 dígitos que recibió por correo a las 09:01, ENTONCES `precio_litro = 15.00` y la auditoría registra la propuesta, los dos pasos y la confirmación (RN-151 y RN-153).
+- **[NUEVO][Positivo]** DADO QUE `precio_litro` no tiene valor y no hay suscripciones activas, CUANDO el operador propone S/ 14.50 y el administrador titular lo confirma con los dos pasos, ENTONCES el catálogo muestra "S/ 14.50 por litro" (carga inicial; RN-011 y RN-153).
+- **[NUEVO][Borde]** DADO QUE el precio cambia el sábado 14/11/2026, CUANDO se entrega el pedido del 14/11/2026, cobrado el 13/11/2026, ENTONCES mantiene S/ 14.50 (RN-102).
+- **[NUEVO][Negativo]** DADO QUE el operador propone S/ 15.00, CUANDO el administrador no lo confirma, ENTONCES el precio sigue en S/ 14.50 (RN-032 y RN-153).
+- **[NUEVO][Negativo]** DADO QUE el código se envió a las 09:01:00, CUANDO el administrador lo ingresa a las 09:06:01 (301 s después), ENTONCES la confirmación se cancela y el precio no cambia (RN-152).
+- **[NUEVO][Negativo]** DADO QUE el administrador ingresa mal el código 3 veces, CUANDO falla el tercer intento, ENTONCES la confirmación se cancela y el precio no cambia (RN-152).
+- **[NUEVO][Negativo]** DADO QUE soy repartidor, CUANDO intento proponer un precio, ENTONCES el sistema lo rechaza (RN-099).
+- ⛔ DADO QUE se confirma el precio nuevo y hay suscripciones activas, CUANDO se avisa a los suscriptores, ENTONCES el aviso llega con *(P14)* días de anticipación (RN-103).
+
+**Reglas de negocio relacionadas:** RN-011, RN-032, RN-099, RN-102, RN-103, RN-151, RN-152, RN-153
+**Notas:** en producción, el código por correo requiere el proveedor de correo transaccional con DPA vigente (RN-118).
+
+### HU-014: Anular un registro crítico con doble confirmación ✅ Aprobada (14/11/2026)
+**Prioridad:** Must
+
+Como **administrador titular**, quiero **anular un pago, un comprobante, una suscripción o una entrega solo con doble confirmación**, para **evitar anulaciones por error y dejar rastro en la auditoría**.
+
+**Criterios de aceptación propuestos:**
+- **[NUEVO][Positivo]** DADO QUE pido anular el pago 5521 a las 10:00:00 y reingreso mi contraseña, CUANDO ingreso a las 10:02:10 el código que recibí por correo a las 10:00:05, ENTONCES el pago queda anulado y la tabla de auditoría registra la solicitud, los dos pasos, mi usuario y la hora (RN-151).
+- **[NUEVO][Negativo]** DADO QUE soy operador, CUANDO intento anular un pago, ENTONCES el sistema lo rechaza (RN-099).
+- **[NUEVO][Negativo]** DADO QUE un proceso automático intenta borrar entregas de más de 90 días, CUANDO se ejecuta, ENTONCES el sistema lo rechaza (RN-032).
+- **[NUEVO][Negativo]** DADO QUE reingreso mi contraseña, CUANDO no ingreso el código, ENTONCES no se anula nada (RN-151).
+- **[NUEVO][Borde]** DADO QUE el código se envió a las 10:00:05, CUANDO lo ingreso a las 10:05:05 (300 s después), ENTONCES la anulación se ejecuta; a las 10:05:06 la solicitud ya está cancelada (RN-152).
+- **[NUEVO][Negativo]** DADO QUE ya usé el código para anular el pago 5521, CUANDO intento usarlo otra vez para anular el pago 5522, ENTONCES el sistema lo rechaza, porque cada código es de un solo uso (RN-151).
+
+**Reglas de negocio relacionadas:** RN-032, RN-099, RN-151, RN-152
+
+### HU-015: Cargar el calendario de feriados ✅ Aprobada (14/11/2026)
+**Prioridad:** Must (tarea inicial: poblar la tabla de feriados de 2026 y 2027)
+
+Como **operador**, quiero **cargar los feriados nacionales del año desde la fuente oficial**, para **que los repartos y los plazos de reclamos se calculen bien**.
+
+**Criterios de aceptación propuestos:**
+- **[NUEVO][Positivo]** DADO QUE cargo el martes 08/12/2026 como feriado nacional, CUANDO se calcula la semana, ENTONCES las entregas de ese martes pasan al jueves 10/12/2026 (RN-123) y el día no cuenta como hábil (RN-101).
+- **[NUEVO][Negativo]** DADO QUE soy repartidor, CUANDO intento cargar un feriado, ENTONCES el sistema lo rechaza (RN-099).
+- **[NUEVO][Borde]** DADO QUE el calendario del año siguiente no está cargado, CUANDO llega el 01/12/2026, ENTONCES ❓ Sin RN: *(propuesta)* el operador recibe una alerta para cargarlo.
+
+**Reglas de negocio relacionadas:** RN-099, RN-100, RN-101, RN-123
+
+### HU-016: Responder un reclamo ✅ Aprobada (14/11/2026)
+**Prioridad:** Must
+
+Como **operador**, quiero **registrar la respuesta a un reclamo y enviarla al consumidor**, para **cumplir el plazo de 15 días hábiles de la Ley 31435**.
+
+**Criterios de aceptación:**
+- **[NUEVO][Positivo]** DADO QUE el reclamo `LR-2026-000017` se registró el lunes 16/11/2026, CUANDO lo respondo el miércoles 25/11/2026 a las 11:00:00, ENTONCES pasa a `respondido` con mi usuario y la hora, y la respuesta llega al correo del consumidor antes de las 11:05:00 (RN-146 y RN-148).
+- **[NUEVO][Negativo]** DADO QUE intento guardar una respuesta sin texto, CUANDO la envío, ENTONCES el sistema la rechaza (RN-147).
+- **[NUEVO][Borde]** DADO QUE el reclamo del 16/11/2026 se respondió el 25/11/2026, CUANDO llega el lunes 30/11/2026 (10.º día hábil), ENTONCES el operador no recibe ninguna alerta (RN-149).
+- **[NUEVO][Borde]** DADO QUE el reclamo del 16/11/2026 se responde el lunes 07/12/2026, último día del plazo, CUANDO se guarda, ENTONCES queda dentro del plazo legal.
+- **[NUEVO][Negativo]** DADO QUE soy repartidor, CUANDO intento responder un reclamo, ENTONCES el sistema lo rechaza (RN-099).
+- ⛔ DADO QUE un reclamo necesita **derivación**, CUANDO el operador la registra, ENTONCES *(pendiente: P24, qué es y a quién se deriva)*.
+
+**Reglas de negocio relacionadas:** RN-035, RN-036, RN-099, RN-146, RN-147, RN-148, RN-149
+**Notas:** las reglas RN-146 a RN-149 son un borrador basado en la Ley 31435 y requieren validación del asesor legal.
+
+### HU-017: Registrar fincas y productos ✅ Propuesta (14/11/2026, QA-C2-004)
+**Prioridad:** Must
+
+Como **operador**, quiero **registrar las fincas proveedoras y publicar sus productos con su registro DIGESA y su certificación SENASA**, para **que el catálogo muestre leche legalmente vendible y su finca de origen**.
+
+**Validación INVEST:** ✅ Cumple todos. Es requisito de HU-003 y HU-004: sin productos publicados no hay catálogo ni suscripción.
+
+**Criterios de aceptación:**
+- **[NUEVO][Positivo]** DADO QUE registro la finca "Finca Santa Rosa", de la provincia de Huaral, con certificación SENASA vigente hasta el 30/11/2026, CUANDO la guardo, ENTONCES aparece en la ficha de finca del catálogo con la etiqueta "Orgánico" (RN-010).
+- **[NUEVO][Positivo]** DADO QUE registro "Leche fresca 1 L" de esa finca con registro DIGESA, CUANDO la publico, ENTONCES aparece en el catálogo (RN-009).
+- **[NUEVO][Negativo]** DADO QUE el producto no tiene registro DIGESA, CUANDO intento publicarlo, ENTONCES el sistema lo rechaza y no aparece en el catálogo (RN-009).
+- **[NUEVO][Negativo]** DADO QUE ingreso una provincia distinta de Cañete o Huaral, CUANDO guardo la finca, ENTONCES el sistema la rechaza (alcance §5.3).
+- **[NUEVO][Borde]** DADO QUE actualizo la certificación SENASA de la finca con vencimiento el 30/11/2027, CUANDO la guardo el 01/12/2026, ENTONCES la etiqueta "Orgánico" vuelve a mostrarse (RN-010).
+- **[NUEVO][Negativo]** DADO QUE soy repartidor, CUANDO intento registrar una finca o publicar un producto, ENTONCES el sistema lo rechaza (RN-099).
+- **[NUEVO][Positivo]** DADO QUE publico o despublico un producto, CUANDO se guarda, ENTONCES la tabla de auditoría registra la acción con mi usuario y la hora.
+
+**Reglas de negocio relacionadas:** RN-009, RN-010, RN-099
+**Notas:** los datos de la finca (nombre, código SENASA, vencimiento y registro DIGESA) son datos de una empresa, no datos personales; se guardan en claro. Los documentos de respaldo de DIGESA y SENASA los custodia un humano.
+
+### Reglas SHOULD sin HU
+RN-042 y RN-043 (avisos dentro de la ventana de 09:00 a 20:00), RN-044 (trazabilidad por lote para el cliente) y RN-117 (consentimiento para fines comerciales). Se recomienda escribir sus HU al planificar F-S02, F-S03 y las campañas comerciales.
+
+
+
+--- DOCUMENTO DE ARQUITECTURA ---
+# Documento de Arquitectura del Sistema — Muuvi
+
+**Versión:** 1.0.1  
+**Fecha:** 28/10/2026  
+**Estado:** Aprobado para Fase de Especificación e Implementación Técnica  
+
+---
+
+
+## 1. Overview del sistema
+
+### 1.1 Descripción
+Muuvi es una **PWA en React** que permite a hogares de Miraflores, San Isidro y La Molina suscribirse a una entrega semanal de leche fresca de fincas de Cañete y Huaral. Un **backend monolítico modular en Node.js con Express**, sobre **PostgreSQL**, gestiona cuentas, suscripciones, cobros (Culqi, Yape y Plin), comprobantes SUNAT, la operación diaria (lotes, cadena de frío, entregas y botellas) y el Libro de Reclamaciones. Un **proceso de tareas programadas** (worker) ejecuta todo lo que depende del reloj de Lima: el corte de las 18:00, los 900 s de revisión de lotes, las 72 h para elegir entre reembolso y saldo, los 30 días de anonimización y los reintentos con backoff. La misma PWA ofrece un **módulo de operación** para el operador y el administrador titular, y un **módulo de reparto que funciona sin conexión** para los repartidores.
+
+### 1.2 Diagrama de alto nivel
+
+**Descripción textual.** El cliente, el operador, el administrador y el repartidor usan una única PWA servida por HTTPS (TLS 1.3). La PWA llama a la API REST de Express. La API guarda los datos en PostgreSQL y pide a un KMS externo las claves de cifrado de los datos personales. El worker, que comparte el código y la base de datos con la API, toma las tareas de una cola en PostgreSQL y se comunica con los servicios externos: la pasarela de pagos (a través del módulo `pagos`), el OSE/PSE (a través del módulo `comprobantes`) y el proveedor de correo y Web Push (a través del módulo `notificaciones`). Las pasarelas avisan del resultado de los cobros a la API mediante webhooks. El módulo de reparto guarda los cierres en el dispositivo cuando no hay señal y los sincroniza al recuperarla.
+
+```mermaid
+flowchart TB
+    subgraph Usuarios
+        CLI[Cliente]
+        OPE[Operador / Administrador titular]
+        REP[Repartidor]
+        CON[Consumidor sin cuenta]
+    end
+
+    subgraph PWA["PWA React 18 (una sola aplicación)"]
+        MC[Módulo cliente]
+        MO[Módulo operación]
+        MR["Módulo reparto<br/>Service Worker + IndexedDB"]
+        LR[Libro de Reclamaciones público]
+    end
+
+    subgraph Backend["Node.js 20 + Express (monolito modular)"]
+        API[API REST /api/v1]
+        WRK["Worker de tareas programadas<br/>(mismo código, otro proceso)"]
+    end
+
+    DB[(PostgreSQL 16<br/>datos + cola de tareas + outbox)]
+    KMS[[KMS<br/>claves de cifrado]]
+
+    subgraph Externos
+        PAS["Pasarela: Culqi · Yape · Plin<br/>(módulo pagos)"]
+        OSE[OSE/PSE SUNAT]
+        MAIL[Correo transaccional]
+        PUSH[Web Push]
+    end
+
+    CLI --> MC
+    OPE --> MO
+    REP --> MR
+    CON --> LR
+    MC & MO & MR & LR -->|HTTPS TLS 1.3| API
+    API --> DB
+    WRK --> DB
+    API & WRK --> KMS
+    WRK --> PAS
+    API -->|tokenización y consulta| PAS
+    PAS -->|webhooks| API
+    WRK --> OSE
+    WRK --> MAIL
+    WRK --> PUSH
+```
+
+### 1.3 Principios de diseño
+| # | Principio de diseño | Origen |
+|---|---|---|
+| D1 | **Stack fijo:** React 18 PWA, Node.js 20 con Express y PostgreSQL 16. Ningún otro motor de base de datos, cola o framework sin un ADR aprobado. | PRINCIPIO-002 |
+| D2 | **Monolito modular:** un solo despliegue con módulos de dominio separados por carpeta y por interfaz. Un módulo no accede a las tablas de otro, sino a su servicio. | [ADR-005](adr/ADR-005-monolito-modular.md) |
+| D3 | **Las pasarelas solo se tocan desde `pagos`** y el OSE/PSE solo desde `comprobantes`, mediante adaptadores con interfaz común. | PRINCIPIO-002, ADR-001 |
+| D4 | **Cifrado de campo por defecto:** todo dato personal se guarda en columnas `*_cifrado` con AES-256-GCM y claves del KMS. Los logs usan solo identificadores. | PRINCIPIO-003, RN-006, RN-007 |
+| D5 | **Sin datos de tarjeta:** los DTO rechazan cualquier propiedad no declarada, y un test falla si aparece `numero_tarjeta`, `cvv` o `pan`. | PRINCIPIO-004, RN-020 |
+| D6 | **Reloj de Lima, almacenamiento en UTC:** las reglas horarias se evalúan en `America/Lima`, los timestamps se guardan en `timestamptz` y los montos en `NUMERIC(12,2)`. En JSON, los montos viajan como **texto decimal** (`"43.50"`) para evitar errores de punto flotante. | PRINCIPIO-011, RN-039, RN-040 |
+| D7 | **Idempotencia en todo lo que mueve dinero o estado:** cobros, webhooks, reembolsos y sincronización de cierres. | RN-072, RN-073, RN-144 |
+| D8 | **Máquinas de estado explícitas** para suscripción, entrega, lote, pago y reclamo; toda transición no prevista se rechaza. | RN-070, RN-071 |
+| D9 | **Textos fuera del código:** la API devuelve **claves de traducción** y códigos de regla, y la PWA los resuelve con `es-PE.json`. | PRINCIPIO-001, ADR-002, RN-041 |
+| D10 | **Pensado para Android de gama baja y conectividad intermitente:** presupuesto de peso por pantalla, carga diferida y módulo de reparto sin conexión. | PRINCIPIO-007, RN-141 a RN-145 |
+| D11 | **Contrato primero:** cada endpoint existe en `docs/api/openapi.yaml` antes de implementarse, y el CI valida que coincidan. | PRINCIPIO-010 |
+
+---
+
+## 2. Componentes principales
+
+### 2.1 Catálogo de componentes
+| # | Componente | Responsabilidad | Tecnología | HU que implementa |
+|---|---|---|---|---|
+| C1 | **PWA · módulo cliente** | Registro, catálogo, suscripción, pagos, elección de reembolso y baja. | React 18, Service Worker (caché de recursos estáticos) | HU-001 a HU-009 |
+| C2 | **PWA · módulo operación** | Lotes, temperaturas, lista de entregas, precio, anulaciones, feriados y respuesta a reclamos. | React 18 (carga diferida por rol) | HU-010, HU-011 (asignación), HU-013, HU-014, HU-015, HU-016, HU-017 |
+| C3 | **PWA · módulo reparto (sin conexión)** | Lista del día, cierre de entregas, temperatura y botellas, con o sin señal. | React 18, Service Worker, IndexedDB nativo | HU-011 |
+| C4 | **PWA · Libro de Reclamaciones público** | Formulario accesible sin iniciar sesión. | React 18 (ruta pública) | HU-012 |
+| C5 | **API REST** | Expone `/api/v1`, autentica, autoriza por rol, valida DTO y orquesta los módulos de dominio. | Node.js 20, Express | Todas |
+| C6 | **Módulos de dominio** (dentro de C5 y C7) | `cuentas`, `catalogo`, `suscripciones`, `operacion` (lotes y entregas), `pagos`, `comprobantes`, `devoluciones` (importes, reembolsos y saldo), `reclamos`, `calendario`, `configuracion`, `notificaciones`, `auditoria`, `cifrado`, `permisos`. | Node.js 20 | Todas |
+| C7 | **Worker de tareas programadas** | Ejecuta las tareas que dependen del tiempo y los reintentos con backoff. | Node.js 20 (mismo código que C5, otro proceso) | HU-002, HU-004, HU-005, HU-007 a HU-012, HU-016 |
+| C8 | **Base de datos** | Datos del negocio, cola de tareas, outbox de eventos y auditoría. | PostgreSQL 16 | Todas |
+| C9 | **Módulo `cifrado` + KMS** | Cifra y descifra campos con AES-256-GCM (cifrado de sobre) y calcula índices ciegos para buscar sin descifrar. | `crypto` nativo de Node.js + KMS del proveedor de hosting | HU-001, HU-002, HU-008 |
+| C10 | **Adaptadores externos** | `pagos/adaptadores/{culqi,yape,plin}`, `comprobantes/adaptadores/{ose}`, `notificaciones/adaptadores/{correo,webpush}`. | Node.js 20 (HTTPS) | HU-007, HU-008, HU-009, HU-012, HU-016 |
+
+### 2.2 Tareas del worker (C7)
+| Tarea | Cuándo | Reglas |
+|---|---|---|
+| `corte_dia_reparto` | 18:00:00 (Lima) del día previo a cada día de reparto, o al nuevo día si hay traslado por feriado | Crear entregas (RN-069), cobrar (RN-045), calcular la demanda (RN-090 y RN-091), trasladar por feriado (RN-123) |
+| `reintento_cobro` | 60 s después del primer rechazo | RN-046, RN-080 |
+| `vencer_pago_pendiente` | 1 800 s después de iniciar el cobro | RN-074 |
+| `consultar_pago_en_verificacion` | Al entrar en `en_verificacion` (intervalo ❓ P23) | RN-137, RN-138 |
+| `cerrar_revision_lote` | 900 s después de la alerta | RN-134 |
+| `reembolso_automatico_72h` | 259 200 s después del aviso de elección | RN-130 |
+| `reintento_ose` y `reintento_reembolso` | Backoff de 60, 120, 240, 480 y 960 s | RN-104 a RN-106 |
+| `alerta_reclamo_dia_10` | Diaria, 08:00 (Lima) | RN-036 |
+| `anonimizar_bajas` | Diaria, 03:00 (Lima) | RN-008, RN-111 |
+| `enviar_outbox` | Continua | Entrega de correos, push y eventos a los adaptadores con reintento |
+
+Todas las tareas se encolan en la tabla `tarea_programada` y se toman con `SELECT … FOR UPDATE SKIP LOCKED` (ADR-007). Cada tarea tiene una clave única que impide crearla dos veces.
+
+### 2.3 Interfaces entre componentes
+| Llamador | Llamado | Medio | Para qué |
+|---|---|---|---|
+| C1, C2, C3, C4 | C5 API | HTTPS JSON, JWT Bearer (salvo C4) | Todas las operaciones de usuario |
+| C3 | C5 `POST /reparto/cierres` | HTTPS JSON, lote de cierres | Sincronizar cierres guardados sin conexión |
+| C5 | C6 módulos | Llamada en proceso (servicios) | Lógica de negocio |
+| C6 `pagos` | Pasarela | HTTPS, a través del adaptador | Tokenizar, cobrar, consultar y reembolsar |
+| Pasarela | C5 `POST /webhooks/pagos/{pasarela}` | HTTPS, firma verificada | Confirmar o rechazar cobros y reembolsos |
+| C7 | C6 módulos | Llamada en proceso | Ejecutar tareas programadas |
+| C6 `notificaciones` | Correo y Web Push | HTTPS, a través del adaptador | Avisos al cliente (ventana de 09:00 a 20:00 para push, RN-042) y alertas internas (cualquier hora, RN-150) |
+| C6 `comprobantes` | OSE/PSE | HTTPS, a través del adaptador | Emitir boletas, facturas y notas de crédito |
+| C6 `cifrado` | KMS | HTTPS (SDK del KMS) | Obtener y rotar las claves de datos |
+| C5, C7 | C8 PostgreSQL | Protocolo de PostgreSQL con TLS | Persistencia, cola y outbox |
+
+**Regla de dependencias entre módulos:** `suscripciones` → `pagos` → `comprobantes` y `devoluciones`; `operacion` → `devoluciones` y `notificaciones`. Ningún módulo conoce a una pasarela concreta (D3).
+
+---
+
+## 3. Modelo de datos
+
+### 3.1 Convenciones
+- **Claves primarias:** `id BIGINT GENERATED ALWAYS AS IDENTITY`, salvo los cierres sin conexión, que usan `UUID` generado en el dispositivo (RN-144).
+- **Montos:** `NUMERIC(12,2) CHECK (>= 0)`. **Timestamps:** `TIMESTAMPTZ` en UTC. **Fechas de calendario** (día de entrega, feriado): `DATE`, interpretada en `America/Lima`.
+- **Datos personales:** `BYTEA` con el sufijo `_cifrado`, en formato `{versión de clave | IV de 12 bytes | texto cifrado | tag de 16 bytes}`.
+- **Índice ciego:** `*_hmac BYTEA`, un HMAC-SHA-256 con clave del KMS, para buscar por correo o RUC sin descifrar (ADR-006).
+- **Estados:** tipos `ENUM` de PostgreSQL, con las transiciones validadas en el servicio de dominio (RN-071).
+- **Nada se borra físicamente** en ventas, pedidos, pagos, comprobantes, suscripciones, entregas ni auditoría; solo se anula con doble confirmación (RN-032, PRINCIPIO-008.2).
+
+### 3.2 Entidades principales
+
+**Cuentas y consentimiento**
+| Entidad | Atributos clave | Restricciones |
+|---|---|---|
+| `cliente` | `id`, `nombre_cifrado`, `correo_cifrado`, `correo_hmac`, `telefono_cifrado`, `fecha_nacimiento_cifrado`, `dni_cifrado` (opcional, ver QA-044), `ruc_cifrado`, `ruc_tipo ENUM('10','20','otro')`, `tipo_comprobante ENUM('boleta','factura')`, `contrasena_hash` (argon2id), `estado ENUM('activa','baja_solicitada','anonimizada')`, `fecha_baja`, `creado_en` | `UNIQUE(correo_hmac)`; la edad ≥ 18 se valida antes de cifrar (RN-001) |
+| `direccion` | `id`, `cliente_id`, `linea_cifrado`, `referencia_cifrado`, `coordenadas_cifrado`, `distrito ENUM('miraflores','san_isidro','la_molina')`, `vigente BOOLEAN` | El distrito queda en claro, porque no identifica a la persona y se usa para la cobertura (RN-005) y las rutas |
+| `consentimiento` | `id`, `cliente_id`, `tipo ENUM('principal','terceros','comercial')`, `otorgado BOOLEAN`, `version_texto`, `registrado_en` | Una fila por tipo y por versión del texto; `principal` es obligatorio (RN-114) |
+| `usuario_interno` | `id`, `nombre_cifrado`, `correo_cifrado`, `correo_hmac`, `rol ENUM('operador','administrador_titular','repartidor')`, `contrasena_hash` | `UNIQUE(correo_hmac)`. El segundo paso de la doble confirmación es un código por correo (RN-151), así que no se guarda un secreto de segundo factor |
+
+**Catálogo y operación**
+| Entidad | Atributos clave | Restricciones |
+|---|---|---|
+| `finca` | `id`, `nombre`, `provincia ENUM('canete','huaral')`, `senasa_codigo`, `senasa_vence DATE` | La etiqueta "orgánico" se calcula como `senasa_vence >= hoy_lima` (RN-010) |
+| `producto` | `id`, `finca_id`, `nombre`, `volumen_ml INT DEFAULT 1000`, `registro_digesa`, `publicado BOOLEAN` | `CHECK (NOT publicado OR registro_digesa IS NOT NULL)` (RN-009) |
+| `lote` | `id`, `codigo UNIQUE`, `finca_id`, `producto_id`, `fecha_ordeno DATE`, `fecha_reparto DATE`, `litros_comprometidos INT`, `litros_recibidos INT`, `estado ENUM('recibido','en_revision','invalidado')`, `revision_vence_en TIMESTAMPTZ` | `litros_*` y la temperatura son obligatorios (RN-028, RN-085) |
+| `lectura_temperatura` | `id`, `lote_id`, `entrega_id NULL`, `origen ENUM('recepcion','entrega')`, `valor NUMERIC(4,1)`, `corrige_a_id NULL`, `justificacion`, `usuario_id`, `registrada_en` | Solo se insertan filas; un *trigger* rechaza `UPDATE` y `DELETE` (RN-088). Una corrección es una fila nueva con `corrige_a_id` (RN-089) |
+
+**Suscripción, ciclo y entrega**
+| Entidad | Atributos clave | Restricciones |
+|---|---|---|
+| `suscripcion` | `id`, `cliente_id`, `direccion_id`, `medio_pago_id`, `litros INT CHECK (litros >= 1)`, `dia_entrega ENUM('martes','jueves','sabado')`, `estado ENUM('activa','pausada','suspendida_por_pago','cancelada')`, `creada_en` | RN-016, RN-017, RN-061 |
+| `pausa` | `id`, `suscripcion_id`, `tipo ENUM('con_plazo','indefinida')`, `entregas_a_omitir INT CHECK (>= 1)`, `entregas_omitidas INT`, `solicitada_en`, `terminada_en` | RN-062 a RN-064 |
+| `cambio_suscripcion` | `id`, `suscripcion_id`, `campo`, `valor_nuevo`, `aplica_desde_ciclo_id`, `solicitado_en` | RN-083 |
+| `ciclo` | `id`, `suscripcion_id`, `fecha_entrega DATE`, `corte_en TIMESTAMPTZ`, `litros INT`, `precio_litro NUMERIC(12,2)`, `importe NUMERIC(12,2)`, `saldo_aplicado NUMERIC(12,2)` | `UNIQUE(suscripcion_id, fecha_entrega)`; el precio se congela en el corte (RN-102) |
+| `entrega` | `id`, `ciclo_id`, `lote_id NULL`, `repartidor_id NULL`, `fecha DATE`, `franja TEXT DEFAULT '07:00-10:00'`, `estado ENUM('programada','en_ruta','entregada','fallida','reprogramada','cancelada','suspendida')`, `motivo_suspension ENUM('pago','lote_invalidado')`, `causa_fallo ENUM('imputable_muuvi','imputable_cliente')`, `motivo_fallo TEXT`, `reprogramada_de_id NULL`, `temperatura_entrega NUMERIC(4,1)`, `cerrada_en TIMESTAMPTZ` | RN-029, RN-052, RN-070; una reprogramación como máximo (RN-107) |
+| `cierre_entrega` | `id UUID` (del dispositivo), `entrega_id`, `repartidor_id`, `payload JSONB`, `registrado_en`, `recibido_en`, `resultado ENUM('aplicado','duplicado','rechazado')` | `PRIMARY KEY(id)` evita la doble aplicación (RN-144) |
+| `movimiento_botellas` | `id`, `cliente_id`, `entrega_id`, `entregadas INT`, `devueltas INT`, `registrado_en` | El saldo es la suma y nunca es negativo (RN-030, RN-031, RN-065) |
+
+**Pagos, comprobantes y devoluciones**
+| Entidad | Atributos clave | Restricciones |
+|---|---|---|
+| `medio_pago` | `id`, `cliente_id`, `tipo ENUM('tarjeta','yape','plin')`, `token_pasarela`, `ultimos_4 CHAR(4) NULL`, `activo BOOLEAN` | Sin columnas de PAN, CVV ni vencimiento; un test del esquema lo verifica (RN-020, RN-021, RN-095) |
+| `pago` | `id`, `ciclo_id`, `medio_pago_id NULL`, `origen ENUM('pasarela','saldo_favor')`, `intento SMALLINT`, `clave_idempotencia`, `estado ENUM('iniciado','pendiente','en_verificacion','confirmado','rechazado')`, `importe NUMERIC(12,2)`, `referencia_pasarela`, `iniciado_en`, `resuelto_en` | `UNIQUE(clave_idempotencia, intento)`; **índice único parcial** `ON pago(ciclo_id) WHERE estado = 'confirmado'`, que impide dos cobros confirmados (RN-073) |
+| `evento_pasarela` | `id`, `pasarela`, `evento_id_externo`, `tipo`, `payload JSONB`, `recibido_en` | `UNIQUE(pasarela, evento_id_externo)` hace idempotentes los webhooks |
+| `comprobante` | `id`, `pago_id NULL`, `tipo ENUM('boleta','factura','nota_credito')`, `referencia_id NULL`, `serie`, `numero`, `importe NUMERIC(12,2)`, `forma_pago`, `estado ENUM('pendiente','emitido','fallido')`, `intentos SMALLINT` | Se conserva tras la anonimización (RN-111) |
+| `importe_devolver` | `id`, `cliente_id`, `origen ENUM('entrega_fallida','lote_invalidado','pago_tardio')`, `entrega_id NULL`, `pago_id NULL`, `importe NUMERIC(12,2)`, `eleccion ENUM('reembolso','saldo_favor') NULL`, `avisado_en`, `vence_en`, `resuelto_en` | `vence_en = avisado_en + 72 h` (RN-129, RN-130) |
+| `reembolso` | `id`, `pago_id`, `importe_devolver_id NULL`, `importe NUMERIC(12,2)`, `estado ENUM('solicitado','confirmado','fallido')`, `intentos SMALLINT`, `solicitado_en` | RN-055, RN-105 |
+| `movimiento_saldo` | `id`, `cliente_id`, `importe NUMERIC(12,2)` (positivo o negativo), `motivo`, `ciclo_id NULL`, `registrado_en` | El saldo es la suma de los movimientos (RN-056, RN-096, RN-097) |
+
+**Reclamos, calendario, configuración y auditoría**
+| Entidad | Atributos clave | Restricciones |
+|---|---|---|
+| `reclamo` | `id`, `codigo UNIQUE` (`LR-AAAA-NNNNNN`), `tipo ENUM('reclamo','queja')`, `cliente_id NULL`, `nombre_cifrado`, `correo_cifrado`, `detalle_cifrado`, `estado ENUM('abierto','respondido')`, `fecha_limite DATE`, `registrado_en` | El código sale de una secuencia por año (RN-034) |
+| `respuesta_reclamo` | `id`, `reclamo_id UNIQUE`, `texto_cifrado`, `usuario_id`, `respondido_en`, `enviado_en` | RN-146 a RN-149 |
+| `feriado` | `fecha DATE PRIMARY KEY`, `descripcion`, `norma`, `cargado_por` | RN-100 |
+| `configuracion` | `clave PRIMARY KEY`, `valor`, `vigente_desde`, `propuesto_por`, `confirmado_por` | `precio_litro` solo cambia con doble confirmación (RN-011, RN-032, RN-153) |
+| `confirmacion_doble` | `id`, `accion ENUM('cambiar_precio','anular_pago','anular_comprobante','anular_suscripcion','anular_entrega')`, `entidad_id NULL`, `payload JSONB` (por ejemplo `{ "precio_litro": "15.00" }`), `propuesto_por`, `contrasena_verificada_en`, `codigo_hash` (HMAC-SHA-256), `codigo_enviado_en`, `intentos SMALLINT`, `estado ENUM('pendiente_contrasena','pendiente_codigo','ejecutada','cancelada')`, `resuelta_en` | RN-151 y RN-152. El código nunca se guarda en claro; vence a los 300 s y se cancela al tercer intento fallido. Cada transición queda en `auditoria` |
+| `proveedor_habilitado` | `proveedor PRIMARY KEY` (por ejemplo `culqi`, `yape`, `plin`, `ose`, `correo`), `dpa_vigente_hasta DATE`, `registrado_por`, `registrado_en` | RN-118. La carga un humano a partir de `docs/proveedores-datos.md`; ningún adaptador real envía datos personales si su proveedor no está o tiene el DPA vencido |
+| `auditoria` | `id`, `actor_tipo`, `actor_id`, `accion`, `entidad`, `entidad_id`, `detalle JSONB` (sin datos personales), `registrado_en` | Solo inserción |
+| `tarea_programada` | `id`, `tipo`, `clave_unica UNIQUE`, `ejecutar_en`, `intentos`, `estado`, `payload JSONB` | Cola del worker (ADR-007) |
+| `outbox` | `id`, `canal ENUM('correo','push','pasarela','ose')`, `destino_ref`, `plantilla`, `datos JSONB`, `no_antes_de`, `estado` | `no_antes_de` aplica la ventana de 09:00 a 20:00 para el push al cliente (RN-042, RN-043) |
+
+### 3.3 Relaciones
+
+```mermaid
+erDiagram
+    CLIENTE ||--o{ DIRECCION : tiene
+    CLIENTE ||--o{ CONSENTIMIENTO : otorga
+    CLIENTE ||--o{ MEDIO_PAGO : registra
+    CLIENTE ||--o{ SUSCRIPCION : contrata
+    CLIENTE ||--o{ MOVIMIENTO_BOTELLAS : acumula
+    CLIENTE ||--o{ MOVIMIENTO_SALDO : acumula
+    CLIENTE |o--o{ RECLAMO : registra
+    FINCA ||--o{ PRODUCTO : ofrece
+    FINCA ||--o{ LOTE : despacha
+    LOTE ||--o{ LECTURA_TEMPERATURA : registra
+    LOTE |o--o{ ENTREGA : abastece
+    SUSCRIPCION ||--o{ PAUSA : tiene
+    SUSCRIPCION ||--o{ CICLO : genera
+    CICLO ||--|| ENTREGA : produce
+    ENTREGA |o--o| ENTREGA : reprogramada_de
+    ENTREGA ||--o{ CIERRE_ENTREGA : recibe
+    CICLO ||--o{ PAGO : intenta
+    PAGO |o--o| COMPROBANTE : emite
+    COMPROBANTE |o--o{ COMPROBANTE : nota_credito_de
+    PAGO ||--o{ REEMBOLSO : devuelve
+    IMPORTE_DEVOLVER |o--o| REEMBOLSO : resuelve
+    RECLAMO ||--o| RESPUESTA_RECLAMO : tiene
+    USUARIO_INTERNO ||--o{ ENTREGA : reparte
+```
+
+| Relación | Cardinalidad | Nota |
+|---|---|---|
+| cliente → suscripción | 1:N | QA-050: si se admite más de una suscripción por cliente queda abierto; el modelo lo permite |
+| suscripción → ciclo | 1:N | Un ciclo por semana y por día de entrega |
+| ciclo → entrega | 1:1 | La entrega reprogramada cuelga de la original (`reprogramada_de_id`), no de un ciclo nuevo (RN-067) |
+| ciclo → pago | 1:N (intentos) | Como máximo 1 confirmado, por el índice único parcial |
+| lote → entrega | 1:N | Una entrega puede cambiar de lote al reasignarse (RN-093) |
+| pago → comprobante | 1:0..1 | La nota de crédito referencia al comprobante original (RN-057) |
+| reclamo → respuesta | 1:0..1 | RN-146 |
+
+### 3.4 Notas de seguridad
+| Campo | Tratamiento | Regla |
+|---|---|---|
+| Nombre, correo, teléfono, fecha de nacimiento, DNI, dirección, referencia, coordenadas | AES-256-GCM por campo, con clave de datos protegida por el KMS (cifrado de sobre) | PRINCIPIO-003, RN-006 |
+| Correo | Además, `correo_hmac` para el login y la unicidad, sin descifrar | ADR-006 |
+| RUC que empieza con `10` | Cifrado (contiene el DNI) | RN-060 |
+| RUC de empresa (`20…`) | Puede quedar en claro: no es un dato personal | RN-060 |
+| Datos del consumidor y texto del reclamo y de su respuesta | Cifrados (pueden contener datos personales) | PRINCIPIO-003 |
+| Token de tarjeta, últimos 4 dígitos y referencia de billetera | En claro: no son datos de tarjeta según PCI-DSS SAQ-A | PRINCIPIO-004, RN-021, RN-094 |
+| `contrasena_hash` | argon2id; nunca se cifra de forma reversible | Buena práctica |
+| Logs y `auditoria.detalle` | Solo identificadores (`cliente_id`, `entrega_id`); un filtro rechaza los patrones de datos personales | RN-007 |
+| Almacenamiento local de la PWA de reparto | Solo `entrega_id` y datos del cierre, sin datos personales | RN-145 (⚠️ K9) |
+| Anonimización | Sobrescribe las columnas `*_cifrado` con un valor nulo o un marcador y destruye la clave de datos del cliente. Conserva los comprobantes | RN-008, RN-111 |
+
+---
+
+## 4. API Contracts
+
+### 4.1 Convenciones comunes
+- **Base:** `https://api.muuvi.pe/api/v1` *(dominio ilustrativo)*. Solo TLS 1.3.
+- **Autenticación:** `Authorization: Bearer <JWT de acceso>` (15 min) más un token de renovación en una *cookie* `HttpOnly`, `Secure`, `SameSite=Strict`. El JWT lleva `sub`, `rol` y `exp`.
+- **Montos:** texto decimal con 2 decimales (`"43.50"`). **Fechas:** `YYYY-MM-DD` (en hora de Lima). **Instantes:** ISO 8601 en UTC (`2026-11-13T23:00:00Z`). La PWA les da el formato `S/ 43.50` y `DD/MM/AAAA` (RN-037, RN-038).
+- **DTO estrictos:** cualquier propiedad no declarada devuelve **400** (D5).
+- **Errores** (sin texto visible, solo claves de traducción):
+```json
+{ "error": { "codigo": "RN-017", "clave_mensaje": "errores.suscripcion.litros_invalidos", "campo": "litros" } }
+```
+- **Idempotencia:** los POST que crean recursos aceptan el encabezado `Idempotency-Key` (UUID); repetirlo devuelve la misma respuesta.
+
+| Código | Significado común |
+|---|---|
+| 400 | DTO inválido o con propiedades no permitidas |
+| 401 | Sin token, o token vencido |
+| 403 | El rol no tiene permiso (RN-099) |
+| 404 | El recurso no existe o no pertenece al usuario |
+| 409 | Conflicto de estado o transición no permitida (RN-071) |
+| 422 | Viola una regla de negocio (`codigo` = ID de la regla) |
+| 429 | Se superó el límite de peticiones |
+| 503 | Servicio externo no disponible |
+
+---
+
+### 4.2 `POST /clientes` — Registro de cliente (HU-001)
+**Autenticación:** no. **Rate limit:** 5 por minuto y 20 por hora, por IP.
+
+**Request**
+```json
+{
+  "nombre": "Ana Torres",
+  "correo": "ana@example.com",
+  "telefono": "+51987654321",
+  "fecha_nacimiento": "1990-03-15",
+  "contrasena": "••••••••••••",
+  "direccion": { "linea": "Calle Ficticia 123", "referencia": "Puerta verde", "distrito": "san_isidro" },
+  "consentimientos": { "principal": true, "terceros": false, "version_texto": "2026-11-01" },
+  "tipo_comprobante": "boleta"
+}
+```
+**Response 201**
+```json
+{ "cliente_id": 4821, "estado": "activa", "creado_en": "2026-11-12T15:00:00Z" }
+```
+| Código | Cuándo |
+|---|---|
+| 201 | Cuenta creada |
+| 400 | Falta un campo obligatorio, incluida la fecha de nacimiento (RN-002) |
+| 422 `RN-001` | Menor de 18 años a la fecha de hoy en Lima |
+| 422 `RN-114` | `consentimientos.principal` no es `true` |
+| 422 `RN-005` | `distrito` fuera de Miraflores, San Isidro y La Molina |
+| 409 `RN-154` | Correo ya registrado (comparado por `correo_hmac`): `clave_mensaje: "errores.cuenta.correo_registrado"`. El fundador aceptó el 14/11/2026 que esto revela qué correos tienen cuenta; el límite de peticiones de esta ruta reduce la enumeración |
+| 429 | Límite superado |
+
+---
+
+### 4.3 `POST /medios-pago` — Registrar un medio de pago (HU-007)
+**Autenticación:** sí (rol `cliente`). **Rate limit:** 10 por hora por cliente.
+La PWA tokeniza la tarjeta con el formulario o SDK de Culqi **antes** de llamar a este endpoint; el backend nunca ve el PAN.
+
+**Request**
+```json
+{ "tipo": "tarjeta", "token_pasarela": "tkn_8f2a1c", "ultimos_4": "4242" }
+```
+```json
+{ "tipo": "yape", "token_pasarela": "yp_autoriz_77c1" }
+```
+**Response 201**
+```json
+{ "medio_pago_id": 310, "tipo": "tarjeta", "ultimos_4": "4242", "activo": true }
+```
+| Código | Cuándo |
+|---|---|
+| 201 | Registrado. Si la suscripción estaba `suspendida_por_pago`, vuelve a `activa` (RN-051) |
+| 400 `RN-020` | El cuerpo trae `numero_tarjeta`, `cvv`, `pan` o `fecha_vencimiento`; se rechaza sin guardar nada |
+| 422 `RN-019` | `tipo` distinto de `tarjeta`, `yape` o `plin` |
+| 503 | La pasarela no valida el token |
+
+---
+
+### 4.4 `POST /suscripciones` — Crear una suscripción (HU-004)
+**Autenticación:** sí (rol `cliente`). **Rate limit:** 10 por hora por cliente.
+
+**Request**
+```json
+{ "litros": 3, "dia_entrega": "sabado", "direccion_id": 77, "medio_pago_id": 310 }
+```
+**Response 201** *(creada el viernes 13/11/2026 a las 19:00 en Lima)*
+```json
+{
+  "suscripcion_id": 912,
+  "estado": "activa",
+  "litros": 3,
+  "dia_entrega": "sabado",
+  "precio_litro": "14.50",
+  "importe_ciclo": "43.50",
+  "franja": "07:00-10:00",
+  "primera_entrega": "2026-11-21",
+  "primer_corte_y_cobro": "2026-11-20T23:00:00Z"
+}
+```
+| Código | Cuándo |
+|---|---|
+| 201 | Creada; primera entrega según RN-084 |
+| 422 `RN-017` | `litros` no es un entero ≥ 1 |
+| 422 `RN-061` | `dia_entrega` no es `martes`, `jueves` ni `sabado` |
+| 422 `RN-005` | La dirección no está en un distrito atendido |
+| 404 | La dirección o el medio de pago no son del cliente |
+
+---
+
+### 4.5 `POST /suscripciones/{id}/pausas` — Pausar una suscripción (HU-005)
+**Autenticación:** sí (rol `cliente`, dueño de la suscripción).
+
+**Request**
+```json
+{ "tipo": "con_plazo", "entregas_a_omitir": 2 }
+```
+**Response 201** *(pedida el viernes 13/11/2026 a las 10:00)*
+```json
+{ "pausa_id": 55, "estado_suscripcion": "pausada", "entregas_omitidas": ["2026-11-14", "2026-11-21"], "reanuda_el": "2026-11-28" }
+```
+| Código | Cuándo |
+|---|---|
+| 201 | Pausa creada. Si se pide a partir de las 18:00:00 del día previo, la entrega inmediata se mantiene (RN-013) y no figura en `entregas_omitidas` |
+| 422 `RN-062` | `entregas_a_omitir` < 1 cuando `tipo = con_plazo` |
+| 409 | La suscripción está `cancelada` o `suspendida_por_pago` (❓ SR-07) |
+
+---
+
+### 4.6 `POST /webhooks/pagos/{pasarela}` — Notificación de la pasarela (HU-007, HU-009)
+**Autenticación:** firma HMAC de la pasarela en el encabezado (por ejemplo `X-Firma`), verificada con el secreto del KMS. **Rate limit:** no aplica. Sí hay lista de IP permitidas, si la pasarela la publica.
+
+**Request** *(forma normalizada por el adaptador)*
+```json
+{ "evento_id": "evt_123", "tipo": "cargo.confirmado", "clave_idempotencia": "ciclo-7781-cliente-4821", "referencia": "chr_9a1", "importe": "43.50" }
+```
+**Response 200**
+```json
+{ "recibido": true }
+```
+| Código | Cuándo |
+|---|---|
+| 200 | Procesado, o ya procesado antes (`evento_id` repetido, RN-073) |
+| 401 | Firma inválida; se registra en la auditoría sin el payload |
+| 422 | Tipo de evento desconocido; se guarda para revisión |
+
+**Efectos:** `cargo.confirmado` emite el comprobante (RN-022). Un cargo confirmado después de suspender la entrega genera un importe a devolver y reactiva la suscripción (RN-119, RN-131).
+
+---
+
+### 4.7 `POST /operacion/lotes` — Registrar un lote recibido (HU-010)
+**Autenticación:** sí (rol `operador` o `administrador_titular`).
+
+**Request**
+```json
+{
+  "codigo": "L-2026-1114-01",
+  "finca_id": 3,
+  "producto_id": 8,
+  "fecha_ordeno": "2026-11-14",
+  "fecha_reparto": "2026-11-14",
+  "litros_recibidos": 94,
+  "temperatura_recepcion": "4.6"
+}
+```
+**Response 201**
+```json
+{
+  "lote_id": 120,
+  "estado": "en_revision",
+  "litros_comprometidos": 100,
+  "litros_recibidos": 94,
+  "revision_vence_en": "2026-11-14T11:25:00Z",
+  "entregas_sin_cubrir": [ { "entrega_id": 9931, "motivo": "falla_abastecimiento_finca" } ]
+}
+```
+| Código | Cuándo |
+|---|---|
+| 201 | Registrado. `litros_comprometidos` sale de la demanda calculada en el corte (RN-091). Con más de 4.5 °C queda `en_revision` (RN-024) y la alerta sale en 60 s (RN-026) |
+| 400 `RN-085` / `RN-028` | Falta la temperatura o los litros |
+| 422 `RN-087` | La temperatura no tiene exactamente 1 decimal |
+| 403 | El rol `repartidor` no puede registrar lotes |
+
+---
+
+### 4.8 `POST /operacion/lotes/{id}/correcciones-temperatura` — Corregir una lectura (HU-010)
+**Autenticación:** sí (rol `operador` o `administrador_titular`).
+
+**Request**
+```json
+{ "lectura_id": 4410, "valor": "3.8", "justificacion": "Termómetro descalibrado" }
+```
+**Response 201**
+```json
+{ "correccion_id": 4411, "lote_estado": "recibido", "reversion": "aplicada" }
+```
+| Código | Cuándo |
+|---|---|
+| 201 | Corrección registrada como fila nueva (RN-089). `reversion` vale `aplicada` solo si la hace el administrador titular antes de los 900 s (RN-127). Si la hace el operador, vale `no_aplica` (RN-128); si ya pasó el plazo, vale `fuera_de_plazo` (RN-134) |
+| 400 | Falta la justificación |
+| 409 `RN-088` | Se intenta modificar la lectura original en lugar de corregirla |
+
+---
+
+### 4.9 `POST /reparto/cierres` — Sincronizar cierres de entrega (HU-011)
+**Autenticación:** sí (rol `repartidor`). **Rate limit:** 60 por minuto por repartidor.
+Acepta los cierres hechos en línea y los guardados sin conexión, en un solo lote y **en orden de registro** (RN-142).
+
+**Request**
+```json
+{
+  "cierres": [
+    { "cierre_id": "5b0e6a5e-1c1a-4c1e-9a8e-0d2f4a7b1c10", "entrega_id": 9930, "estado": "entregada", "temperatura": "4.1", "botellas_devueltas": 2, "registrado_en": "2026-11-14T13:15:00Z" },
+    { "cierre_id": "c2a9f1e4-7d3b-4b8a-a1f0-3e5d6c7b8a90", "entrega_id": 9931, "estado": "fallida", "causa_fallo": "imputable_cliente", "registrado_en": "2026-11-14T13:25:00Z" }
+  ]
+}
+```
+**Response 200**
+```json
+{
+  "resultados": [
+    { "cierre_id": "5b0e6a5e-1c1a-4c1e-9a8e-0d2f4a7b1c10", "resultado": "aplicado", "saldo_botellas": 3 },
+    { "cierre_id": "c2a9f1e4-7d3b-4b8a-a1f0-3e5d6c7b8a90", "resultado": "aplicado", "reprogramada_para": "2026-11-17" }
+  ]
+}
+```
+| Código | Cuándo |
+|---|---|
+| 200 | Lote procesado. Cada cierre informa `aplicado`, `duplicado` (mismo `cierre_id`, RN-144) o `rechazado` con su `codigo` (por ejemplo `RN-086` sin temperatura, `RN-031` devueltas mayores que el saldo, `RN-052` fallida sin causa, `RN-132` lote en revisión, `RN-099` entrega de otro repartidor) |
+| 400 | Lote vacío o mal formado |
+| 413 | Más de 200 cierres en un solo lote |
+
+**⚠️ K8:** falta decidir qué hacer con un cierre `entregada` registrado sin conexión cuando el lote ya estaba `en_revision` o `invalidado` a la hora de `registrado_en`.
+
+---
+
+### 4.10 `POST /importes-devolver/{id}/eleccion` — Elegir reembolso o saldo a favor (HU-007, HU-009)
+**Autenticación:** sí (rol `cliente`, dueño del importe).
+
+**Request**
+```json
+{ "opcion": "saldo_favor" }
+```
+**Response 200**
+```json
+{ "importe_devolver_id": 301, "opcion": "saldo_favor", "importe": "43.50", "saldo_actual": "43.50" }
+```
+| Código | Cuándo |
+|---|---|
+| 200 | Elección aplicada (RN-120 o RN-121) |
+| 422 | `opcion` distinta de `reembolso` o `saldo_favor` |
+| 409 ❓ SR-10 | Ya vencieron las 72 h y el reembolso automático está en curso |
+
+---
+
+### 4.11 `POST /reclamos` — Registrar un reclamo sin cuenta (HU-012)
+**Autenticación:** no (RN-109). **Rate limit:** 5 por hora por IP, más protección contra bots que **no** dependa de servicios de terceros sin DPA (RN-118).
+
+**Request**
+```json
+{ "tipo": "reclamo", "nombre": "Luis Pérez", "correo": "luis@example.com", "detalle": "La leche llegó tibia.", "pedido": "Reembolso" }
+```
+**Response 201** *(registrado el lunes 16/11/2026)*
+```json
+{ "codigo": "LR-2026-000017", "fecha_limite_respuesta": "2026-12-07", "constancia_enviada_a": "l***@example.com" }
+```
+| Código | Cuándo |
+|---|---|
+| 201 | Registrado, con código correlativo (RN-034) y constancia por correo (RN-112) |
+| 400 ❓ SR-15 | Falta el correo |
+| 429 | Límite superado |
+
+---
+
+### 4.12 Otros endpoints (resumen; se detallan en `openapi.yaml`)
+| Método y ruta | HU | Rol |
+|---|---|---|
+| `POST /sesiones`, `POST /sesiones/renovar`, `DELETE /sesiones` | Todas | Público / autenticado |
+| `POST /clientes/me/baja` | HU-002 | cliente |
+| `GET /catalogo` | HU-003 | público |
+| `PATCH /suscripciones/{id}` y `POST /suscripciones/{id}/cancelacion` | HU-006 | cliente |
+| `POST /suscripciones/{id}/reactivacion` | HU-005 | cliente |
+| `GET /comprobantes` | HU-008 | cliente |
+| `GET /operacion/dias/{fecha}/entregas` | HU-010, HU-011 | operador, repartidor (solo las suyas) |
+| `POST /operacion/configuracion/precio` | HU-013 | operador o administrador titular (propone; crea una `confirmacion_doble`) |
+| `POST /operacion/anulaciones` | HU-014 | administrador titular (crea una `confirmacion_doble`) |
+| `POST /operacion/confirmaciones/{id}/contrasena` y `POST /operacion/confirmaciones/{id}/codigo` | HU-013, HU-014 | administrador titular (ver §4.13) |
+| `POST /operacion/feriados` y `GET /operacion/feriados?anio=AAAA` | HU-015 | operador, administrador titular |
+| `POST /operacion/reclamos/{codigo}/respuesta` | HU-016 | operador |
+
+### 4.13 Endpoints agregados en la versión 1.1.0 (auditoría de trazabilidad)
+Se detallan en `openapi.yaml` con las convenciones de la §4.1. Todos validan el rol con la matriz de permisos (RN-099) y registran la acción en `auditoria`.
+
+| Método y ruta | HU | Rol | Request (resumen) | Respuestas | Hallazgo |
+|---|---|---|---|---|---|
+| `POST /operacion/fincas` | HU-017 | operador, administrador titular | `{ "nombre", "provincia": "canete" \| "huaral", "senasa_codigo", "senasa_vence": "AAAA-MM-DD" }` | 201 · 400 · 422 (provincia fuera de alcance) · 403 | QA-C2-004 |
+| `PATCH /operacion/fincas/{id}` | HU-017 | operador, administrador titular | `{ "senasa_codigo"?, "senasa_vence"? }` | 200 · 404 · 403 | QA-C2-004 |
+| `POST /operacion/productos` | HU-017 | operador, administrador titular | `{ "finca_id", "nombre", "volumen_ml": 1000, "registro_digesa"? }` | 201 (`publicado: false`) · 404 · 403 | QA-C2-004 |
+| `POST /operacion/productos/{id}/publicacion` y `POST /operacion/productos/{id}/despublicacion` | HU-017 | operador, administrador titular | — | 200 · 422 `RN-009` (sin registro DIGESA) · 403 | QA-C2-004 |
+| `POST /operacion/confirmaciones/{id}/contrasena` | HU-013, HU-014 | administrador titular | `{ "contrasena" }` | 200 (envía el código por correo y pasa a `pendiente_codigo`) · 401 · 409 (ya resuelta) | P18 |
+| `POST /operacion/confirmaciones/{id}/codigo` | HU-013, HU-014 | administrador titular | `{ "codigo": "482913" }` | 200 (`ejecutada`) · 422 `RN-152` (código incorrecto, con intentos restantes) · 409 `RN-152` (vencido o cancelado) | P18 |
+| `POST /operacion/dias/{fecha}/asignaciones` | HU-010, HU-011 | operador, administrador titular | `{ "asignaciones": [ { "entrega_id", "lote_id", "repartidor_id", "orden" } ] }` | 200 · 422 `RN-027` o `RN-132` (lote invalidado o en revisión) · 422 `RN-068` o `RN-113` (lote de otro día o lote original en una reprogramada) · 409 (entrega que ya no está `programada`) | QA-C2-005 |
+| `POST /reparto/salidas` | HU-011 | repartidor | `{ "salida_id": "<uuid>", "fecha": "AAAA-MM-DD", "registrado_en" }` | 200: pasa a `en_ruta` sus entregas `programada` de esa fecha cuyo lote está `recibido`, con `salida_id` como clave de idempotencia. Funciona sin conexión, con la misma cola de cierres (ADR-008) | QA-C2-005 |
+| `PATCH /clientes/me/facturacion` | HU-008 | cliente | `{ "tipo_comprobante": "boleta" \| "factura", "ruc"? }` | 200 · 422 `RN-058` (RUC sin 11 dígitos numéricos). Un RUC que empieza con `10` se cifra (RN-060) | QA-C2-013 |
+| `GET /operacion/lotes?fecha=AAAA-MM-DD` | HU-010 | operador, administrador titular | — | 200: lotes del día con estado, litros comprometidos, recibidos y libres, y `revision_vence_en` | QA-C2-006 |
+| `GET /operacion/fincas` | HU-017 | operador, administrador titular | — | 200: fincas con sus productos y estado de publicación | QA-C2-006 |
+| `GET /operacion/reclamos?estado=abierto` | HU-012, HU-016 | operador, administrador titular | — | 200: reclamos con su fecha límite (RN-035), ordenados por fecha límite | QA-C2-006 |
+
+**Algoritmo de asignación de lotes (QA-C2-005).** La asignación la propone el sistema y la confirma el operador con `POST /operacion/dias/{fecha}/asignaciones`. Se asignan las entregas `programada` del día por orden de antigüedad de la suscripción (RN-122) a los lotes `recibido` del mismo día con litros libres. Las entregas reprogramadas nunca van al lote de su entrega original (RN-068 y RN-113). Los lotes `en_revision` o `invalidado` no reciben entregas (RN-027 y RN-132).
+
+---
+
+## 5. Decisiones técnicas (ADRs)
+
+Los ADR **vigentes** son el ADR-001 (pasarelas), el ADR-002 (idioma), el ADR-003 (aprobaciones por PR) y el ADR-004 (horario de alertas internas). Los ADR-005 a ADR-009 de esta arquitectura fueron **aceptados por el fundador el 14/11/2026** y tienen su archivo en `docs/adr/`. El resumen de cada uno queda a continuación.
+
+### ADR-005 (aceptado el 14/11/2026): Monolito modular en lugar de microservicios
+Archivo: [`adr/ADR-005-monolito-modular.md`](adr/ADR-005-monolito-modular.md)
+
+- **Contexto:** hay un fundador, un PMV de 50 suscriptores y ningún equipo de plataforma. El stack fija Express y PostgreSQL.
+- **Decisión:** un repositorio, un servicio Express y un proceso worker, con módulos de dominio aislados por carpeta e interfaz (D2).
+- **Alternativas:** microservicios por dominio (descartados: costo operativo y despliegues múltiples), funciones *serverless* (descartadas: el reloj de Lima y las tareas largas complican los tiempos de arranque y los límites de ejecución).
+- **Consecuencias:** ➕ despliegue simple, transacciones locales para cobro, entrega y comprobante, y bajo costo. ➖ hay que vigilar el acoplamiento entre módulos; escalar por módulo requerirá separar procesos más adelante.
+
+### ADR-006 (aceptado el 14/11/2026): Cifrado de sobre con AES-256-GCM e índices ciegos
+Archivo: [`adr/ADR-006-cifrado-sobre-indice-ciego.md`](adr/ADR-006-cifrado-sobre-indice-ciego.md)
+
+- **Contexto:** el PRINCIPIO-003 exige cifrado de campo con claves en un KMS, pero el login por correo y la unicidad necesitan buscar sin descifrar.
+- **Decisión:** una clave de datos por cliente, protegida por una clave maestra del KMS. AES-256-GCM con el módulo `crypto` nativo de Node.js y un IV aleatorio de 12 bytes por valor. Para buscar, un HMAC-SHA-256 del correo y del RUC con otra clave del KMS. La anonimización destruye la clave de datos del cliente (borrado criptográfico).
+- **Alternativas:** cifrado transparente de toda la base (no cumple "a nivel de campo"), `pgcrypto` dentro de PostgreSQL (la clave pasaría por la base y los logs del servidor).
+- **Consecuencias:** ➕ cumple el PRINCIPIO-003 sin librerías nuevas, y la baja es rápida y verificable. ➖ no se puede buscar ni ordenar por texto en los campos cifrados; hay que cachear las claves de datos con un tiempo de vida corto para no llamar al KMS en cada petición.
+
+### ADR-007 (aceptado el 14/11/2026): Cola de tareas y outbox en PostgreSQL, sin Redis
+Archivo: [`adr/ADR-007-cola-outbox-postgresql.md`](adr/ADR-007-cola-outbox-postgresql.md)
+
+- **Contexto:** hay muchas tareas con hora exacta (18:00:00, 900 s, 72 h, backoff) y avisos que no pueden perderse. Agregar Redis o un *broker* sería un componente nuevo del stack (PRINCIPIO-002).
+- **Decisión:** las tablas `tarea_programada` y `outbox`, tomadas con `FOR UPDATE SKIP LOCKED` por el worker, con claves únicas por tarea. El outbox se escribe en la misma transacción que el cambio de negocio.
+- **Alternativas:** Redis con BullMQ (requiere ADR y otro servicio), `cron` del sistema operativo (no es transaccional ni reintenta).
+- **Consecuencias:** ➕ consistencia transaccional (si se confirma el pago, el comprobante queda encolado sí o sí) y nada nuevo que operar. ➖ con mucho volumen, la cola compite con las consultas; alcanza holgadamente para 600 suscriptores (mes 12).
+
+### ADR-008 (aceptado el 14/11/2026): Módulo de reparto sin conexión, con API nativas del navegador
+Archivo: [`adr/ADR-008-reparto-sin-conexion.md`](adr/ADR-008-reparto-sin-conexion.md)
+
+- **Contexto:** los repartidores usan Android de gama baja con señal intermitente en ruta (SR-13). El PRINCIPIO-003 impide guardar datos personales en el teléfono (K9).
+- **Decisión:** un Service Worker y IndexedDB **nativos**, sin librerías nuevas. En el dispositivo solo se guardan la lista del día (identificadores, orden y litros) y la cola de cierres, cada uno con un UUID propio. La sincronización se hace en lote y en orden (`POST /reparto/cierres`), cada cierre con su hora real y deduplicado por UUID.
+- **Alternativas:** Workbox o Dexie (facilitan el trabajo, pero requieren aprobar la dependencia), una app nativa (descartada por F-W04).
+- **Consecuencias:** ➕ funciona sin señal, sin dependencias nuevas y sin datos personales en el dispositivo. ➖ el repartidor no ve la dirección sin conexión hasta que se resuelva K9; un repartidor sin señal no recibe el aviso de lote en revisión (K8). Web Push no existe en iOS 15 y solo funciona en PWA instaladas a partir de iOS 16.4, así que en esos equipos el aviso "no entregar" depende de consultar la API al abrir la app o al sincronizar.
+
+### ADR-009 (aceptado el 14/11/2026): Adaptadores de pago con idempotencia de extremo a extremo
+Archivo: [`adr/ADR-009-adaptadores-pago-idempotencia.md`](adr/ADR-009-adaptadores-pago-idempotencia.md)
+
+- **Contexto:** hay tres medios (Culqi, Yape y Plin), webhooks que pueden repetirse, respuestas tardías y *timeouts* (SR-09). Un cobro duplicado es el peor fallo posible.
+- **Decisión:** una interfaz `PasarelaPago` con `tokenizar`, `cobrar`, `consultar` y `reembolsar`, y un adaptador por medio. Clave de idempotencia `ciclo-{id}-cliente-{id}` en cada cobro (RN-072). Índice único parcial de un solo pago confirmado por ciclo. Tabla `evento_pasarela` con `UNIQUE(evento_id)`. Un *timeout* o un 5xx deja el pago en `en_verificacion`, que se resuelve consultando y nunca reintentando a ciegas (RN-135 a RN-138).
+- **Alternativas:** depender solo de la idempotencia de la pasarela (no todas la ofrecen igual), reintentar con un *timeout* corto (riesgo de doble cargo).
+- **Consecuencias:** ➕ ningún doble cobro, aunque falle la red o la pasarela, y agregar Niubiz, Izipay o Mercado Pago es solo un adaptador nuevo (F-S05). ➖ más estados que probar; hay que confirmar en el sandbox que cada medio permite consultar un cargo por la clave de idempotencia o por su referencia.
+
+---
+
+## 6. Restricciones técnicas y dependencias externas
+
+### 6.1 Restricciones (constitución y ADR)
+| Restricción | Cómo se cumple en la arquitectura |
+|---|---|
+| Stack React 18 PWA, Node.js 20 con Express, PostgreSQL 16 (PRINCIPIO-002) | Todos los componentes; cola y outbox en PostgreSQL (ADR-007) |
+| Código, tablas y endpoints en español (PRINCIPIO-001) | `suscripciones`, `importe_devolver`, `/reparto/cierres`, `calcularDemanda()` |
+| Interfaz solo es-PE en el PMV (ADR-002) | `src/locales/es-PE.json`; la API devuelve claves de mensaje |
+| Cifrado de campo y TLS 1.3 (PRINCIPIO-003) | ADR-006, proxy inverso configurado solo con TLS 1.3 |
+| PCI-DSS SAQ-A (PRINCIPIO-004) | Tokenización en la PWA con el formulario o SDK de Culqi; DTO estrictos; test del esquema |
+| Anonimización en 30 días y ANPDP (PRINCIPIO-005) | Tarea `anonimizar_bajas`; inscribir el banco de datos antes de producción |
+| Comprobante por pago confirmado (PRINCIPIO-006) | Outbox transaccional hacia el OSE/PSE (ADR-007) |
+| WCAG 2.1 AA, Android 9+ y iOS 15+ (PRINCIPIO-007) | Pruebas automatizadas de accesibilidad en el CI; ver 6.4 |
+| Ventana de 09:00 a 20:00 para el cliente (PRINCIPIO-008.4), salvo alertas internas (ADR-004) | `outbox.no_antes_de` para el push al cliente; RN-150 para el personal interno |
+| Sin push ni merge directo a `main`; 1 aprobación humana (ADR-003) | Protección de rama y CI obligatorio |
+| Cobertura ≥ 80 % en reglas y ≥ 60 % general (PRINCIPIO-009) | Tests con el ID de la regla en el nombre (`test_RN045_cobrar_en_el_corte`) |
+| OpenAPI 3.x validado en el CI (PRINCIPIO-010) | `docs/api/openapi.yaml` generado a partir de la sección 4 |
+
+### 6.2 Servicios externos
+| Servicio | Uso | Estado | Bloquea el PMV |
+|---|---|---|---|
+| Culqi | Tokenización y cobro con tarjeta; consulta y reembolso | Elegido (ADR-001); DPA ⏳ | Sí |
+| Yape y Plin | Cobro recurrente y reembolso con billetera | Elegidos (ADR-001); DPA ⏳; **validar en el sandbox** el cobro recurrente y el reembolso (S13, QA-048) | Sí |
+| OSE/PSE autorizado por SUNAT | Boletas, facturas y notas de crédito | ❓ Por elegir; DPA ⏳ | Sí |
+| Correo transaccional | Verificación, comprobantes, avisos y constancias | ❓ Por elegir; DPA ⏳ | Sí |
+| Web Push (VAPID) | Alertas internas y avisos al cliente dentro de la ventana | Estándar del navegador, sin proveedor propio | No |
+| KMS | Claves maestras de cifrado y del índice ciego | ❓ Depende del hosting | Sí |
+| Hosting con PostgreSQL 16 gestionado | API, worker y base de datos | ❓ Por elegir | Sí |
+| WhatsApp Business | Avisos al cliente (F-S02) | Fuera del PMV | No |
+
+Todos los encargados deben figurar en `docs/proveedores-datos.md` con su DPA vigente antes de recibir datos (RN-118).
+
+**Cómo se hace cumplir RN-118 (QA-C2-015).** Cada adaptador real de C10 consulta `proveedor_habilitado` antes de enviar datos personales. Si su proveedor no figura, o tiene el DPA vencido, el adaptador falla con el error `PROVEEDOR_NO_HABILITADO`, la operación queda en el outbox para reintento y se envía una alerta interna. Los adaptadores simulados no consultan la tabla. La tabla la carga un humano (PRINCIPIO-008.9) y nunca un agente ni una migración.
+
+### 6.3 Dependencias de software aprobadas
+Aprobadas por el fundador titular el 14/11/2026 (PRINCIPIO-008.1). Agregar, quitar o cambiar cualquiera de ellas sigue requiriendo aprobación humana.
+
+| Capa | Propósito | Dependencia aprobada | Nota |
+|---|---|---|---|
+| Backend | Framework HTTP | `express` | Parte del stack (PRINCIPIO-002) |
+| Backend | Driver de PostgreSQL | `pg` | |
+| Backend | Validación estricta de DTO | `ajv` | JSON Schema, reutilizable con OpenAPI |
+| Backend | Hash de contraseñas | `argon2` | argon2id |
+| Backend | JWT | `jsonwebtoken` | |
+| Backend | Migraciones SQL | `node-pg-migrate` | Opcional: el backlog (T-005) usa un ejecutor propio de SQL versionado con `pg` |
+| Backend | Web Push | `web-push` | |
+| Backend | SDK del KMS | El del proveedor que se elija | Aprobado en principio; queda atado a la elección del hosting y el KMS (compuerta G3) |
+| Frontend | Biblioteca de interfaz | `react`, `react-dom` | Parte del stack (PRINCIPIO-002) |
+| Frontend | Empaquetador y servidor de desarrollo | `vite` | Agregada en el backlog: la §6.3 original no la listaba |
+| Frontend | Traducciones | `react-i18next` | |
+| Frontend | Rutas | `react-router` | |
+| Pruebas | Tests del backend | `node:test` | Incluido en Node.js 20; no es una dependencia nueva |
+| Pruebas | Tests del frontend | `vitest` | Elegido frente a `jest` por integrarse con `vite` |
+| Pruebas | E2E | `playwright` | |
+| Pruebas | Accesibilidad | `axe-core` | |
+| CI | Validación de OpenAPI | `@redocly/cli` | Agregada en el backlog: la §6.3 original no la listaba |
+| CI | Lint del código | `eslint` | Aprobada el 14/11/2026 (QA-C2-002) |
+| Pruebas | Cobertura del frontend | `@vitest/coverage-v8` | Aprobada el 14/11/2026 (QA-C2-002) |
+| Pruebas | DOM simulado para tests de componentes | `jsdom` | Aprobada el 14/11/2026 (QA-C2-002) |
+| Pruebas | Tests de componentes React | `@testing-library/react` | Aprobada el 14/11/2026 (QA-C2-002) |
+| Pruebas | Cobertura con umbrales en el backend | `c8` | Aprobada el 14/11/2026 (QA-C2-002); mide los tests de `node:test` y falla bajo el umbral |
+
+Las migraciones **nunca** incluyen `DROP`, `TRUNCATE`, ni `DELETE` o `UPDATE` sin `WHERE` sin aprobación humana (PRINCIPIO-008.7).
+--- ALCANCE ---
+# Documento de Alcance: Muuvi
+
+
+
+## 1. IN-SCOPE
+
+### Usuarios del sistema en esta versión
+| Rol | Quién es |
+|---|---|
+| **Cliente** | Hogar suscrito en uno de los 3 distritos de lanzamiento |
+| **Operador** | El fundador o una persona de Muuvi que gestiona fincas, lotes, entregas y clientes |
+| **Repartidor** | Personal de última milla de Muuvi |
+
+> La **finca no usa el sistema** en esta versión. El operador registra sus datos.
+
+### 1.1 Must have (6)
+| ID | Funcionalidad | Descripción | Principios que aplica |
+|---|---|---|---|
+| **F-M01** | Registro y cuenta del cliente | El cliente crea su cuenta con fecha de nacimiento (solo mayores de 18), consentimientos separados y sin premarcar, y una dirección dentro de los 3 distritos atendidos. También puede pedir la baja de su cuenta. | 003, 005 |
+| **F-M02** | Catálogo de leche con finca de origen | Muestra la leche fresca disponible con precio en soles y una ficha de la finca de origen (nombre, provincia, certificación SENASA). Un producto no se publica si falta su registro DIGESA. | 006, 011 |
+| **F-M03** | Suscripción semanal | El cliente elige cantidad de litros y día de entrega a **S/ 14.50 por litro**, con **franja única de 07:00 a 10:00**, y puede pausar o cancelar su suscripción hasta las **18:00 del día previo** a la entrega (hora de Lima). | 008.9, 011 |
+| **F-M04** | Cobro y comprobante electrónico | Cobra cada ciclo de la suscripción mediante **Culqi** (tarjetas) y las billeteras **Yape** y **Plin**, todas detrás del módulo `pagos`, y emite la boleta o factura electrónica SUNAT de cada pago confirmado. | 002, 004, 006 |
+| **F-M05** | Panel de operación diaria | El operador registra cada lote recibido de la finca (litros comprometidos frente a recibidos y temperatura de recepción), genera la lista de entregas del día y ve cuántas botellas tiene cada cliente. El repartidor marca cada entrega (entregada o fallida), las botellas devueltas y la temperatura de entrega. **Una lectura mayor de 4.5 °C en el acopio o en la entrega genera una alerta crítica e invalida el lote.** | 003, 008.2 |
+| **F-M06** | Libro de Reclamaciones virtual | Acceso desde el menú principal para registrar quejas y reclamos, conforme a la Ley 29571. | 006 |
+
+> **Por qué estos 6 y no otros:** F-M01 a F-M04 son el mínimo para que alguien pague una suscripción de forma legal. F-M05 es el mínimo para entregar la leche y **medir** los KPIs del Brief: abastecimiento de fincas (R2), cadena de frío (R3) y retorno de botellas (S6). F-M06 es obligación legal.
+
+### 1.2 Should have (5)
+| ID | Funcionalidad | Descripción | Por qué no es Must |
+|---|---|---|---|
+| **F-S01** | Pedido puntual y plan mensual | Compra de una sola vez y suscripción con cobro mensual, además de la semanal. | La métrica del PMV es "suscriptores activos"; una sola modalidad basta para validar. |
+| **F-S02** | Avisos de entrega y renovación | Aviso de próxima entrega, cobro y pausa por WhatsApp o push, **solo entre las 09:00 y las 20:00, hora de Lima**. | Con 50 clientes, el operador puede avisar manualmente; la suscripción ya resuelve el "me olvido de comprar". |
+| **F-S03** | Trazabilidad por lote | El cliente ve de qué finca, lote y fecha de ordeño viene su leche y qué temperatura tuvo en la recepción. | La ficha estática de finca (F-M02) cubre el diferenciador mínimo; requiere que F-M05 ya acumule datos. |
+| **F-S04** | Depósito de garantía por botella | Cobro y devolución de una garantía por botella, con saldo visible para el cliente. | El monto todavía no está definido (Brief §4.4) y cambiar la lógica de cobro requiere revisión humana (008.9). En el PMV solo se **cuentan** las botellas. |
+| **F-S05** | Pasarelas adicionales | Agregar **Niubiz**, **Izipay** y **Mercado Pago** detrás del módulo `pagos` en la fase de escala. | Culqi, Yape y Plin bastan para validar la disposición a pagar (ADR-001). |
+
+### 1.3 Could have (4)
+| ID | Funcionalidad | Descripción |
+|---|---|---|
+| **F-C01** | Portal de la finca | La finca registra sus litros comprometidos, lotes y certificados por su cuenta. |
+| **F-C02** | Programa de referidos | Beneficio para el cliente que trae a otro hogar de su distrito. |
+| **F-C03** | Contenido de bienestar animal | Fotos y videos de la finca y del ganado en pastoreo. |
+| **F-C04** | Encuesta de satisfacción por entrega | Calificación corta después de cada entrega. |
+
+---
+
+## 2. OUT-OF-SCOPE
+
+### 2.1 Won't have en esta versión
+| ID | Funcionalidad | Razón por la que está fuera |
+|---|---|---|
+| **F-W01** | **Lácteos artesanales** (yogurt, queso, mantequilla) | Cada producto suma su propio registro DIGESA y, posiblemente, advertencias octogonales (Ley 30021). Primero hay que validar la leche, que es el producto central. |
+| **F-W02** | **Segmentos fitness y B2B** (cafeterías, pastelerías) | El Brief los ubica en fases posteriores. El B2B necesita facturación, volúmenes y crédito distintos. |
+| **F-W03** | **Distritos fuera de Miraflores, San Isidro y La Molina** | La densidad de entregas por distrito es el riesgo R6. San Borja, Surco y Barranco entran en el mes 6. |
+| **F-W04** | **App nativa** iOS o Android | La constitución fija una PWA en React (PRINCIPIO-002). |
+| **F-W05** | **Funciones con IA** (recomendaciones, chatbot, predicción de demanda) | Exigen consentimiento de envío a terceros y que el proveedor figure en `docs/proveedores-datos.md` (PRINCIPIO-005.3 y 005.4). No aportan a validar R1. |
+| **F-W06** | **Sensores IoT de temperatura en tiempo real** | Hardware y costo sin capital definido. En el PMV, la temperatura se registra manualmente en F-M05. |
+| **F-W07** | **Optimización automática de rutas** | Con 50 clientes en 3 distritos, la ruta se arma a mano. Se revisa con 200 suscriptores o más. |
+| **F-W08** | **Pago contra entrega en efectivo** | Exige manejo de caja por el repartidor y complica la emisión de comprobantes SUNAT. |
+| **F-W09** | **Marketplace donde el cliente elige finca o precio por finca** | Muuvi vende una sola leche con un precio fijado por un humano (PRINCIPIO-008.9). Es otro modelo de negocio. |
+| **F-W10** | **Fidelización por puntos o descuentos automáticos** | Afecta precios y descuentos, que requieren revisión humana (PRINCIPIO-008.3 y 008.9). |
+
+---
+
+## 3. MVP
+
+**Con el MVP, un hogar de Miraflores, San Isidro o La Molina puede** crear su cuenta, si es mayor de 18 años y da sus consentimientos; ver la leche fresca disponible, su precio en soles y la finca certificada de la que viene; suscribirse a S/ 14.50 por litro para recibir cierta cantidad de litros cada semana, el día que elija, entre las 07:00 y las 10:00; pagar con tarjeta (Culqi), Yape o Plin y recibir su boleta electrónica; pausar o cancelar hasta las 18:00 del día previo, y registrar un reclamo en el Libro de Reclamaciones. La interfaz está solo en español (es-PE). **Del lado de Muuvi**, el operador registra cada lote que llega de Cañete o Huaral (litros y temperatura), obtiene la lista de entregas del día y sabe cuántas botellas tiene cada cliente. El repartidor confirma cada entrega, la temperatura y las botellas que recoge. Si una lectura pasa de 4.5 °C, el lote se invalida. Todo esto basta para conseguir y retener a los primeros 50 suscriptores y para medir los KPIs del Brief: suscriptores activos, retención a 3 meses, retorno de botellas, cumplimiento de las fincas y cadena de frío.
+
+```mermaid
+flowchart LR
+    A[Cliente se registra<br/>F-M01] --> B[Elige leche<br/>F-M02]
+    B --> C[Se suscribe<br/>F-M03]
+    C --> D[Paga y recibe boleta<br/>F-M04]
+    D --> E[Operador recibe lote<br/>y arma entregas<br/>F-M05]
+    E --> F[Repartidor entrega<br/>y recoge botellas<br/>F-M05]
+    F -->|siguiente semana| D
+```
+
+---
+
+## 4. Supuestos
+
+### 4.1 Heredados del Brief (sin validar)
+| ID | Supuesto |
+|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar". |
+| S2 | Certificación, botella de vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro. |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro. |
+| S4 | Las fincas de Cañete y Huaral tienen volumen para 600 suscriptores al mes 12. |
+| S5 | Las fincas llevan la leche hasta un punto en Lima por su cuenta. |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas. |
+
+### 4.2 Nuevos, propios del alcance
+| ID | Supuesto | Si resulta falso… |
+|---|---|---|
+| S7 | Culqi, Yape y Plin bastan para no perder clientes en el PMV. | Niubiz o Izipay (F-S05) suben a Must. |
+| S8 | El hogar acepta una suscripción **semanal** como única modalidad al inicio. | F-S01 sube a Must. |
+| S9 | Con 50 suscriptores, un solo operador puede gestionar lotes, entregas y avisos sin automatizar. | F-S02 sube a Must. |
+| S10 | Cada finca proveedora tiene registro sanitario DIGESA vigente para su leche envasada. | No se puede publicar el producto (PRINCIPIO-006); el lanzamiento se bloquea. |
+| S11 | Los repartidores tienen un smartphone Android 9+ o iOS 15+ con datos móviles. | F-M05 necesita otra forma de registrar las entregas. |
+| S12 | ✅ **Confirmado por el fundador (12/11/2026):** los lotes llegan al punto de acopio en Lima **antes de las 07:00**. La finca sale hacia las 04:00. | Hay que mover la franja de 07:00–10:00 o cambiar el horario de ordeño y despacho. |
+| S13 | ✅ **Confirmado por el fundador (12/11/2026):** Yape y Plin permiten cobrar la suscripción semanal de forma **automática y recurrente**. | El cobro con billetera pasa a ser manual por ciclo, o la suscripción con billetera queda fuera del PMV. |
+| S14 | El corte a las 18:00 del día previo deja tiempo para avisar a la finca cuántos litros despachar esa madrugada. | Hay que adelantar el corte. |
+| S15 | Un margen bruto de **S/ 9.00 por litro** (S/ 14.50 − S/ 5.50) cubre la logística y las comisiones de pago. | Hay que revisar el precio (posible subida a S/ 15.00 o S/ 16.00). |
+
+---
+
+## 5. Restricciones
+
+### 5.1 Técnicas (constitución)
+- **Stack fijo:** PWA en React 18+, Node.js 20+ con Express y PostgreSQL 16+. Cualquier cambio requiere un ADR aprobado por un humano (PRINCIPIO-002).
+- **Pagos:** todas las pasarelas pasan por el módulo `pagos`; el backend nunca recibe número de tarjeta, CVV ni vencimiento (PRINCIPIO-004).
+- **Datos personales:** se cifran con AES-256-GCM a nivel de campo, con claves en un KMS; las comunicaciones usan TLS 1.3, y los logs no contienen datos personales (PRINCIPIO-003).
+- **Interfaz solo en es-PE en el MVP**, por excepción al PRINCIPIO-001 (ADR-002). Los textos **siguen cargándose desde archivos de traducción** (`es-PE.json`), así que agregar `en.json` después no obliga a reescribir componentes.
+- **Accesibilidad:** WCAG 2.1 AA, áreas táctiles de 48×48 px, compatibilidad con TalkBack y VoiceOver, Android 9+ y iOS 15+ (PRINCIPIO-007).
+- **Formatos:** montos como `S/ 1,250.50`, fechas `DD/MM/AAAA`, zona horaria `America/Lima`, montos `NUMERIC(12,2)` y timestamps en UTC (PRINCIPIO-011).
+- **Calidad:** cobertura ≥ 80 % en reglas de negocio y ≥ 60 % general, E2E de registro, suscripción, pago y entrega, y **1 aprobación humana por PR durante la etapa inicial**, por excepción al PRINCIPIO-009 (ADR-003). Se vuelve a 2 aprobaciones cuando se incorpore el primer desarrollador o cofundador técnico.
+- **Documentación:** OpenAPI 3.x validado en el CI, ADR y diagramas en Mermaid (PRINCIPIO-010).
+
+### 5.2 Legales y regulatorias
+- Ley N.° 29733 y D.S. 016-2024-JUS: bancos de datos inscritos ante la ANPDP **antes** de salir a producción, solo mayores de 18 años, consentimientos separados y eliminación de datos en un máximo de 30 días tras la baja.
+- SUNAT: comprobante electrónico por cada pago confirmado.
+- DIGESA: registro sanitario por producto. SENASA: certificación vigente para usar la palabra "orgánico".
+- Ley 29571: Libro de Reclamaciones virtual.
+- Avisos al cliente solo entre las 09:00 y las 20:00, hora de Lima (PRINCIPIO-008.4).
+
+### 5.3 De negocio y recursos
+- Fundador único; el capital inicial y la fecha de lanzamiento no están definidos.
+- Cobertura solo en Miraflores, San Isidro y La Molina, y abastecimiento solo de Cañete y Huaral.
+- **Ningún agente de IA fija ni cambia precios, cobros, tarifas o textos legales** (PRINCIPIO-008.9). El precio por litro lo configura un humano en el sistema. Para el PMV, el fundador fijó **S/ 14.50** al cliente y **S/ 5.50** a la finca.
+
+---
+
+## 6. Dependencias
+
+| ID | Dependencia | Tipo | La usa | ¿Bloquea el MVP? |
+|---|---|---|---|---|
+| D1 | **Culqi** (tarjetas) y las billeteras **Yape** y **Plin** (ADR-001) | Servicio externo | F-M04 | Sí |
+| D2 | **Proveedor de facturación electrónica** (OSE o PSE autorizado por SUNAT) | Servicio externo | F-M04 | Sí |
+| D3 | **Gestor de secretos (KMS)** | Infraestructura | F-M01, F-M04 | Sí |
+| D4 | **Hosting** con TLS 1.3 y PostgreSQL 16+ | Infraestructura | Todas | Sí |
+| D5 | **Proveedor de correo transaccional** (verificación de cuenta y envío de comprobantes) | Servicio externo | F-M01, F-M04 | Sí |
+| D6 | **Inscripción del banco de datos ante la ANPDP** | Trámite legal | F-M01 | Sí |
+| D7 | **Fincas proveedoras** con certificación SENASA y registro DIGESA vigentes | Operativa | F-M02, F-M05 | Sí |
+| D8 | **Transporte refrigerado** de la finca al punto de acopio en Lima | Operativa (a cargo de la finca, S5) | F-M05 | Sí |
+| D9 | **Punto de acopio refrigerado en Lima** | Operativa | F-M05 | Sí |
+| D10 | **WhatsApp Business API** o un servicio de push | Servicio externo | F-S02 | No (Should) |
+
+---
+</contexto>
+
+<tarea>
+Genera una UI Specification (09-ui-spec.md) con las siguientes secciones:
+
+1. **Inventario de Pantallas**: tabla con ID (P-XXX), nombre, actor principal, HUs que implementa, prioridad MoSCoW.
+2. **User Flows**: para cada flujo principal, la secuencia de pantallas con acciones del usuario.
+3. **Screen Specs**: para cada pantalla Must/Should, describe: propósito, actor, HUs, datos que muestra, acciones disponibles, reglas de negocio que aplican, y un wireframe textual (layout detallado con secciones, componentes, estados).
+4. **Design Tokens**: paleta de colores sugerida (primario, secundario, acento, fondo, texto), tipografía, tamaños de componentes.
+5. **Navigation Map**: diagrama textual del sitio (árbol de navegación).
+</tarea>
+
+<restricciones>
+- Cada pantalla DEBE trazarse a al menos una HU (incluir el ID).
+- Respetar los principios de la constitución (especialmente los de accesibilidad e idioma).
+- Priorizar pantallas Must sobre Should y Could.
+- El wireframe textual debe ser lo suficientemente detallado para que otro LLM pueda generar el HTML/CSS.
+- Formato: Markdown con tablas y headings claros.
+- Si necesitas información que no está en el contexto, PREGUNTA antes de asumir.
+</restricciones>

@@ -1,0 +1,3097 @@
+<rol>
+Eres un Product Owner Senior (Agente PO del framework BMAD). Tu especialidad
+es transformar especificaciones de producto en Historias de Usuario
+estructuradas y priorizadas. Cada HU que generes debe ser trazable a una
+regla de negocio o feature del PRD.
+</rol>
+
+<contexto>
+Estamos en la fase de planificación del producto Muuvi.
+País de operación: Perú.
+
+A continuación te comparto el PRD, las reglas de negocio, el alcance y la constitución del proyecto del Spec Pack v0.2:
+
+<rol>
+Eres un Analista de Negocios Senior (Agente Analyst del framework BMAD). Tu especialidad es descubrimiento de producto: entender profundamente un problema antes de proponer soluciones. No propones funcionalidades: investigas, preguntas y sintetizas.
+</rol>
+
+<contexto>
+Estamos en la fase de descubrimiento del producto FiaYa.
+Descripción inicial: FiaYa digitaliza el cuaderno de fiados de las bodegas de barrio en Lima, Perú. Permite al bodeguero registrar ventas al crédito, controlar límites de crédito por cliente y enviar recordatorios de cobro por WhatsApp.
+País de operación: Perú.
+Este es un ejercicio académico de un Diploma en AI-First Software Architecture.
+</contexto>
+
+<tarea>
+FASE 1 — INVESTIGACIÓN (haz esto primero):
+Hazme preguntas para entender el proyecto. Organízalas en rondas de 3-5 preguntas. Cubre:
+- El problema real (¿quién sufre? ¿cómo lo resuelve hoy? ¿qué pierde?)
+- Los usuarios y segmentos (¿quiénes son? ¿qué necesitan diferente?)
+- La propuesta de valor (¿por qué usarían esto y no lo que tienen?)
+- El modelo de negocio (¿cómo generaría ingresos?)
+- Métricas de éxito (¿cómo sabemos que funciona?)
+- Riesgos y supuestos (¿qué puede salir mal? ¿qué estamos asumiendo?)
+
+NO propongas soluciones ni funcionalidades todavía. Solo pregunta.
+Después de mis respuestas a cada ronda, haz otra ronda hasta tener suficiente.
+
+FASE 2 — SÍNTESIS (cuando yo diga "genera el Project Brief"):
+Genera un Project Brief estructurado en Markdown con estas secciones:
+1. Problema y oportunidad
+2. Usuarios y segmentos objetivo
+3. Propuesta de valor
+4. Modelo de negocio preliminar
+5. Métricas de éxito (KPIs medibles)
+6. Riesgos identificados y supuestos
+7. Restricciones conocidas
+</tarea>
+
+<restricciones>
+- Haz preguntas, no asumas. Si algo no está claro, PREGUNTA.
+- No propongas funcionalidades técnicas. Eso es trabajo del Product Manager, no tuyo.
+- Usa datos y ejemplos específicos del contexto peruano cuando aplique.
+- Todas las métricas deben ser medibles (no "mejorar la experiencia").
+</restricciones>
+
+<formato>
+
+---
+
+## 1. Problema y oportunidad
+
+### 1.1 Problema
+**Del lado del hogar (prioridad):**
+- ✅ Hoy los hogares de Lima que quieren leche fresca de pastoreo la piden **directamente a las fincas por WhatsApp**, a un precio de **S/ 3.50 – S/ 6.00 por litro**.
+- 📌 El dolor principal, según la hipótesis del fundador, es que **no encuentran dónde comprarla cerca** y que **se olvidan de comprarla**. No se ha validado con entrevistas.
+- ❓ No sabemos todavía cuánto pierde el hogar con la situación actual (tiempo, dinero, leche desperdiciada, desconfianza en lo "orgánico").
+
+**Del lado de la finca:**
+- ✅ Las fincas **no quieren hacerse cargo de la logística de envío** ni de **atender los pedidos** de cada cliente.
+
+### 1.2 Oportunidad
+- **Hay oferta cerca de Lima.** La región Lima es la segunda cuenca lechera del Perú, con el 16.1 % de la producción nacional en 2024, solo detrás de Cajamarca (Midagri).
+- **La leche diferenciada puede pagar mejor al productor.** La gran industria paga en promedio alrededor de S/ 1.22 por kilo de leche cruda (estudio PUCP), y en algunas regiones el precio en chacra ronda los S/ 2.80 por litro en 2026. El canal directo por WhatsApp (S/ 3.50 – S/ 6.00) ya muestra que existe un consumidor que paga más por leche de finca.
+- **Hay un hueco entre los dos lados:** fincas certificadas que no quieren distribuir y hogares de alto poder adquisitivo que no tienen un acceso cómodo y recurrente.
+
+### 1.3 Cadena actual frente a la cadena propuesta
+
+```mermaid
+flowchart LR
+    subgraph Hoy
+        F1[Finca] -- WhatsApp y entrega informal --> H1[Hogar]
+    end
+    subgraph Con Muuvi
+        F2[Finca en Cañete o Huaral<br/>ordeño, enfriamiento y envasado] -- traslado refrigerado --> P[Punto de acopio en Lima]
+        P -- última milla Muuvi --> H2[Hogar]
+    end
+```
+
+---
+
+## 2. Usuarios y segmentos objetivo
+
+| Prioridad | Segmento | Estado | Por qué |
+|---|---|---|---|
+| 1 | **Hogares** de Miraflores, San Isidro y La Molina | ✅ Segmento de lanzamiento | Alto poder adquisitivo y densidad de entregas en tres distritos |
+| 2 | **Personas fitness o con dietas específicas** | ✅ Segunda fase | Valoran origen, pureza y regularidad del consumo |
+| 3 | **Cafeterías, pastelerías y otros negocios** | ✅ Fase posterior | Compran en volumen; modelo B2B con otra lógica de pedido |
+| — | Familias con niños y adultos mayores | 📌 Subsegmentos dentro de "hogares" | Mencionados por el fundador; falta priorizarlos dentro del segmento 1 |
+
+### 2.1 Usuario del otro lado: la finca proveedora
+- ✅ Fincas con **certificación SENASA** ubicadas en **Cañete y Huaral** (región Lima, a unas 2 o 3 horas de la ciudad).
+- ✅ La finca **ordeña, enfría y envasa** en botella de vidrio, y **lleva la leche hasta un punto en Lima**.
+- ❓ Número de fincas comprometidas y litros diarios disponibles: sin definir.
+
+### 2.2 Expansión geográfica prevista
+| Fase | Distritos |
+|---|---|
+| Lanzamiento (meses 1–3) | Miraflores, San Isidro, La Molina |
+| Consolidación (mes 6) | + San Borja, Surco, Barranco |
+
+---
+
+## 3. Propuesta de valor
+
+### 3.1 Para el hogar
+> **Leche fresca de vacas en libre pastoreo, de fincas con certificación SENASA, que llega en botella de vidrio a casa de forma recurrente y sin romper la cadena de frío. El hogar no tiene que acordarse de pedir ni buscar dónde comprarla.**
+
+Los cuatro diferenciadores que, según el fundador, justifican el precio adicional:
+1. **Certificación SENASA garantizada.**
+2. **Botella de vidrio retornable.**
+3. **Trazabilidad** de la finca y del bienestar del ganado.
+4. **Cadena de frío** garantizada hasta la puerta.
+
+Además: **comodidad**, porque la compra pasa a ser recurrente y ya no depende de recordar ni de buscar un proveedor.
+
+### 3.2 Para la finca
+> **Vende a hogares urbanos de alto valor sin montar su propia logística de reparto ni atender cliente por cliente.**
+
+### 3.3 Frente a las alternativas actuales
+| Alternativa | Qué ofrece | Qué le falta frente a Muuvi |
+|---|---|---|
+| Finca directa por WhatsApp | Precio bajo (S/ 3.50 – S/ 6.00) | Recurrencia, comodidad y cadena de frío garantizada 📌 |
+| Sección premium de Wong o Vivanda | Disponibilidad y confianza en la marca | Origen directo de finca, botella retornable y trazabilidad por finca 📌 |
+| Otras marcas de leche fresca con delivery | Entrega a domicilio | ❓ Falta el análisis competitivo (precios, cobertura, propuesta) |
+
+---
+
+## 4. Modelo de negocio preliminar
+
+### 4.1 Ingresos
+- ✅ **Suscripción** semanal o mensual.
+- ✅ **Pago por pedido** (compra puntual).
+- ✅ Precio al consumidor: **S/ 13.50 – S/ 16.00 por litro**.
+
+### 4.2 Costos principales (identificados, sin cuantificar)
+- ❓ Compra de leche a la finca, a un precio por litro todavía sin definir.
+- ❓ Operación del punto de acopio refrigerado en Lima.
+- ❓ Última milla propia refrigerada (personal, vehículos, cadena de frío).
+- ❓ Reposición de las botellas que no vuelven.
+- ❓ Comisiones de las pasarelas de pago (ver constitución, PRINCIPIO-002).
+
+### 4.3 Margen bruto por litro (escenario ilustrativo)
+📌 Este cálculo **supone** que Muuvi le paga a la finca el mismo precio que hoy cobra por WhatsApp. El fundador no lo ha confirmado.
+
+| Escenario | Precio de venta | Costo de la leche | Margen bruto antes de logística |
+|---|---|---|---|
+| Pesimista | S/ 13.50 | S/ 6.00 | **S/ 7.50** |
+| Optimista | S/ 16.00 | S/ 3.50 | **S/ 12.50** |
+
+### 4.4 Botella retornable
+- ✅ Botella de vidrio con meta de retorno ≥ 90 %.
+- ❓ Monto del depósito o garantía por botella: sin definir.
+
+### 4.5 Capital inicial
+- ❓ Sin definir.
+
+---
+
+## 5. Métricas de éxito (KPIs medibles)
+
+> Los meses se cuentan desde el lanzamiento comercial (fecha ❓ por definir).
+
+### 5.1 Crecimiento
+| KPI | Mes 3 (validación / PMV) | Mes 6 (consolidación) | Mes 12 (escala inicial) | Origen |
+|---|---|---|---|---|
+| Suscriptores activos | **50** | **200** | **600** | ✅ Fundador |
+| Distritos con servicio | 3 | 6 | ❓ | ✅ Fundador |
+
+### 5.2 Retención y operación
+| KPI | Meta | Cómo se mide | Origen |
+|---|---|---|---|
+| Retención de suscriptores a 3 meses | **≥ 60 %** | Suscriptores activos al día 90 ÷ suscriptores de la misma cohorte al día 0 | ✅ Fundador |
+| Tasa de retorno de botellas | **≥ 90 %** | Botellas devueltas ÷ botellas entregadas, por mes | ✅ Fundador |
+| Entregas sin rotura de cadena de frío | **100 %** en la fase PMV | Entregas dentro del rango de temperatura ÷ entregas totales | ✅ Objetivo del fundador; 📌 el rango de temperatura lo debe fijar un especialista sanitario |
+| Cumplimiento de abastecimiento de las fincas | 📌 **≥ 95 %** (propuesto) | Litros entregados ÷ litros comprometidos, por semana | 📌 Propuesto para medir el riesgo R2 |
+
+### 5.3 Validación del problema (antes o durante el PMV)
+| KPI | Meta propuesta 📌 | Cómo se mide |
+|---|---|---|
+| Entrevistas a hogares objetivo | **≥ 20** en Miraflores, San Isidro y La Molina | Conteo de entrevistas registradas |
+| Hogares que confirman el dolor ("no la encuentro cerca" o "me olvido de comprar") | **≥ 60 %** de los entrevistados | Respuestas codificadas en las entrevistas |
+| Disposición a pagar ≥ S/ 13.50 por litro | **≥ 40 %** de los entrevistados | Pregunta de precio en la entrevista |
+
+---
+
+## 6. Riesgos identificados y supuestos
+
+### 6.1 Riesgos
+| ID | Riesgo | Probabilidad | Impacto | Origen |
+|---|---|---|---|---|
+| R1 | **No hay suficientes clientes al precio de S/ 13.50 – S/ 16.00**, entre 2.3 y 4.6 veces lo que se paga hoy por WhatsApp | Alta | Crítico | ✅ Fundador |
+| R2 | **Las fincas entregan menos leche de la acordada** | Media | Alto | ✅ Fundador |
+| R3 | Rotura de la cadena de frío en el traslado de Cañete o Huaral a Lima (2 a 3 horas) o en la última milla | Media | Crítico (sanitario y reputacional) | 📌 Analista |
+| R4 | Las botellas no vuelven en la proporción esperada, lo que eleva el costo por litro | Media | Medio | 📌 Analista |
+| R5 | El cliente se salta a Muuvi y le compra directo a la finca por WhatsApp | Media | Alto | 📌 Analista |
+| R6 | La densidad de clientes por distrito no alcanza para rentabilizar la última milla propia | Media | Alto | ✅ Objetivo del mes 12 del fundador |
+| R7 | Una finca pierde o deja vencer su certificación SENASA o su registro DIGESA | Baja | Alto (no se puede vender ni rotular como orgánico) | 📌 Analista, a partir de la constitución |
+
+### 6.2 Supuestos por validar
+| ID | Supuesto | Cómo validarlo |
+|---|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar" | Entrevistas (KPI 5.3) |
+| S2 | Certificación, vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro | Pregunta de disposición a pagar y preventa |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro | Negociación con las fincas |
+| S4 | Las fincas de Cañete y Huaral tienen volumen suficiente para 600 suscriptores al mes 12 | Inventario de litros diarios por finca |
+| S5 | Las fincas aceptan llevar la leche hasta un punto en Lima por su cuenta | Acuerdo firmado con cada finca |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas | Medición en la fase PMV |
+
+---
+
+## 7. Restricciones conocidas
+
+### 7.1 Legales, sanitarias y tributarias (según `00-constitucion.md`)
+- **Datos personales:** cumplir la Ley N.° 29733 y el D.S. 016-2024-JUS. Esto incluye inscribir los bancos de datos ante la ANPDP, aceptar solo a mayores de 18 años, pedir consentimiento expreso y eliminar los datos en un plazo máximo de 30 días tras la baja (PRINCIPIO-005).
+- **Producto:** cada producto debe tener **registro sanitario DIGESA** antes de publicarse, y solo se puede rotular como "orgánico" con **certificación SENASA vigente** (PRINCIPIO-006). Como la finca envasa, estos registros dependen de ella.
+- **Tributaria:** cada pago confirmado debe emitir su **boleta o factura electrónica SUNAT** (PRINCIPIO-006).
+- **Consumidor:** **Libro de Reclamaciones virtual** (Ley 29571) y, cuando corresponda, **advertencias octogonales** (Ley 30021).
+- **Pagos:** el sistema no puede recibir ni guardar datos de tarjeta (PCI-DSS SAQ-A, PRINCIPIO-004).
+
+### 7.2 Operativas
+- **Cobertura inicial:** solo Miraflores, San Isidro y La Molina.
+- **Abastecimiento:** solo fincas de Cañete y Huaral, a 2 o 3 horas de Lima.
+- **Envasado:** lo hace la finca. Muuvi no manipula el producto, solo lo recibe y lo distribuye.
+- **Comunicaciones al cliente:** solo entre las **09:00 y las 20:00, hora de Lima** (PRINCIPIO-008).
+
+### 7.3 Del proyecto
+- El **stack tecnológico** y las **pasarelas de pago** ya están definidos en la constitución (PRINCIPIO-002). El Product Manager trabaja dentro de ese marco.
+- Fundador único, emprendedor independiente; el proyecto parte desde cero.
+- ❓ Capital inicial y fecha de lanzamiento sin definir.
+
+---
+
+</formato>
+
+<rol>
+Eres un Business Analyst Senior especializado en escritura de reglas de
+negocio para sistemas de software que serán implementados por agentes
+de IA autónomos. Dominas la notación EARS (Easy Approach to Requirements
+Syntax) y escribes reglas atómicas, verificables y libres de ambigüedad.
+</rol>
+
+<contexto>
+Proyecto: Muuvi
+Constitución del proyecto: 
+# Constitución del Proyecto Muuvi
+**Versión:** 1.0.0  
+**Ámbito:** Obligatorio y vinculante para todos los desarrolladores humanos y agentes de inteligencia artificial que colaboren en el proyecto.
+
+---
+
+### PRINCIPIO-001: Uniformidad Lingüística
+Todo el código fuente (variables, funciones, componentes, tablas, endpoints), los comentarios, los mensajes de commit, los ADR y la documentación se redactan en español. La interfaz de usuario es bilingüe: español (`es-PE`, idioma por defecto) e inglés (`en`). Todo texto visible se carga desde archivos de traducción y nunca se escribe directamente en el código.
+- **Ejemplo de cumplimiento:** Una función `calcularProximaEntrega()` con su comentario en español, y un componente que muestra `t('pedido.titulo')` resuelto desde `src/locales/es-PE.json` y `src/locales/en.json`.
+- **Ejemplo de violación:** Una función `getNextDelivery()`, un commit "fix delivery bug" o un JSX con texto fijo como `<h1>Tu pedido</h1>`.
+
+### PRINCIPIO-002: Inmutabilidad del Stack Tecnológico Base
+El stack aprobado es:
+- **Frontend:** React 18+ como Aplicación Web Progresiva (PWA).
+- **Backend:** Node.js 20+ con Express.
+- **Base de datos:** PostgreSQL 16+.
+- **Pasarelas de pagos:** Culqi, Niubiz, Izipay y Mercado Pago, más las billeteras Yape y Plin. Todas se integran detrás de un único módulo `pagos` con una interfaz común, de modo que ninguna otra parte del sistema dependa directamente de una pasarela concreta.
+
+Ningún componente del stack puede modificarse ni sustituirse sin aprobación explícita y documentada del equipo humano titular, registrada en un ADR (`docs/adr/ADR-NNN-*.md`).
+- **Ejemplo de cumplimiento:** Desarrollar la pantalla de suscripciones en React 18+ y su endpoint en Express sobre Node.js 20.
+- **Ejemplo de violación:** Reemplazar Express por otro framework web, usar Flutter o introducir una base de datos NoSQL sin un ADR aprobado.
+
+### PRINCIPIO-003: Cifrado de Datos Personales
+Los datos personales (DNI, nombres completos, fecha de nacimiento, teléfono, correo, dirección exacta y coordenadas de geolocalización) se cifran en reposo **a nivel de campo con AES-256-GCM**, y sus claves se guardan en un gestor de secretos (KMS), nunca en el repositorio. Toda comunicación entre la PWA, el backend y los servicios de terceros usa **TLS 1.3**. Ningún dato personal puede aparecer en texto plano en logs, mensajes de error ni analítica.
+- **Ejemplo de cumplimiento:** Transmitir los datos por un canal TLS 1.3 y guardar el DNI del cliente cifrado con AES-256-GCM en la columna `dni_cifrado` de PostgreSQL; los logs solo registran `cliente_id`.
+- **Ejemplo de violación:** Guardar el DNI o el teléfono del cliente en texto plano en tablas o logs, o registrar `Error al entregar en Av. Larco 123, tel. 987654321`.
+
+### PRINCIPIO-004: Pagos sin Datos de Tarjeta (PCI-DSS SAQ-A)
+Los datos de tarjeta (número de tarjeta o PAN, CVV y fecha de vencimiento) **nunca** llegan al backend ni a la base de datos de Muuvi. Se capturan con el formulario o SDK de la pasarela, que devuelve un token; el sistema solo guarda ese token y los 4 últimos dígitos. Un test automatizado falla si algún esquema SQL, DTO o validador contiene campos como `numero_tarjeta`, `cvv` o `pan`.
+- **Ejemplo de cumplimiento:** La PWA envía al backend solo `{ "token_pasarela": "tkn_…", "ultimos_4": "4242" }` para cobrar la suscripción mensual.
+- **Ejemplo de violación:** Un endpoint `POST /pagos` que recibe `{ "numero_tarjeta": "4111…", "cvv": "123" }`.
+
+### PRINCIPIO-005: Ciclo de Vida de los Datos Personales (Ley N.° 29733 y D.S. 016-2024-JUS)
+1. **Inscripción ante la ANPDP:** los bancos de datos de clientes están inscritos ante la ANPDP. Ningún banco de datos nuevo (por ejemplo, una nueva tabla o servicio con datos personales) entra en producción sin su inscripción o actualización previa.
+2. **Solo mayores de edad:** el registro exige fecha de nacimiento y rechaza a quien tenga menos de 18 años.
+3. **Consentimiento:** se pide consentimiento expreso, separado y sin casillas premarcadas para (a) el tratamiento de datos y (b) el envío de datos a terceros, incluidos los proveedores de IA.
+4. **Datos enviados a IA:** el DNI y los datos de pago nunca se envían a un proveedor de IA. Los demás datos solo se envían si el cliente dio su consentimiento y el proveedor figura en `docs/proveedores-datos.md`.
+5. **Eliminación:** al darse de baja una cuenta, sus datos se eliminan o anonimizan en un plazo máximo de **30 días**. Solo se conservan los comprobantes que SUNAT obliga a guardar.
+- **Ejemplo de cumplimiento:** Un job diario anonimiza las cuentas cuya `fecha_baja` tiene más de 30 días y deja la ejecución registrada en la tabla de auditoría.
+- **Ejemplo de violación:** Registrar a un usuario de 17 años, o enviar a un LLM un prompt que contiene el DNI del cliente.
+
+### PRINCIPIO-006: Cumplimiento Comercial, Tributario y Sanitario
+- Todo pago confirmado emite su **boleta o factura electrónica SUNAT**.
+- Ningún producto se publica sin su **registro sanitario DIGESA**.
+- Ningún producto o finca se rotula como "orgánico" sin una **certificación SENASA vigente**.
+- La PWA ofrece acceso al **Libro de Reclamaciones virtual** desde el menú principal (Ley 29571).
+- Los productos que lo requieran muestran las **advertencias octogonales** (Ley 30021).
+- **Ejemplo de cumplimiento:** El catálogo rechaza guardar un yogurt artesanal si `registro_digesa` está vacío.
+- **Ejemplo de violación:** Mostrar la etiqueta "Orgánico" en una finca cuya certificación SENASA está vencida.
+
+### PRINCIPIO-007: Accesibilidad Universal de Interfaz (WCAG 2.1 AA)
+Todas las interfaces cumplen como mínimo el nivel AA de WCAG 2.1:
+- Contraste mínimo de **4.5:1** para texto normal y **3:1** para texto grande y componentes.
+- Navegación completa mediante teclado, con foco visible.
+- Texto alternativo (`alt` o `aria-label`) en toda imagen e ícono interactivo.
+- Áreas táctiles de al menos **48×48 px**.
+- Texto que escala hasta **200 %** sin cortarse.
+- Compatibilidad con TalkBack y VoiceOver.
+- **Dispositivos soportados:** Android 9 (API 28, Pie) o superior con Chrome actualizado, e iOS 15 o superior con Safari 15 o superior.
+- **Ejemplo de cumplimiento:** El botón "Programar entrega" tiene contraste de 5.2:1, mide 48×48 px, recibe foco con Tab y el lector de pantalla lo anuncia como "Programar entrega, botón".
+- **Ejemplo de violación:** Un botón de acción crítico con contraste inferior a 4.5:1, que no responde al foco del teclado, o un ícono de botella sin texto alternativo.
+
+### PRINCIPIO-008: Restricciones Absolutas y Líneas Rojas para Agentes de IA
+Ningún agente de IA, autónomo o asistido, puede bajo ninguna circunstancia:
+1. **Modificar el stack tecnológico:** cambiar, actualizar o introducir librerías o frameworks fuera del stack aprobado (React PWA, Node.js con Express, PostgreSQL), ni añadir o quitar dependencias sin aprobación humana.
+2. **Eliminar datos críticos:** borrar o anular registros de ventas, pedidos, pagos, abonos, suscripciones, comprobantes o auditorías sin la doble confirmación explícita del administrador titular de Muuuvi.
+3. **Alterar límites de crédito:** modificar por su cuenta los topes de crédito, descuentos o saldos de garantía de botellas retornables asignados a los clientes.
+4. **Violar ventanas de comunicación:** enviar recordatorios o notificaciones por WhatsApp, SMS o push fuera del horario permitido (**09:00–20:00, America/Lima, UTC-5**).
+5. **Saltarse los controles de integración:** hacer push o merge directo a `main` o a producción, o desplegar a producción sin aprobación humana.
+6. **Tocar secretos:** leer, crear o modificar secretos (`.env`, claves de API, credenciales de la pasarela o del KMS).
+7. **Ejecutar operaciones destructivas:** correr migraciones destructivas (`DROP`, `TRUNCATE`, `DELETE` o `UPDATE` sin `WHERE`) o acceder a datos reales de clientes.
+8. **Manipular tests:** modificar, saltar (`skip`) o borrar tests para que pasen.
+9. **Cambiar lo comercial o legal:** cambiar precios, lógica de cobro, tarifas de entrega o textos legales (términos, privacidad, consentimientos) sin revisión humana.
+10. **Modificar esta constitución:** editar este archivo.
+
+Ante cualquier duda o inconsistencia, el agente se detiene y solicita intervención humana.
+- **Ejemplo de cumplimiento:** El agente detecta suscripciones duplicadas en la base de datos, no las borra, y genera una alerta que pide intervención humana obligatoria.
+- **Ejemplo de violación:** El agente decide por su cuenta purgar registros antiguos de la tabla de pedidos, instala un ORM alternativo en el backend sin aprobación, o programa un recordatorio de renovación a las 22:30.
+
+### PRINCIPIO-009: Garantía de Calidad y Cobertura de Pruebas Automatizadas
+- Todo cambio en la lógica del sistema debe mantener al menos **80 % de cobertura en reglas de negocio** y **60 % de cobertura general**. El CI bloquea el merge si no se alcanza.
+- Cada regla de `03-reglas-de-negocio.md` está respaldada por al menos un test unitario que cita su ID.
+- Son obligatorias las pruebas unitarias, de integración, E2E de los flujos críticos (registro, suscripción, pago y entrega) y de accesibilidad automatizadas.
+- Cada PR requiere **2 aprobaciones humanas**, linter y SAST en verde, y commits en formato **Conventional Commits** en español.
+- **Ejemplo de cumplimiento:** Un PR que implementa la regla de pausa de suscripción incluye `test_RN012_pausar_suscripcion_antes_del_corte`, deja el módulo en 85 % de cobertura y tiene 2 aprobaciones.
+- **Ejemplo de violación:** Mergear con una sola aprobación, o con la cobertura del módulo de negocio por debajo del 80 %.
+
+### PRINCIPIO-010: Documentación como Código
+- Toda la documentación vive en el repositorio en formato **Markdown**.
+- Cada decisión técnica relevante se registra como **ADR** en `docs/adr/ADR-NNN-titulo.md`.
+- La API se documenta con **OpenAPI 3.x** en `docs/api/openapi.yaml`, y el CI valida que el contrato coincide con la implementación.
+- Todo diagrama se escribe en **Mermaid** dentro del propio Markdown.
+- **Ejemplo de cumplimiento:** El endpoint `GET /fincas/{id}/trazabilidad` se añade a `openapi.yaml` en el mismo PR, junto con un diagrama de secuencia en Mermaid.
+- **Ejemplo de violación:** Documentar la arquitectura en un PNG exportado de otra herramienta, o publicar un endpoint que no figura en OpenAPI.
+
+### PRINCIPIO-011: Estandarización de Formatos de Localización Peruana
+Montos, fechas y números se muestran según las convenciones del Perú:
+- Moneda en soles con el formato `S/ 1,250.50` (punto decimal y coma de miles).
+- Fechas en formato `DD/MM/AAAA` cuando la interfaz está en español.
+- Zona horaria `America/Lima` (UTC-5) para ventanas de entrega, cortes de suscripción y notificaciones.
+
+En la base de datos, los timestamps se guardan en UTC y los montos como `NUMERIC(12,2)`, nunca como `FLOAT`.
+- **Ejemplo de cumplimiento:** La suscripción semanal se muestra como `S/ 32.90 · próxima entrega 12/11/2026, 07:00–09:00`.
+- **Ejemplo de violación:** Mostrar `$32.9` o `11/12/2026`, o guardar el precio en una columna `FLOAT`.
+Project Brief: 
+
+# Project Brief — Muuvi
+
+**Versión:** 1.0.0  
+**Fecha:** 28/10/2026  
+**Estado:** Aprobado para Fase de Arquitectura y Especificación  
+---
+
+## 1. Problema y oportunidad
+
+### 1.1 Problema
+**Del lado del hogar (prioridad):**
+- ✅ Hoy los hogares de Lima que quieren leche fresca de pastoreo la piden **directamente a las fincas por WhatsApp**, a un precio de **S/ 3.50 – S/ 6.00 por litro**.
+- 📌 El dolor principal, según la hipótesis del fundador, es que **no encuentran dónde comprarla cerca** y que **se olvidan de comprarla**. No se ha validado con entrevistas.
+- ❓ No sabemos todavía cuánto pierde el hogar con la situación actual (tiempo, dinero, leche desperdiciada, desconfianza en lo "orgánico").
+
+**Del lado de la finca:**
+- ✅ Las fincas **no quieren hacerse cargo de la logística de envío** ni de **atender los pedidos** de cada cliente.
+
+### 1.2 Oportunidad
+- **Hay oferta cerca de Lima.** La región Lima es la segunda cuenca lechera del Perú, con el 16.1 % de la producción nacional en 2024, solo detrás de Cajamarca (Midagri).
+- **La leche diferenciada puede pagar mejor al productor.** La gran industria paga en promedio alrededor de S/ 1.22 por kilo de leche cruda (estudio PUCP), y en algunas regiones el precio en chacra ronda los S/ 2.80 por litro en 2026. El canal directo por WhatsApp (S/ 3.50 – S/ 6.00) ya muestra que existe un consumidor que paga más por leche de finca.
+- **Hay un hueco entre los dos lados:** fincas certificadas que no quieren distribuir y hogares de alto poder adquisitivo que no tienen un acceso cómodo y recurrente.
+
+### 1.3 Cadena actual frente a la cadena propuesta
+
+```mermaid
+flowchart LR
+    subgraph Hoy
+        F1[Finca] -- WhatsApp y entrega informal --> H1[Hogar]
+    end
+    subgraph Con Muuvi
+        F2[Finca en Cañete o Huaral<br/>ordeño, enfriamiento y envasado] -- traslado refrigerado --> P[Punto de acopio en Lima]
+        P -- última milla Muuvi --> H2[Hogar]
+    end
+```
+
+---
+
+## 2. Usuarios y segmentos objetivo
+
+| Prioridad | Segmento | Estado | Por qué |
+|---|---|---|---|
+| 1 | **Hogares** de Miraflores, San Isidro y La Molina | ✅ Segmento de lanzamiento | Alto poder adquisitivo y densidad de entregas en tres distritos |
+| 2 | **Personas fitness o con dietas específicas** | ✅ Segunda fase | Valoran origen, pureza y regularidad del consumo |
+| 3 | **Cafeterías, pastelerías y otros negocios** | ✅ Fase posterior | Compran en volumen; modelo B2B con otra lógica de pedido |
+| — | Familias con niños y adultos mayores | 📌 Subsegmentos dentro de "hogares" | Mencionados por el fundador; falta priorizarlos dentro del segmento 1 |
+
+### 2.1 Usuario del otro lado: la finca proveedora
+- ✅ Fincas con **certificación SENASA** ubicadas en **Cañete y Huaral** (región Lima, a unas 2 o 3 horas de la ciudad).
+- ✅ La finca **ordeña, enfría y envasa** en botella de vidrio, y **lleva la leche hasta un punto en Lima**.
+- ❓ Número de fincas comprometidas y litros diarios disponibles: sin definir.
+
+### 2.2 Expansión geográfica prevista
+| Fase | Distritos |
+|---|---|
+| Lanzamiento (meses 1–3) | Miraflores, San Isidro, La Molina |
+| Consolidación (mes 6) | + San Borja, Surco, Barranco |
+
+---
+
+## 3. Propuesta de valor
+
+### 3.1 Para el hogar
+> **Leche fresca de vacas en libre pastoreo, de fincas con certificación SENASA, que llega en botella de vidrio a casa de forma recurrente y sin romper la cadena de frío. El hogar no tiene que acordarse de pedir ni buscar dónde comprarla.**
+
+Los cuatro diferenciadores que, según el fundador, justifican el precio adicional:
+1. **Certificación SENASA garantizada.**
+2. **Botella de vidrio retornable.**
+3. **Trazabilidad** de la finca y del bienestar del ganado.
+4. **Cadena de frío** garantizada hasta la puerta.
+
+Además: **comodidad**, porque la compra pasa a ser recurrente y ya no depende de recordar ni de buscar un proveedor.
+
+### 3.2 Para la finca
+> **Vende a hogares urbanos de alto valor sin montar su propia logística de reparto ni atender cliente por cliente.**
+
+### 3.3 Frente a las alternativas actuales
+| Alternativa | Qué ofrece | Qué le falta frente a Muuvi |
+|---|---|---|
+| Finca directa por WhatsApp | Precio bajo (S/ 3.50 – S/ 6.00) | Recurrencia, comodidad y cadena de frío garantizada 📌 |
+| Sección premium de Wong o Vivanda | Disponibilidad y confianza en la marca | Origen directo de finca, botella retornable y trazabilidad por finca 📌 |
+| Otras marcas de leche fresca con delivery | Entrega a domicilio | ❓ Falta el análisis competitivo (precios, cobertura, propuesta) |
+
+---
+
+## 4. Modelo de negocio preliminar
+
+### 4.1 Ingresos
+- ✅ **Suscripción** semanal o mensual.
+- ✅ **Pago por pedido** (compra puntual).
+- ✅ Precio al consumidor: **S/ 13.50 – S/ 16.00 por litro**.
+
+### 4.2 Costos principales (identificados, sin cuantificar)
+- ❓ Compra de leche a la finca, a un precio por litro todavía sin definir.
+- ❓ Operación del punto de acopio refrigerado en Lima.
+- ❓ Última milla propia refrigerada (personal, vehículos, cadena de frío).
+- ❓ Reposición de las botellas que no vuelven.
+- ❓ Comisiones de las pasarelas de pago (ver constitución, PRINCIPIO-002).
+
+### 4.3 Margen bruto por litro (escenario ilustrativo)
+📌 Este cálculo **supone** que Muuvi le paga a la finca el mismo precio que hoy cobra por WhatsApp. El fundador no lo ha confirmado.
+
+| Escenario | Precio de venta | Costo de la leche | Margen bruto antes de logística |
+|---|---|---|---|
+| Pesimista | S/ 13.50 | S/ 6.00 | **S/ 7.50** |
+| Optimista | S/ 16.00 | S/ 3.50 | **S/ 12.50** |
+
+### 4.4 Botella retornable
+- ✅ Botella de vidrio con meta de retorno ≥ 90 %.
+- ❓ Monto del depósito o garantía por botella: sin definir.
+
+### 4.5 Capital inicial
+- ❓ Sin definir.
+
+---
+
+## 5. Métricas de éxito (KPIs medibles)
+
+> Los meses se cuentan desde el lanzamiento comercial (fecha ❓ por definir).
+
+### 5.1 Crecimiento
+| KPI | Mes 3 (validación / PMV) | Mes 6 (consolidación) | Mes 12 (escala inicial) | Origen |
+|---|---|---|---|---|
+| Suscriptores activos | **50** | **200** | **600** | ✅ Fundador |
+| Distritos con servicio | 3 | 6 | ❓ | ✅ Fundador |
+
+### 5.2 Retención y operación
+| KPI | Meta | Cómo se mide | Origen |
+|---|---|---|---|
+| Retención de suscriptores a 3 meses | **≥ 60 %** | Suscriptores activos al día 90 ÷ suscriptores de la misma cohorte al día 0 | ✅ Fundador |
+| Tasa de retorno de botellas | **≥ 90 %** | Botellas devueltas ÷ botellas entregadas, por mes | ✅ Fundador |
+| Entregas sin rotura de cadena de frío | **100 %** en la fase PMV | Entregas dentro del rango de temperatura ÷ entregas totales | ✅ Objetivo del fundador; 📌 el rango de temperatura lo debe fijar un especialista sanitario |
+| Cumplimiento de abastecimiento de las fincas | 📌 **≥ 95 %** (propuesto) | Litros entregados ÷ litros comprometidos, por semana | 📌 Propuesto para medir el riesgo R2 |
+
+### 5.3 Validación del problema (antes o durante el PMV)
+| KPI | Meta propuesta 📌 | Cómo se mide |
+|---|---|---|
+| Entrevistas a hogares objetivo | **≥ 20** en Miraflores, San Isidro y La Molina | Conteo de entrevistas registradas |
+| Hogares que confirman el dolor ("no la encuentro cerca" o "me olvido de comprar") | **≥ 60 %** de los entrevistados | Respuestas codificadas en las entrevistas |
+| Disposición a pagar ≥ S/ 13.50 por litro | **≥ 40 %** de los entrevistados | Pregunta de precio en la entrevista |
+
+---
+
+## 6. Riesgos identificados y supuestos
+
+### 6.1 Riesgos
+| ID | Riesgo | Probabilidad | Impacto | Origen |
+|---|---|---|---|---|
+| R1 | **No hay suficientes clientes al precio de S/ 13.50 – S/ 16.00**, entre 2.3 y 4.6 veces lo que se paga hoy por WhatsApp | Alta | Crítico | ✅ Fundador |
+| R2 | **Las fincas entregan menos leche de la acordada** | Media | Alto | ✅ Fundador |
+| R3 | Rotura de la cadena de frío en el traslado de Cañete o Huaral a Lima (2 a 3 horas) o en la última milla | Media | Crítico (sanitario y reputacional) | 📌 Analista |
+| R4 | Las botellas no vuelven en la proporción esperada, lo que eleva el costo por litro | Media | Medio | 📌 Analista |
+| R5 | El cliente se salta a Muuvi y le compra directo a la finca por WhatsApp | Media | Alto | 📌 Analista |
+| R6 | La densidad de clientes por distrito no alcanza para rentabilizar la última milla propia | Media | Alto | ✅ Objetivo del mes 12 del fundador |
+| R7 | Una finca pierde o deja vencer su certificación SENASA o su registro DIGESA | Baja | Alto (no se puede vender ni rotular como orgánico) | 📌 Analista, a partir de la constitución |
+
+### 6.2 Supuestos por validar
+| ID | Supuesto | Cómo validarlo |
+|---|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar" | Entrevistas (KPI 5.3) |
+| S2 | Certificación, vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro | Pregunta de disposición a pagar y preventa |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro | Negociación con las fincas |
+| S4 | Las fincas de Cañete y Huaral tienen volumen suficiente para 600 suscriptores al mes 12 | Inventario de litros diarios por finca |
+| S5 | Las fincas aceptan llevar la leche hasta un punto en Lima por su cuenta | Acuerdo firmado con cada finca |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas | Medición en la fase PMV |
+
+---
+
+## 7. Restricciones conocidas
+
+### 7.1 Legales, sanitarias y tributarias (según `00-constitucion.md`)
+- **Datos personales:** cumplir la Ley N.° 29733 y el D.S. 016-2024-JUS. Esto incluye inscribir los bancos de datos ante la ANPDP, aceptar solo a mayores de 18 años, pedir consentimiento expreso y eliminar los datos en un plazo máximo de 30 días tras la baja (PRINCIPIO-005).
+- **Producto:** cada producto debe tener **registro sanitario DIGESA** antes de publicarse, y solo se puede rotular como "orgánico" con **certificación SENASA vigente** (PRINCIPIO-006). Como la finca envasa, estos registros dependen de ella.
+- **Tributaria:** cada pago confirmado debe emitir su **boleta o factura electrónica SUNAT** (PRINCIPIO-006).
+- **Consumidor:** **Libro de Reclamaciones virtual** (Ley 29571) y, cuando corresponda, **advertencias octogonales** (Ley 30021).
+- **Pagos:** el sistema no puede recibir ni guardar datos de tarjeta (PCI-DSS SAQ-A, PRINCIPIO-004).
+
+### 7.2 Operativas
+- **Cobertura inicial:** solo Miraflores, San Isidro y La Molina.
+- **Abastecimiento:** solo fincas de Cañete y Huaral, a 2 o 3 horas de Lima.
+- **Envasado:** lo hace la finca. Muuvi no manipula el producto, solo lo recibe y lo distribuye.
+- **Comunicaciones al cliente:** solo entre las **09:00 y las 20:00, hora de Lima** (PRINCIPIO-008).
+
+### 7.3 Del proyecto
+- El **stack tecnológico** y las **pasarelas de pago** ya están definidos en la constitución (PRINCIPIO-002). El Product Manager trabaja dentro de ese marco.
+- Fundador único, emprendedor independiente; el proyecto parte desde cero.
+- ❓ Capital inicial y fecha de lanzamiento sin definir.
+
+---
+
+Alcance: 
+
+# Documento de Alcance: Muuvi
+
+---
+
+## 1. IN-SCOPE
+
+### Usuarios del sistema en esta versión
+| Rol | Quién es |
+|---|---|
+| **Cliente** | Hogar suscrito en uno de los 3 distritos de lanzamiento |
+| **Operador** | El fundador o una persona de Muuvi que gestiona fincas, lotes, entregas y clientes |
+| **Repartidor** | Personal de última milla de Muuvi |
+
+> La **finca no usa el sistema** en esta versión. El operador registra sus datos.
+
+### 1.1 Must have (6)
+| ID | Funcionalidad | Descripción | Principios que aplica |
+|---|---|---|---|
+| **F-M01** | Registro y cuenta del cliente | El cliente crea su cuenta con fecha de nacimiento (solo mayores de 18), consentimientos separados y sin premarcar, y una dirección dentro de los 3 distritos atendidos. También puede pedir la baja de su cuenta. | 003, 005 |
+| **F-M02** | Catálogo de leche con finca de origen | Muestra la leche fresca disponible con precio en soles y una ficha de la finca de origen (nombre, provincia, certificación SENASA). Un producto no se publica si falta su registro DIGESA. | 006, 011 |
+| **F-M03** | Suscripción semanal | El cliente elige cantidad de litros y día de entrega a **S/ 14.50 por litro**, con **franja única de 07:00 a 10:00**, y puede pausar o cancelar su suscripción hasta las **18:00 del día previo** a la entrega (hora de Lima). | 008.9, 011 |
+| **F-M04** | Cobro y comprobante electrónico | Cobra cada ciclo de la suscripción mediante **Culqi** (tarjetas) y las billeteras **Yape** y **Plin**, todas detrás del módulo `pagos`, y emite la boleta o factura electrónica SUNAT de cada pago confirmado. | 002, 004, 006 |
+| **F-M05** | Panel de operación diaria | El operador registra cada lote recibido de la finca (litros comprometidos frente a recibidos y temperatura de recepción), genera la lista de entregas del día y ve cuántas botellas tiene cada cliente. El repartidor marca cada entrega (entregada o fallida), las botellas devueltas y la temperatura de entrega. **Una lectura mayor de 4.5 °C en el acopio o en la entrega genera una alerta crítica e invalida el lote.** | 003, 008.2 |
+| **F-M06** | Libro de Reclamaciones virtual | Acceso desde el menú principal para registrar quejas y reclamos, conforme a la Ley 29571. | 006 |
+
+> **Por qué estos 6 y no otros:** F-M01 a F-M04 son el mínimo para que alguien pague una suscripción de forma legal. F-M05 es el mínimo para entregar la leche y **medir** los KPIs del Brief: abastecimiento de fincas (R2), cadena de frío (R3) y retorno de botellas (S6). F-M06 es obligación legal.
+
+### 1.2 Should have (5)
+| ID | Funcionalidad | Descripción | Por qué no es Must |
+|---|---|---|---|
+| **F-S01** | Pedido puntual y plan mensual | Compra de una sola vez y suscripción con cobro mensual, además de la semanal. | La métrica del PMV es "suscriptores activos"; una sola modalidad basta para validar. |
+| **F-S02** | Avisos de entrega y renovación | Aviso de próxima entrega, cobro y pausa por WhatsApp o push, **solo entre las 09:00 y las 20:00, hora de Lima**. | Con 50 clientes, el operador puede avisar manualmente; la suscripción ya resuelve el "me olvido de comprar". |
+| **F-S03** | Trazabilidad por lote | El cliente ve de qué finca, lote y fecha de ordeño viene su leche y qué temperatura tuvo en la recepción. | La ficha estática de finca (F-M02) cubre el diferenciador mínimo; requiere que F-M05 ya acumule datos. |
+| **F-S04** | Depósito de garantía por botella | Cobro y devolución de una garantía por botella, con saldo visible para el cliente. | El monto todavía no está definido (Brief §4.4) y cambiar la lógica de cobro requiere revisión humana (008.9). En el PMV solo se **cuentan** las botellas. |
+| **F-S05** | Pasarelas adicionales | Agregar **Niubiz**, **Izipay** y **Mercado Pago** detrás del módulo `pagos` en la fase de escala. | Culqi, Yape y Plin bastan para validar la disposición a pagar (ADR-001). |
+
+### 1.3 Could have (4)
+| ID | Funcionalidad | Descripción |
+|---|---|---|
+| **F-C01** | Portal de la finca | La finca registra sus litros comprometidos, lotes y certificados por su cuenta. |
+| **F-C02** | Programa de referidos | Beneficio para el cliente que trae a otro hogar de su distrito. |
+| **F-C03** | Contenido de bienestar animal | Fotos y videos de la finca y del ganado en pastoreo. |
+| **F-C04** | Encuesta de satisfacción por entrega | Calificación corta después de cada entrega. |
+
+---
+
+## 2. OUT-OF-SCOPE
+
+### 2.1 Won't have en esta versión
+| ID | Funcionalidad | Razón por la que está fuera |
+|---|---|---|
+| **F-W01** | **Lácteos artesanales** (yogurt, queso, mantequilla) | Cada producto suma su propio registro DIGESA y, posiblemente, advertencias octogonales (Ley 30021). Primero hay que validar la leche, que es el producto central. |
+| **F-W02** | **Segmentos fitness y B2B** (cafeterías, pastelerías) | El Brief los ubica en fases posteriores. El B2B necesita facturación, volúmenes y crédito distintos. |
+| **F-W03** | **Distritos fuera de Miraflores, San Isidro y La Molina** | La densidad de entregas por distrito es el riesgo R6. San Borja, Surco y Barranco entran en el mes 6. |
+| **F-W04** | **App nativa** iOS o Android | La constitución fija una PWA en React (PRINCIPIO-002). |
+| **F-W05** | **Funciones con IA** (recomendaciones, chatbot, predicción de demanda) | Exigen consentimiento de envío a terceros y que el proveedor figure en `docs/proveedores-datos.md` (PRINCIPIO-005.3 y 005.4). No aportan a validar R1. |
+| **F-W06** | **Sensores IoT de temperatura en tiempo real** | Hardware y costo sin capital definido. En el PMV, la temperatura se registra manualmente en F-M05. |
+| **F-W07** | **Optimización automática de rutas** | Con 50 clientes en 3 distritos, la ruta se arma a mano. Se revisa con 200 suscriptores o más. |
+| **F-W08** | **Pago contra entrega en efectivo** | Exige manejo de caja por el repartidor y complica la emisión de comprobantes SUNAT. |
+| **F-W09** | **Marketplace donde el cliente elige finca o precio por finca** | Muuvi vende una sola leche con un precio fijado por un humano (PRINCIPIO-008.9). Es otro modelo de negocio. |
+| **F-W10** | **Fidelización por puntos o descuentos automáticos** | Afecta precios y descuentos, que requieren revisión humana (PRINCIPIO-008.3 y 008.9). |
+
+---
+
+## 3. MVP
+
+**Con el MVP, un hogar de Miraflores, San Isidro o La Molina puede** crear su cuenta, si es mayor de 18 años y da sus consentimientos; ver la leche fresca disponible, su precio en soles y la finca certificada de la que viene; suscribirse a S/ 14.50 por litro para recibir cierta cantidad de litros cada semana, el día que elija, entre las 07:00 y las 10:00; pagar con tarjeta (Culqi), Yape o Plin y recibir su boleta electrónica; pausar o cancelar hasta las 18:00 del día previo, y registrar un reclamo en el Libro de Reclamaciones. La interfaz está solo en español (es-PE). **Del lado de Muuvi**, el operador registra cada lote que llega de Cañete o Huaral (litros y temperatura), obtiene la lista de entregas del día y sabe cuántas botellas tiene cada cliente. El repartidor confirma cada entrega, la temperatura y las botellas que recoge. Si una lectura pasa de 4.5 °C, el lote se invalida. Todo esto basta para conseguir y retener a los primeros 50 suscriptores y para medir los KPIs del Brief: suscriptores activos, retención a 3 meses, retorno de botellas, cumplimiento de las fincas y cadena de frío.
+
+```mermaid
+flowchart LR
+    A[Cliente se registra<br/>F-M01] --> B[Elige leche<br/>F-M02]
+    B --> C[Se suscribe<br/>F-M03]
+    C --> D[Paga y recibe boleta<br/>F-M04]
+    D --> E[Operador recibe lote<br/>y arma entregas<br/>F-M05]
+    E --> F[Repartidor entrega<br/>y recoge botellas<br/>F-M05]
+    F -->|siguiente semana| D
+```
+
+---
+
+## 4. Supuestos
+
+### 4.1 Heredados del Brief (sin validar)
+| ID | Supuesto |
+|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar". |
+| S2 | Certificación, botella de vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro. |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro. |
+| S4 | Las fincas de Cañete y Huaral tienen volumen para 600 suscriptores al mes 12. |
+| S5 | Las fincas llevan la leche hasta un punto en Lima por su cuenta. |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas. |
+
+### 4.2 Nuevos, propios del alcance
+| ID | Supuesto | Si resulta falso… |
+|---|---|---|
+| S7 | Culqi, Yape y Plin bastan para no perder clientes en el PMV. | Niubiz o Izipay (F-S05) suben a Must. |
+| S8 | El hogar acepta una suscripción **semanal** como única modalidad al inicio. | F-S01 sube a Must. |
+| S9 | Con 50 suscriptores, un solo operador puede gestionar lotes, entregas y avisos sin automatizar. | F-S02 sube a Must. |
+| S10 | Cada finca proveedora tiene registro sanitario DIGESA vigente para su leche envasada. | No se puede publicar el producto (PRINCIPIO-006); el lanzamiento se bloquea. |
+| S11 | Los repartidores tienen un smartphone Android 9+ o iOS 15+ con datos móviles. | F-M05 necesita otra forma de registrar las entregas. |
+| S12 | ✅ **Confirmado por el fundador (12/11/2026):** los lotes llegan al punto de acopio en Lima **antes de las 07:00**. La finca sale hacia las 04:00. | Hay que mover la franja de 07:00–10:00 o cambiar el horario de ordeño y despacho. |
+| S13 | ✅ **Confirmado por el fundador (12/11/2026):** Yape y Plin permiten cobrar la suscripción semanal de forma **automática y recurrente**. | El cobro con billetera pasa a ser manual por ciclo, o la suscripción con billetera queda fuera del PMV. |
+| S14 | El corte a las 18:00 del día previo deja tiempo para avisar a la finca cuántos litros despachar esa madrugada. | Hay que adelantar el corte. |
+| S15 | Un margen bruto de **S/ 9.00 por litro** (S/ 14.50 − S/ 5.50) cubre la logística y las comisiones de pago. | Hay que revisar el precio (posible subida a S/ 15.00 o S/ 16.00). |
+
+---
+
+## 5. Restricciones
+
+### 5.1 Técnicas (constitución)
+- **Stack fijo:** PWA en React 18+, Node.js 20+ con Express y PostgreSQL 16+. Cualquier cambio requiere un ADR aprobado por un humano (PRINCIPIO-002).
+- **Pagos:** todas las pasarelas pasan por el módulo `pagos`; el backend nunca recibe número de tarjeta, CVV ni vencimiento (PRINCIPIO-004).
+- **Datos personales:** se cifran con AES-256-GCM a nivel de campo, con claves en un KMS; las comunicaciones usan TLS 1.3, y los logs no contienen datos personales (PRINCIPIO-003).
+- **Interfaz solo en es-PE en el MVP**, por excepción al PRINCIPIO-001 (ADR-002). Los textos **siguen cargándose desde archivos de traducción** (`es-PE.json`), así que agregar `en.json` después no obliga a reescribir componentes.
+- **Accesibilidad:** WCAG 2.1 AA, áreas táctiles de 48×48 px, compatibilidad con TalkBack y VoiceOver, Android 9+ y iOS 15+ (PRINCIPIO-007).
+- **Formatos:** montos como `S/ 1,250.50`, fechas `DD/MM/AAAA`, zona horaria `America/Lima`, montos `NUMERIC(12,2)` y timestamps en UTC (PRINCIPIO-011).
+- **Calidad:** cobertura ≥ 80 % en reglas de negocio y ≥ 60 % general, E2E de registro, suscripción, pago y entrega, y **1 aprobación humana por PR durante la etapa inicial**, por excepción al PRINCIPIO-009 (ADR-003). Se vuelve a 2 aprobaciones cuando se incorpore el primer desarrollador o cofundador técnico.
+- **Documentación:** OpenAPI 3.x validado en el CI, ADR y diagramas en Mermaid (PRINCIPIO-010).
+
+### 5.2 Legales y regulatorias
+- Ley N.° 29733 y D.S. 016-2024-JUS: bancos de datos inscritos ante la ANPDP **antes** de salir a producción, solo mayores de 18 años, consentimientos separados y eliminación de datos en un máximo de 30 días tras la baja.
+- SUNAT: comprobante electrónico por cada pago confirmado.
+- DIGESA: registro sanitario por producto. SENASA: certificación vigente para usar la palabra "orgánico".
+- Ley 29571: Libro de Reclamaciones virtual.
+- Avisos al cliente solo entre las 09:00 y las 20:00, hora de Lima (PRINCIPIO-008.4).
+
+### 5.3 De negocio y recursos
+- Fundador único; el capital inicial y la fecha de lanzamiento no están definidos.
+- Cobertura solo en Miraflores, San Isidro y La Molina, y abastecimiento solo de Cañete y Huaral.
+- **Ningún agente de IA fija ni cambia precios, cobros, tarifas o textos legales** (PRINCIPIO-008.9). El precio por litro lo configura un humano en el sistema. Para el PMV, el fundador fijó **S/ 14.50** al cliente y **S/ 5.50** a la finca.
+
+---
+
+## 6. Dependencias
+
+| ID | Dependencia | Tipo | La usa | ¿Bloquea el MVP? |
+|---|---|---|---|---|
+| D1 | **Culqi** (tarjetas) y las billeteras **Yape** y **Plin** (ADR-001) | Servicio externo | F-M04 | Sí |
+| D2 | **Proveedor de facturación electrónica** (OSE o PSE autorizado por SUNAT) | Servicio externo | F-M04 | Sí |
+| D3 | **Gestor de secretos (KMS)** | Infraestructura | F-M01, F-M04 | Sí |
+| D4 | **Hosting** con TLS 1.3 y PostgreSQL 16+ | Infraestructura | Todas | Sí |
+| D5 | **Proveedor de correo transaccional** (verificación de cuenta y envío de comprobantes) | Servicio externo | F-M01, F-M04 | Sí |
+| D6 | **Inscripción del banco de datos ante la ANPDP** | Trámite legal | F-M01 | Sí |
+| D7 | **Fincas proveedoras** con certificación SENASA y registro DIGESA vigentes | Operativa | F-M02, F-M05 | Sí |
+| D8 | **Transporte refrigerado** de la finca al punto de acopio en Lima | Operativa (a cargo de la finca, S5) | F-M05 | Sí |
+| D9 | **Punto de acopio refrigerado en Lima** | Operativa | F-M05 | Sí |
+| D10 | **WhatsApp Business API** o un servicio de push | Servicio externo | F-S02 | No (Should) |
+
+---
+
+</contexto>
+
+<tarea>
+Genera un catálogo de reglas de negocio para las funcionalidades
+del in-scope (priorizando Must y Should).
+
+Cada regla debe seguir este formato EXACTO:
+---
+**RN-[NNN]** | Categoría: [cat] | Prioridad: [MUST/SHOULD/COULD]
+Patrón EARS: [Ubiquitous / Event-driven / State-driven / Unwanted / Optional]
+
+[Regla escrita en notación EARS con DEBE / NO DEBE / PUEDE]
+
+✅ Ejemplo: [caso concreto con valores]
+❌ Contraejemplo: [caso concreto que viola la regla]
+---
+
+Requisitos:
+- MÍNIMO 15 reglas
+- Cada regla es ATÓMICA: una sola idea
+- Valores concretos: montos en S/, tiempos en segundos
+- Cada regla DEBE tener ejemplo y contraejemplo
+
+Al final, genera un GLOSARIO con mínimo 15 términos del dominio.
+</tarea>
+
+<restricciones>
+- NO uses adjetivos vagos
+- NO escribas reglas compuestas
+- Respeta la constitución
+- Si necesitas más información, PREGUNTA
+</restricciones>
+
+<formato>
+03-reglas-de-negocio.md 
+
+
+### Excepciones constitucionales vigentes (QA-001)
+Estas excepciones forman parte obligatoria del Spec Pack. Un agente que vea una diferencia entre la constitución y estas reglas **en los puntos listados** no debe detenerse: la excepción está aprobada. En cualquier otro punto prevalece la constitución.
+
+| ADR | Principio exceptuado | Excepción | Reglas que la citan | Vigencia |
+|---|---|---|---|---|
+| [ADR-001](adr/ADR-001-pasarelas-mvp.md) | PRINCIPIO-002 (no es excepción: elige un subconjunto) | Solo Culqi, Yape y Plin en el PMV | RN-019 | Hasta la fase de escala |
+| [ADR-002](adr/ADR-002-excepcion-idioma-mvp.md) | PRINCIPIO-001 (interfaz bilingüe) | Interfaz solo en es-PE | RN-041 | Hasta salir del PMV |
+| [ADR-003](adr/ADR-003-excepcion-aprobaciones-pr.md) | PRINCIPIO-009 (2 aprobaciones por PR) | 1 aprobación humana por PR | Proceso de desarrollo; no genera una regla de producto | Hasta incorporar al primer desarrollador o cofundador técnico |
+
+### Patrones EARS usados
+| Patrón | Plantilla |
+|---|---|
+| Ubiquitous | El sistema DEBE … |
+| Event-driven | CUANDO \<evento\>, el sistema DEBE … |
+| State-driven | MIENTRAS \<estado\>, el sistema DEBE … |
+| Unwanted | SI \<condición no deseada\>, ENTONCES el sistema DEBE … |
+| Optional | DONDE \<funcionalidad\> esté habilitada, el sistema DEBE … |
+
+### Estados de una suscripción
+```mermaid
+stateDiagram-v2
+    [*] --> activa
+    activa --> pausada: pausa antes del corte (RN-012)
+    pausada --> activa: fin del plazo (RN-062) o reactivación (RN-064)
+    activa --> suspendida_por_pago: cobro y reintento rechazados (RN-048)
+    suspendida_por_pago --> activa: nuevo medio de pago (RN-051)
+    activa --> cancelada: cancelación (RN-014)
+    pausada --> cancelada: cancelación
+    suspendida_por_pago --> cancelada: cancelación
+    cancelada --> [*]
+```
+
+### Ciclo semanal (ejemplo: entrega el sábado 14/11/2026)
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant S as Sistema
+    participant P as Módulo pagos
+    participant O as Operador
+    C->>S: Puede pausar o cancelar hasta antes del vie 13/11 18:00:00
+    Note over S: vie 13/11 18:00:00, hora de corte
+    S->>P: Cobro del ciclo (RN-045)
+    alt Pago rechazado
+        S->>P: 1 reintento a los 60 s (RN-046)
+        S->>C: Correo para actualizar el medio de pago (RN-049)
+        Note over S: Si el reintento falla, no hay entrega (RN-047)
+    else Pago confirmado
+        S->>S: Emite el comprobante (RN-022)
+        S->>O: Incluye la entrega en la lista del sáb 14/11
+    end
+    O->>C: Entrega sáb 14/11, 07:00–10:00
+```
+
+### Índice por funcionalidad
+| Funcionalidad | Reglas |
+|---|---|
+| F-M01 Registro y cuenta | RN-001 a RN-008, RN-098, RN-111, RN-114 a RN-118 |
+| F-M02 Catálogo y precio | RN-009 a RN-011, RN-102, RN-103 |
+| F-M03 Suscripción semanal | RN-012 a RN-018, RN-061 a RN-065, RN-081 a RN-084 |
+| F-M04 Cobro, comprobante y reembolso | RN-019 a RN-023, RN-045 a RN-060, RN-072 a RN-075, RN-079, RN-080, RN-094 a RN-097, RN-104 a RN-106, RN-108 |
+| F-M05 Operación diaria | RN-024 a RN-032, RN-066 a RN-071, RN-076 a RN-078, RN-085 a RN-093, RN-107, RN-113 |
+| F-M06 Libro de Reclamaciones | RN-033 a RN-036, RN-109, RN-112 |
+| Transversales (localización, idioma, permisos y feriados) | RN-037 a RN-041, RN-099 a RN-101, RN-110 |
+| F-S02 y F-S03 (Should) | RN-042 a RN-044 |
+
+---
+
+## F-M01 · Registro y cuenta del cliente
+
+---
+**RN-001** | Categoría: Registro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la fecha de nacimiento ingresada corresponde a una edad menor de 18 años a la fecha del registro, ENTONCES el sistema DEBE rechazar el registro.
+
+✅ Ejemplo: El 12/11/2026, una persona nacida el 12/11/2008 (18 años cumplidos ese día) completa el registro.
+❌ Contraejemplo: El 12/11/2026, el sistema crea la cuenta de una persona nacida el 13/11/2008 (17 años).
+---
+
+---
+**RN-002** | Categoría: Registro | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema NO DEBE crear una cuenta de cliente sin una fecha de nacimiento registrada.
+
+✅ Ejemplo: El formulario no se envía mientras el campo de fecha de nacimiento está vacío.
+❌ Contraejemplo: Se crea la cuenta con `fecha_nacimiento = NULL` porque el cliente se saltó el campo.
+---
+
+---
+**RN-003** | Categoría: Consentimiento | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE mostrar la casilla del consentimiento principal (tratamiento de datos para ejecutar el servicio, incluidos los encargados de tratamiento) desmarcada por defecto.
+
+✅ Ejemplo: Al abrir el formulario, la casilla "Acepto el tratamiento de mis datos personales para la prestación del servicio" aparece vacía y el cliente la marca.
+❌ Contraejemplo: La casilla aparece marcada al cargar el formulario.
+---
+
+---
+**RN-004** | Categoría: Consentimiento | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE pedir el consentimiento para el envío de datos a terceros en una casilla distinta de la del consentimiento principal. Los encargados de tratamiento (RN-115) **no** son terceros (QA-006).
+
+✅ Ejemplo: El formulario tiene una casilla obligatoria para el consentimiento principal y otra, separada y opcional, para el envío a terceros.
+❌ Contraejemplo: Una sola casilla dice "Acepto el tratamiento de mis datos y su envío a terceros".
+---
+
+---
+**RN-005** | Categoría: Cobertura | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la dirección de entrega no está en Miraflores, San Isidro o La Molina, ENTONCES el sistema DEBE rechazar esa dirección.
+
+✅ Ejemplo: El sistema acepta una dirección en el distrito de San Isidro.
+❌ Contraejemplo: El sistema acepta una dirección en el distrito de Santiago de Surco durante el PMV.
+---
+
+---
+**RN-006** | Categoría: Privacidad | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE guardar cifrados con AES-256-GCM a nivel de campo el DNI, el nombre completo, la fecha de nacimiento, el teléfono, el correo, la dirección exacta y las coordenadas del cliente.
+
+✅ Ejemplo: La columna `telefono_cifrado` contiene un texto cifrado ilegible, y la clave está en el KMS.
+❌ Contraejemplo: La columna `telefono` contiene `987654321` en texto plano.
+---
+
+---
+**RN-007** | Categoría: Privacidad | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un mensaje de log, de error o de analítica contiene un dato personal en texto plano, ENTONCES el sistema DEBE rechazar ese registro (y el test de la regla DEBE fallar).
+
+✅ Ejemplo: El log registra `Entrega fallida · cliente_id=4821 · entrega_id=9930`.
+❌ Contraejemplo: El log registra `Entrega fallida en Av. Larco 123, tel. 987654321`.
+---
+
+---
+**RN-008** | Categoría: Privacidad | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente se da de baja, el sistema DEBE eliminar o anonimizar sus datos personales en un plazo máximo de 2 592 000 s (30 días). La conservación de comprobantes está en RN-111.
+
+✅ Ejemplo: Un cliente se da de baja el 12/11/2026 a las 10:00; el 12/12/2026 a las 10:00 sus datos ya están anonimizados y sus boletas siguen guardadas.
+❌ Contraejemplo: El 15/12/2026 (33 días después) el nombre y el teléfono del cliente siguen legibles en la base de datos.
+---
+
+## Consentimiento y encargados de tratamiento (QA-006)
+
+> **Dictamen registrado el 14/11/2026:** la pasarela (Culqi), las billeteras (Yape y Plin), el OSE/PSE y el proveedor de correo transaccional tratan los datos por cuenta y bajo las instrucciones exclusivas de Muuvi, y no pueden usarlos para fines propios. Por eso son **encargados de tratamiento**, no terceros. El cliente no puede rechazar que sus datos pasen a ellos, porque sin ellos el cobro y la boleta son imposibles. Muuvi debe tener un **contrato de encargo de tratamiento (DPA)** con cada uno, o verificar sus cláusulas de confidencialidad y seguridad. Los textos legales de cada consentimiento los redacta y aprueba un humano (PRINCIPIO-008.9).
+
+| Consentimiento | Obligatorio | Cubre | Reglas |
+|---|---|---|---|
+| Principal | Sí | Tratamiento para ejecutar el servicio, incluidos los encargados de tratamiento | RN-003, RN-114, RN-115 |
+| Envío a terceros | No | Terceros que usan los datos para fines propios, incluidos los proveedores de IA (PRINCIPIO-005.3) | RN-004, RN-116 |
+| Fines comerciales | No | Campañas comerciales o publicitarias de Muuvi, si en el futuro se habilitan | RN-117 |
+
+---
+**RN-114** | Categoría: Consentimiento | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el cliente no marca la casilla del consentimiento principal, ENTONCES el sistema DEBE rechazar el registro.
+
+✅ Ejemplo: El cliente marca el consentimiento principal, deja vacía la de terceros y su cuenta se crea.
+❌ Contraejemplo: Se crea una cuenta sin el consentimiento principal.
+---
+
+---
+**RN-115** | Categoría: Consentimiento | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE nombrar en el texto del consentimiento principal a cada encargado de tratamiento que recibe datos del cliente: la pasarela de pago, las billeteras, el OSE/PSE y el proveedor de correo transaccional.
+
+✅ Ejemplo: El texto dice que los datos se comparten con Culqi, Yape, Plin, el OSE/PSE y el proveedor de correo solo para cobrar, emitir comprobantes y enviar correos del servicio.
+❌ Contraejemplo: El texto dice "podemos compartir tus datos con proveedores" sin nombrarlos.
+---
+
+---
+**RN-116** | Categoría: Consentimiento | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el cliente no marca la casilla de envío a terceros, ENTONCES el sistema NO DEBE impedir su registro, su suscripción ni su pago.
+
+✅ Ejemplo: Un cliente sin consentimiento de terceros paga con Yape y recibe su boleta.
+❌ Contraejemplo: El sistema bloquea el pago porque el cliente no aceptó el envío a terceros.
+---
+
+---
+**RN-117** | Categoría: Consentimiento | Prioridad: SHOULD
+Patrón EARS: Optional
+
+DONDE las campañas comerciales o publicitarias estén habilitadas, el sistema DEBE pedir un consentimiento adicional y opcional para fines comerciales, en una casilla separada y desmarcada por defecto.
+
+✅ Ejemplo: Cuando se habiliten las campañas, aparece la casilla vacía "Quiero recibir promociones de Muuvi".
+❌ Contraejemplo: El consentimiento para promociones está incluido en el consentimiento principal.
+---
+
+---
+**RN-118** | Categoría: Privacidad | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un proveedor no figura en `docs/proveedores-datos.md` con su contrato de encargo (DPA) o la verificación de sus cláusulas marcados como vigentes, ENTONCES el sistema NO DEBE enviarle datos personales de clientes.
+
+✅ Ejemplo: Culqi figura en `docs/proveedores-datos.md` con su DPA vigente y recibe los datos del cobro.
+❌ Contraejemplo: Se integra un nuevo proveedor de correo que no figura en el registro y recibe correos de clientes.
+---
+
+## F-M02 · Catálogo de leche con finca de origen
+
+---
+**RN-009** | Categoría: Catálogo | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un producto no tiene registro sanitario DIGESA, ENTONCES el sistema DEBE impedir su publicación en el catálogo.
+
+✅ Ejemplo: El operador intenta publicar "Leche fresca 1 L" con `registro_digesa` vacío y el sistema lo rechaza.
+❌ Contraejemplo: El producto aparece en el catálogo con `registro_digesa = NULL`.
+---
+
+---
+**RN-010** | Categoría: Catálogo | Prioridad: MUST
+Patrón EARS: State-driven
+
+MIENTRAS la certificación SENASA de una finca no esté vigente a la fecha actual, el sistema NO DEBE mostrar la etiqueta "Orgánico" en esa finca ni en sus productos.
+
+✅ Ejemplo: La certificación de la finca vence el 30/11/2026; el 01/12/2026 la etiqueta "Orgánico" deja de mostrarse.
+❌ Contraejemplo: El 05/12/2026 se sigue mostrando "Orgánico" en una finca cuya certificación venció el 30/11/2026.
+---
+
+---
+**RN-011** | Categoría: Precio | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE tomar el precio por litro del parámetro `precio_litro` de la tabla de configuración, y NO DEBE modificarlo mediante ningún proceso automático. El valor lo fija un humano (PRINCIPIO-008.9) y su cambio requiere doble confirmación (RN-032).
+
+✅ Ejemplo: `precio_litro = 14.50` en la configuración y el catálogo muestra "S/ 14.50 por litro".
+❌ Contraejemplo: Un proceso nocturno sube el precio a S/ 15.00 sin intervención humana.
+---
+
+## F-M03 · Suscripción semanal
+
+---
+**RN-012** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente pausa su suscripción antes de las 18:00:00 del día previo a una entrega, el sistema NO DEBE programar esa entrega.
+
+✅ Ejemplo: Entrega del sábado 14/11/2026; el cliente pausa el viernes 13/11/2026 a las 17:59:59 y no se programa la entrega del sábado.
+❌ Contraejemplo: El cliente pausa a las 17:30 del viernes y aun así la entrega del sábado aparece en la lista del repartidor.
+---
+
+---
+**RN-013** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un cliente pausa su suscripción a partir de las 18:00:00 del día previo a una entrega, ENTONCES el sistema DEBE mantener programada esa entrega. La cancelación después del corte está en RN-081 y RN-082.
+
+✅ Ejemplo: El cliente pausa el viernes 13/11/2026 a las 18:00:00; la entrega del sábado 14/11/2026 se mantiene.
+❌ Contraejemplo: El cliente pausa el viernes a las 21:00 y el sistema retira la entrega del sábado, que ya se cobró y cuyo pedido a la finca ya se calculó.
+---
+
+---
+**RN-014** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente cancela su suscripción antes de las 18:00:00 del día previo a una entrega, el sistema NO DEBE programar ninguna entrega posterior de esa suscripción.
+
+✅ Ejemplo: El cliente cancela el viernes 13/11/2026 a las 16:00; no se programan entregas el 14/11/2026, el 21/11/2026 ni después.
+❌ Contraejemplo: Tras la cancelación, el sistema programa la entrega del 21/11/2026.
+---
+
+---
+**RN-015** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE asignar a toda entrega la franja única de 07:00 a 10:00.
+
+✅ Ejemplo: La entrega del 14/11/2026 se muestra como "14/11/2026, 07:00–10:00".
+❌ Contraejemplo: El cliente elige la franja de 15:00 a 18:00 y el sistema la acepta.
+---
+
+---
+**RN-016** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE asociar cada suscripción semanal a exactamente 1 día de entrega por semana.
+
+✅ Ejemplo: La suscripción tiene `dia_entrega = sabado`.
+❌ Contraejemplo: Una sola suscripción tiene entregas los martes y los sábados.
+---
+
+---
+**RN-017** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la cantidad de litros de una suscripción no es un número entero mayor o igual a 1, ENTONCES el sistema DEBE rechazar la suscripción.
+
+> Nota: en el PMV no hay un máximo de litros por suscripción (decisión P4). El tope por capacidad de la finca sigue abierto (QA-042).
+
+✅ Ejemplo: El cliente se suscribe a 4 litros por semana.
+❌ Contraejemplo: El sistema acepta una suscripción de 0 litros o de 1.5 litros.
+---
+
+---
+**RN-018** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE calcular el importe de cada ciclo como la cantidad de litros por el precio por litro vigente, y guardarlo como `NUMERIC(12,2)`.
+
+✅ Ejemplo: 3 L × S/ 14.50 = S/ 43.50, guardado como `43.50`.
+❌ Contraejemplo: El importe se guarda en una columna `FLOAT` como `43.4999999`.
+---
+
+---
+**RN-061** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el día de entrega elegido no es martes, jueves ni sábado, ENTONCES el sistema DEBE rechazar la suscripción.
+
+✅ Ejemplo: El cliente elige el jueves como día de entrega.
+❌ Contraejemplo: El sistema acepta una suscripción con entrega los lunes.
+---
+
+---
+**RN-062** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se omiten las N entregas (N entero ≥ 1) de una pausa con plazo, el sistema DEBE volver la suscripción a estado activa. Las N entregas omitidas son las N siguientes cuyo corte ocurre después de la solicitud de pausa.
+
+✅ Ejemplo: El cliente pide una pausa de 2 entregas el viernes 13/11/2026 a las 10:00; se omiten las del 14/11 y el 21/11, y la del sábado 28/11/2026 vuelve a programarse.
+❌ Contraejemplo: Terminado el plazo, la suscripción sigue pausada hasta que el cliente la reactiva a mano.
+---
+
+---
+**RN-063** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: State-driven
+
+MIENTRAS una suscripción esté en pausa indefinida, el sistema NO DEBE programar entregas de esa suscripción.
+
+✅ Ejemplo: Una suscripción en pausa indefinida desde el 13/11/2026 no tiene entregas el 14/11 ni el 21/11.
+❌ Contraejemplo: El sistema reanuda la suscripción por su cuenta a las 4 semanas.
+---
+
+---
+**RN-064** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente reactiva su suscripción antes de las 18:00:00 del día previo a su día de entrega, el sistema DEBE programar esa entrega.
+
+✅ Ejemplo: El cliente reactiva el viernes 20/11/2026 a las 11:00 y se programa la entrega del sábado 21/11/2026.
+❌ Contraejemplo: El cliente reactiva el viernes a las 11:00 y la primera entrega queda para el sábado 28/11/2026.
+---
+
+---
+**RN-065** | Categoría: Botellas | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE registrar como botellas entregadas 1 botella de 1 L por cada litro entregado.
+
+✅ Ejemplo: Una entrega de 3 L suma 3 botellas al saldo del cliente.
+❌ Contraejemplo: Una entrega de 3 L suma 1 botella.
+---
+
+## F-M04 · Cobro, comprobante y reembolso
+
+---
+**RN-019** | Categoría: Pagos | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el medio de pago elegido no es Culqi, Yape o Plin, ENTONCES el sistema DEBE rechazar el pago durante el PMV (ADR-001).
+
+✅ Ejemplo: El cliente paga con Yape y el sistema procesa el pago.
+❌ Contraejemplo: El sistema procesa un pago con Niubiz durante el PMV, sin que lo habilite un ADR.
+---
+
+---
+**RN-020** | Categoría: Pagos | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI una petición al backend contiene número de tarjeta, CVV o fecha de vencimiento, ENTONCES el sistema DEBE rechazar la petición sin guardar su contenido.
+
+✅ Ejemplo: El backend recibe `{ "token_pasarela": "tkn_8f2a…", "ultimos_4": "4242" }` y la procesa.
+❌ Contraejemplo: El backend acepta `{ "numero_tarjeta": "4111111111111111", "cvv": "123" }`.
+---
+
+---
+**RN-021** | Categoría: Pagos | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE guardar de un medio de pago de tipo `tarjeta` únicamente el token de la pasarela y los 4 últimos dígitos. Las billeteras están en RN-094 y el tipo de medio en RN-095.
+
+✅ Ejemplo: Para una tarjeta se guardan `token_pasarela = tkn_8f2a…` y `ultimos_4 = 4242`.
+❌ Contraejemplo: La tabla tiene una columna `pan` o `fecha_vencimiento`.
+---
+
+---
+**RN-022** | Categoría: Comprobantes | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO la pasarela confirma un pago, el sistema DEBE emitir el comprobante electrónico SUNAT de ese pago.
+
+✅ Ejemplo: Se confirma un pago de S/ 43.50 y se emite la boleta electrónica de S/ 43.50 a nombre del cliente.
+❌ Contraejemplo: Se confirma el pago y no queda ningún comprobante asociado.
+---
+
+---
+**RN-023** | Categoría: Comprobantes | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un pago no está confirmado por la pasarela, ENTONCES el sistema NO DEBE emitir un comprobante electrónico por ese pago.
+
+✅ Ejemplo: Un pago con Plin queda en estado `pendiente` y no se emite boleta.
+❌ Contraejemplo: Se emite la boleta de un pago que la pasarela rechazó.
+---
+
+---
+**RN-045** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se cumple la hora de corte (18:00:00 del día previo a una entrega) de una suscripción activa, el sistema DEBE ejecutar el cobro de ese ciclo mediante el módulo `pagos`.
+
+✅ Ejemplo: Para la entrega del sábado 14/11/2026, el cobro de S/ 43.50 se ejecuta el viernes 13/11/2026 a las 18:00:00.
+❌ Contraejemplo: El cobro se ejecuta el sábado a las 09:00, después de la entrega.
+---
+
+---
+**RN-046** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la pasarela rechaza el **primer** intento de cobro de un ciclo, ENTONCES el sistema DEBE ejecutar 1 reintento automático a los 60 s. El límite de reintentos está en RN-080.
+
+✅ Ejemplo: El cobro se rechaza a las 18:00:00 y el reintento se ejecuta a las 18:01:00.
+❌ Contraejemplo: El sistema no reintenta, o reintenta 10 veces seguidas en 5 s.
+---
+
+---
+**RN-047** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el reintento de cobro de un ciclo también es rechazado, ENTONCES el sistema DEBE pasar la entrega de ese ciclo a estado `suspendida` con motivo `pago`.
+
+✅ Ejemplo: El cobro y el reintento del viernes 13/11/2026 fallan; la entrega del sábado 14/11/2026 pasa a `suspendida` y no aparece en la lista del repartidor.
+❌ Contraejemplo: La entrega se despacha aunque el pago no se confirmó.
+---
+
+---
+**RN-048** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO una entrega pasa a estado `suspendida` con motivo `pago`, el sistema DEBE pasar su suscripción a estado `suspendida_por_pago`.
+
+✅ Ejemplo: Tras fallar el reintento del 13/11/2026, la suscripción queda en `suspendida_por_pago`.
+❌ Contraejemplo: La suscripción sigue en `activa` y el sistema vuelve a cobrar con el mismo medio rechazado en el siguiente ciclo.
+---
+
+---
+**RN-049** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO la pasarela rechaza el cobro de un ciclo, el sistema DEBE enviar al cliente, en un máximo de 300 s, un correo que le pida actualizar su medio de pago.
+
+✅ Ejemplo: El cobro se rechaza a las 18:00:00 y el correo llega a las 18:02:00.
+❌ Contraejemplo: El cliente se entera del rechazo cuando no recibe su leche el sábado.
+---
+
+---
+**RN-050** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: State-driven
+
+MIENTRAS una suscripción esté en estado `suspendida_por_pago`, el sistema NO DEBE programar entregas de esa suscripción.
+
+✅ Ejemplo: Una suscripción suspendida desde el 13/11/2026 no tiene entrega el 21/11/2026.
+❌ Contraejemplo: La entrega del 21/11/2026 se programa aunque la suscripción sigue suspendida.
+---
+
+---
+**RN-051** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente con suscripción en estado `suspendida_por_pago` registra un nuevo medio de pago, el sistema DEBE volver la suscripción a estado activa.
+
+✅ Ejemplo: El cliente registra una nueva tarjeta el miércoles 18/11/2026; la suscripción vuelve a activa y el siguiente cobro se ejecuta el viernes 20/11/2026 a las 18:00:00.
+❌ Contraejemplo: El cliente registra una nueva tarjeta y la suscripción sigue suspendida.
+---
+
+---
+**RN-052** | Categoría: Entregas | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el repartidor marca una entrega como "fallida" sin indicar su causa (`imputable_muuvi` o `imputable_cliente`), ENTONCES el sistema DEBE rechazar el registro.
+
+✅ Ejemplo: La entrega 9930 se marca como "fallida" con causa `imputable_muuvi` (el vehículo no llegó).
+❌ Contraejemplo: La entrega se marca como "fallida" sin causa.
+---
+
+---
+**RN-053** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO una entrega pagada queda como "fallida" con causa `imputable_muuvi`, el sistema DEBE reembolsar el importe íntegro de esa entrega al medio de pago original.
+
+✅ Ejemplo: Falla una entrega de 3 L pagada en S/ 43.50 por un error de Muuvi, y se reembolsan S/ 43.50 a la tarjeta del cliente.
+❌ Contraejemplo: Se reembolsan solo S/ 29.00, o no se reembolsa nada.
+---
+
+---
+**RN-054** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO una entrega pagada en estado `programada` no puede realizarse porque su lote fue invalidado y no pudo reasignarse a otro lote (RN-093), el sistema DEBE registrarla como "fallida" con causa `imputable_muuvi`.
+
+✅ Ejemplo: El lote L-2026-1114-01 se recibe a 5.0 °C; las 12 entregas pagadas del 14/11/2026 sin otro lote disponible quedan como "fallida" con causa `imputable_muuvi`.
+❌ Contraejemplo: Esas entregas quedan como "fallida" con causa `imputable_cliente`, y no se reembolsan.
+---
+
+---
+**RN-055** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO corresponde un reembolso, el sistema DEBE solicitarlo a la pasarela en un máximo de 3 600 s desde que la entrega queda como "fallida".
+
+✅ Ejemplo: La entrega queda como "fallida" a las 09:40 y el reembolso se solicita a las 09:45.
+❌ Contraejemplo: El reembolso se solicita 3 días después.
+---
+
+---
+**RN-056** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: State-driven
+
+MIENTRAS un cliente tenga saldo a favor mayor de S/ 0.00, el sistema DEBE descontar ese saldo del importe de su siguiente ciclo. Los casos de saldo parcial están en RN-096 y RN-097.
+
+✅ Ejemplo: El cliente tiene S/ 14.50 de saldo y su ciclo de S/ 43.50 se cobra en S/ 29.00.
+❌ Contraejemplo: El cliente tiene S/ 14.50 de saldo y el sistema le cobra el ciclo completo de S/ 43.50.
+---
+
+---
+**RN-057** | Categoría: Comprobantes | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se ejecuta un reembolso o se aplica un saldo a favor, el sistema DEBE emitir una nota de crédito electrónica SUNAT que haga referencia al comprobante original.
+
+✅ Ejemplo: Por el reembolso de S/ 43.50 se emite la nota de crédito que referencia la boleta original.
+❌ Contraejemplo: Se devuelven S/ 43.50 y la boleta original queda vigente sin nota de crédito.
+---
+
+---
+**RN-058** | Categoría: Comprobantes | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el cliente elige factura y el RUC ingresado no tiene exactamente 11 dígitos numéricos, ENTONCES el sistema DEBE rechazar ese RUC.
+
+✅ Ejemplo: El cliente ingresa el RUC `20123456789` (11 dígitos) y el sistema lo acepta.
+❌ Contraejemplo: El sistema acepta el RUC `2012345678` (10 dígitos).
+---
+
+---
+**RN-059** | Categoría: Comprobantes | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE emitir boleta electrónica por cada pago confirmado, salvo que el cliente haya elegido factura y tenga un RUC registrado; en ese caso DEBE emitir factura electrónica.
+
+✅ Ejemplo: Un cliente sin RUC recibe boleta; un cliente que eligió factura con RUC `20123456789` recibe factura.
+❌ Contraejemplo: Un cliente que eligió factura con RUC registrado recibe boleta.
+---
+
+---
+**RN-060** | Categoría: Privacidad | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE guardar cifrado con AES-256-GCM todo RUC que empiece con `10`, porque el RUC de una persona natural contiene su DNI.
+
+✅ Ejemplo: El RUC `10456789012` se guarda en la columna `ruc_cifrado`.
+❌ Contraejemplo: El RUC `10456789012` se guarda en texto plano, lo que expone el DNI `45678901`.
+---
+
+## F-M05 · Panel de operación diaria
+
+---
+**RN-024** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la temperatura de un lote registrada al recibirlo en el punto de acopio es mayor de 4.5 °C, ENTONCES el sistema DEBE marcar el lote como invalidado.
+
+✅ Ejemplo: Un lote se recibe a 4.5 °C y queda en estado `recibido`.
+❌ Contraejemplo: Un lote se recibe a 4.6 °C y queda en estado `recibido`.
+---
+
+---
+**RN-025** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la temperatura registrada por el repartidor en una entrega es mayor de 4.5 °C, ENTONCES el sistema DEBE marcar como invalidado el lote de esa entrega.
+
+✅ Ejemplo: El repartidor registra 3.8 °C al entregar y el lote sigue válido.
+❌ Contraejemplo: El repartidor registra 5.1 °C y el lote sigue válido.
+---
+
+---
+**RN-026** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un lote pasa a estado invalidado, el sistema DEBE generar una alerta crítica para el operador en un máximo de 60 s.
+
+✅ Ejemplo: El lote L-2026-1114-01 se invalida a las 06:10:00 y la alerta aparece en el panel a las 06:10:20.
+❌ Contraejemplo: El lote se invalida a las 06:10 y el operador no recibe ninguna alerta.
+---
+
+---
+**RN-027** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: State-driven
+
+MIENTRAS un lote esté en estado invalidado, el sistema NO DEBE asignar sus botellas a ninguna entrega.
+
+✅ Ejemplo: El lote L-2026-1114-01 está invalidado y no aparece entre los lotes disponibles para la lista de entregas.
+❌ Contraejemplo: La lista de entregas del 14/11/2026 incluye botellas del lote invalidado.
+---
+
+---
+**RN-028** | Categoría: Abastecimiento | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el registro de un lote no incluye los litros comprometidos y los litros recibidos, ENTONCES el sistema DEBE rechazar el registro.
+
+✅ Ejemplo: El operador registra un lote con 120 L comprometidos y 114 L recibidos.
+❌ Contraejemplo: El lote se registra solo con 114 L recibidos, sin los litros comprometidos.
+---
+
+---
+**RN-029** | Categoría: Entregas | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE aceptar únicamente los estados "entregada" o "fallida" cuando el repartidor cierra una entrega.
+
+✅ Ejemplo: El repartidor marca la entrega 9930 como "fallida".
+❌ Contraejemplo: El repartidor marca la entrega como "dejada con el vecino", un estado que no existe.
+---
+
+---
+**RN-030** | Categoría: Botellas | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE calcular el saldo de botellas de un cliente como el total de botellas entregadas menos el total de botellas devueltas.
+
+✅ Ejemplo: 8 botellas entregadas − 6 devueltas = saldo de 2 botellas.
+❌ Contraejemplo: El saldo muestra 8 botellas porque no se restaron las devueltas.
+---
+
+---
+**RN-031** | Categoría: Botellas | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la cantidad de botellas devueltas registrada en una entrega es mayor que el saldo de botellas del cliente, ENTONCES el sistema DEBE rechazar el registro.
+
+✅ Ejemplo: El cliente tiene un saldo de 2 botellas y el repartidor registra 2 devueltas.
+❌ Contraejemplo: El cliente tiene un saldo de 2 botellas y el sistema acepta 3 devueltas, lo que deja un saldo de −1.
+---
+
+---
+**RN-032** | Categoría: Auditoría | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI se solicita eliminar o anular manualmente un registro de venta, pedido, pago, abono, suscripción, entrega, comprobante o auditoría, o cambiar el precio por litro o un límite de crédito, ENTONCES el sistema DEBE exigir la doble confirmación explícita del administrador titular antes de ejecutarlo.
+
+> ✅ Confirmado por el fundador el 14/11/2026 (K1): la doble confirmación aplica a toda la lista del PRINCIPIO-008.2, más los cambios de precio y de límites de crédito. El **mecanismo** de la doble confirmación sigue sin definir (P18).
+
+✅ Ejemplo: El administrador confirma dos veces la anulación del pago 5521 y queda un registro en la tabla de auditoría.
+❌ Contraejemplo: Un proceso automático borra las entregas de más de 90 días sin confirmación.
+---
+
+---
+**RN-066** | Categoría: Entregas | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO una entrega queda como "fallida" con causa `imputable_cliente`, el sistema DEBE reprogramarla para el siguiente día de reparto.
+
+✅ Ejemplo: La entrega del sábado 14/11/2026 falla porque el cliente no estaba; se reprograma para el martes 17/11/2026, 07:00–10:00.
+❌ Contraejemplo: La entrega fallida se pierde y el cliente ya no la recibe.
+---
+
+---
+**RN-067** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema NO DEBE cobrar de nuevo una entrega reprogramada.
+
+✅ Ejemplo: La entrega de S/ 43.50, ya cobrada el 13/11/2026, se entrega el 17/11/2026 sin un cobro nuevo.
+❌ Contraejemplo: El sistema cobra otros S/ 43.50 el lunes 16/11/2026 a las 18:00:00 por la entrega reprogramada.
+---
+
+---
+**RN-068** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE asignar una entrega reprogramada a un lote recibido el mismo día de la nueva entrega. La prohibición de reutilizar botellas está en RN-113.
+
+✅ Ejemplo: La entrega reprogramada para el 17/11/2026 se arma con botellas del lote L-2026-1117-01.
+❌ Contraejemplo: El repartidor entrega el 17/11/2026 las botellas del lote L-2026-1114-01, que llevan 3 días fuera del acopio de origen.
+---
+
+## F-M06 · Libro de Reclamaciones virtual
+
+---
+**RN-033** | Categoría: Reclamos | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE mostrar el acceso al Libro de Reclamaciones virtual en el menú principal de la PWA.
+
+✅ Ejemplo: El menú principal tiene la opción "Libro de Reclamaciones".
+❌ Contraejemplo: El acceso solo aparece dentro de "Ayuda > Más opciones".
+---
+
+---
+**RN-034** | Categoría: Reclamos | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un consumidor registra un reclamo o una queja, el sistema DEBE asignarle un código correlativo. El envío de la constancia está en RN-112.
+
+✅ Ejemplo: Se registra el reclamo y recibe el código `LR-2026-000017`.
+❌ Contraejemplo: El reclamo queda guardado sin código.
+---
+
+---
+**RN-035** | Categoría: Reclamos | Prioridad: MUST
+Patrón EARS: State-driven
+
+MIENTRAS un reclamo o una queja esté sin respuesta, el sistema DEBE mostrar al operador la fecha límite de respuesta, calculada en 15 días hábiles desde su registro.
+
+✅ Ejemplo: Un reclamo registrado el lunes 16/11/2026 muestra como fecha límite el lunes 07/12/2026 (15 días hábiles, sin sábados ni domingos).
+❌ Contraejemplo: El sistema calcula la fecha límite en 15 días calendario: martes 01/12/2026.
+---
+
+---
+**RN-036** | Categoría: Reclamos | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un reclamo o una queja cumple 10 días hábiles sin respuesta, el sistema DEBE generar una alerta para el operador.
+
+✅ Ejemplo: Un reclamo registrado el 16/11/2026 genera una alerta el 30/11/2026, que es su décimo día hábil.
+❌ Contraejemplo: El reclamo llega al día hábil 15 sin que el operador haya recibido ninguna alerta.
+---
+
+## Transversales · Localización e idioma
+
+---
+**RN-037** | Categoría: Localización | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE mostrar los montos con el formato `S/ 1,250.50`: prefijo `S/`, coma de miles y punto decimal con 2 decimales.
+
+✅ Ejemplo: Se muestra "S/ 43.50".
+❌ Contraejemplo: Se muestra "$43.5" o "S/ 43,50".
+---
+
+---
+**RN-038** | Categoría: Localización | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE mostrar las fechas con el formato `DD/MM/AAAA`.
+
+✅ Ejemplo: Se muestra "14/11/2026".
+❌ Contraejemplo: Se muestra "11/14/2026" o "2026-11-14".
+---
+
+---
+**RN-039** | Categoría: Localización | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE evaluar la hora de corte, la franja de entrega y las ventanas de comunicación en la zona horaria `America/Lima`.
+
+✅ Ejemplo: El corte de las 18:00 en Lima equivale a las 23:00 UTC, y el sistema lo evalúa a esa hora.
+❌ Contraejemplo: El sistema aplica el corte a las 18:00 UTC, es decir, a las 13:00 en Lima.
+---
+
+---
+**RN-040** | Categoría: Localización | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE guardar todos los timestamps en UTC.
+
+✅ Ejemplo: Una entrega del 14/11/2026 a las 08:15 en Lima se guarda como `2026-11-14T13:15:00Z`.
+❌ Contraejemplo: La entrega se guarda como `2026-11-14 08:15:00`, sin zona horaria.
+---
+
+---
+**RN-041** | Categoría: Idioma | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE cargar todo texto visible desde el archivo de traducción `src/locales/es-PE.json` (ADR-002).
+
+✅ Ejemplo: El título de la pantalla se muestra con `t('suscripcion.titulo')`.
+❌ Contraejemplo: El JSX contiene `<h1>Tu suscripción</h1>` escrito directamente.
+---
+
+## Should · F-S02 Avisos y F-S03 Trazabilidad
+
+---
+**RN-042** | Categoría: Notificaciones | Prioridad: SHOULD
+Patrón EARS: Unwanted
+
+SI la hora actual en Lima está fuera del rango de 09:00:00 a 20:00:00, ENTONCES el sistema NO DEBE enviar avisos por WhatsApp, SMS ni push.
+
+✅ Ejemplo: Un aviso de próxima entrega se envía a las 19:45.
+❌ Contraejemplo: Un aviso de renovación se envía a las 22:30.
+---
+
+---
+**RN-043** | Categoría: Notificaciones | Prioridad: SHOULD
+Patrón EARS: Event-driven
+
+CUANDO se genera un aviso fuera del rango de 09:00:00 a 20:00:00, el sistema DEBE postergar su envío hasta las 09:00:00 siguientes.
+
+✅ Ejemplo: Un aviso generado a las 21:10 del 12/11/2026 se envía a las 09:00 del 13/11/2026.
+❌ Contraejemplo: El aviso generado a las 21:10 se descarta y nunca se envía.
+---
+
+---
+**RN-044** | Categoría: Trazabilidad | Prioridad: SHOULD
+Patrón EARS: Optional
+
+DONDE la trazabilidad por lote esté habilitada, el sistema DEBE mostrar al cliente la finca, el código de lote y la fecha de ordeño de cada entrega recibida.
+
+✅ Ejemplo: La entrega del 14/11/2026 muestra "Finca Santa Rosa (Huaral) · Lote L-2026-1114-01 · Ordeño 14/11/2026".
+❌ Contraejemplo: La entrega solo muestra "Leche fresca 1 L", sin finca ni lote.
+---
+
+---
+
+# Reglas agregadas en v0.3.0 (decisiones sobre la auditoría QA)
+
+## Ciclo de vida de la entrega (QA-002)
+
+```mermaid
+stateDiagram-v2
+    [*] --> programada: corte de una suscripción activa (RN-069) o reprogramación (RN-066)
+    programada --> suspendida: pago rechazado (RN-047) o pendiente vencido (RN-074)
+    programada --> fallida: lote invalidado sin reasignación (RN-054) o escasez (RN-092)
+    programada --> en_ruta: el repartidor sale con la entrega
+    en_ruta --> entregada: entrega confirmada
+    en_ruta --> fallida: no se pudo entregar (RN-052)
+    en_ruta --> suspendida: lote invalidado en ruta (RN-076, RN-077)
+    fallida --> reprogramada: imputable_cliente, sin reprogramación previa (RN-066)
+    fallida --> cancelada: imputable_cliente, reprogramación ya usada (RN-107)
+    entregada --> [*]
+    suspendida --> [*]
+    reprogramada --> [*]
+    cancelada --> [*]
+    fallida --> [*]: imputable_muuvi (reembolso, RN-053)
+```
+
+---
+**RN-069** | Categoría: Entregas | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se cumple la hora de corte de una suscripción activa, el sistema DEBE crear la entrega de ese ciclo en estado `programada`.
+
+✅ Ejemplo: El viernes 13/11/2026 a las 18:00:00 se crea en estado `programada` la entrega del sábado 14/11/2026 de una suscripción activa.
+❌ Contraejemplo: La entrega del 14/11/2026 ya existía desde el lunes, y una pausa del jueves no la eliminó.
+---
+
+---
+**RN-070** | Categoría: Entregas | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE aceptar únicamente los estados de entrega `programada`, `en_ruta`, `entregada`, `fallida`, `reprogramada`, `cancelada` y `suspendida`.
+
+✅ Ejemplo: Una entrega pasa de `programada` a `en_ruta`.
+❌ Contraejemplo: Una entrega queda en estado `pendiente_revision`, que no existe.
+---
+
+---
+**RN-071** | Categoría: Entregas | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI se solicita una transición de estado de entrega que no figura en el diagrama del ciclo de vida, ENTONCES el sistema DEBE rechazarla.
+
+✅ Ejemplo: El sistema rechaza pasar una entrega de `entregada` a `en_ruta`.
+❌ Contraejemplo: Una entrega `cancelada` vuelve a `programada`.
+---
+
+## Idempotencia y pagos pendientes (QA-003 y QA-004)
+
+---
+**RN-072** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE enviar cada intento de cobro a la pasarela con una clave de idempotencia formada por el identificador del ciclo y el identificador del cliente.
+
+✅ Ejemplo: El cobro del ciclo 7781 del cliente 4821 usa la clave `ciclo-7781-cliente-4821`, también en el reintento.
+❌ Contraejemplo: El reintento se envía con una clave nueva generada al azar.
+---
+
+---
+**RN-073** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI ya existe un cobro confirmado con la misma clave de idempotencia, ENTONCES el sistema NO DEBE ejecutar otro cargo.
+
+✅ Ejemplo: El proceso de las 18:00 se ejecuta dos veces por error y el cliente recibe un solo cargo de S/ 43.50.
+❌ Contraejemplo: Un webhook duplicado de la pasarela provoca un segundo cargo de S/ 43.50.
+---
+
+---
+**RN-074** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un pago con Yape o Plin sigue en estado pendiente a los 1 800 s de iniciado el cobro del ciclo, ENTONCES el sistema DEBE pasar la entrega de ese ciclo a estado `suspendida` con motivo `pago`.
+
+✅ Ejemplo: El cobro empieza el 13/11/2026 a las 18:00:00; a las 18:30:00 sigue pendiente y la entrega del 14/11/2026 queda `suspendida`.
+❌ Contraejemplo: A las 23:00 el pago sigue pendiente y la entrega se mantiene en la lista del repartidor.
+---
+
+---
+**RN-075** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la pasarela confirma un pago después de que su entrega pasó a `suspendida`, ENTONCES el sistema NO DEBE reactivar esa entrega. El destino del importe está pendiente de decisión (P11).
+
+✅ Ejemplo: El pago se confirma a las 18:40:00; la entrega del 14/11/2026 sigue `suspendida`.
+❌ Contraejemplo: El pago se confirma a las 18:40:00 y la entrega vuelve a la lista cuando el pedido a la finca ya se cerró.
+---
+
+---
+**RN-080** | Categoría: Cobro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI ya se ejecutó 1 reintento de cobro en un ciclo, ENTONCES el sistema NO DEBE ejecutar otro reintento en ese ciclo.
+
+✅ Ejemplo: El cobro de las 18:00:00 y el reintento de las 18:01:00 fallan; no hay más intentos hasta el ciclo siguiente.
+❌ Contraejemplo: El sistema reintenta cada 60 s hasta las 23:00.
+---
+
+## Lote invalidado en ruta (QA-005 y QA-016)
+
+---
+**RN-076** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la temperatura registrada al momento de entregar es mayor de 4.5 °C, ENTONCES el sistema DEBE pasar esa entrega a estado `suspendida` con motivo `lote_invalidado`, sin que la botella se entregue al cliente.
+
+✅ Ejemplo: El repartidor registra 5.1 °C en la puerta del cliente; la entrega queda `suspendida` y la botella vuelve al acopio.
+❌ Contraejemplo: El repartidor registra 5.1 °C y la entrega queda como `entregada`.
+---
+
+---
+**RN-077** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un lote pasa a estado invalidado, el sistema DEBE pasar a estado `suspendida` con motivo `lote_invalidado` todas las entregas `en_ruta` de ese lote.
+
+✅ Ejemplo: El lote L-2026-1114-01 se invalida a las 08:20; las 5 entregas `en_ruta` de ese lote pasan a `suspendida`.
+❌ Contraejemplo: Otro repartidor sigue entregando botellas del mismo lote a las 08:40.
+---
+
+---
+**RN-078** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un lote pasa a estado invalidado, el sistema DEBE enviar un aviso de disculpa por correo, en un máximo de 3 600 s, a cada cliente que tenga una entrega `entregada` de ese lote.
+
+✅ Ejemplo: El lote se invalida a las 08:20; a las 08:35 los 7 clientes que ya recibieron botellas de ese lote reciben el aviso.
+❌ Contraejemplo: Los clientes que ya recibieron leche del lote invalidado no reciben ningún aviso.
+---
+
+---
+**RN-079** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO una entrega pagada pasa a estado `suspendida` con motivo `lote_invalidado`, el sistema DEBE reembolsar el importe íntegro de esa entrega al medio de pago original.
+
+✅ Ejemplo: Una entrega de 2 L (S/ 29.00) queda suspendida por lote invalidado y se reembolsan S/ 29.00.
+❌ Contraejemplo: La entrega queda suspendida y el cliente no recibe ni la leche ni el reembolso.
+---
+
+---
+**RN-093** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un lote pasa a estado invalidado, el sistema DEBE reasignar sus entregas `programada` a otro lote válido del mismo día que tenga litros disponibles, antes de registrarlas como fallidas.
+
+✅ Ejemplo: El lote L-2026-1114-01 se invalida a las 06:10; sus 12 entregas `programada` pasan al lote L-2026-1114-02, que tiene 30 L libres.
+❌ Contraejemplo: Las 12 entregas se marcan como `fallida` aunque el lote L-2026-1114-02 tenía 30 L libres.
+---
+
+## Suscripción: cancelación, modificación y alta (QA-009, QA-020 y QA-021)
+
+---
+**RN-081** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente cancela su suscripción a partir de las 18:00:00 del día previo a una entrega, el sistema DEBE pasar la suscripción a estado `cancelada` sin crear entregas posteriores a la de ese ciclo.
+
+✅ Ejemplo: El cliente cancela el viernes 13/11/2026 a las 20:00; recibe la entrega del 14/11/2026 y no se crea la del 21/11/2026.
+❌ Contraejemplo: La suscripción sigue activa y se crea la entrega del 21/11/2026.
+---
+
+---
+**RN-082** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un cliente cancela su suscripción a partir de las 18:00:00 del día previo a una entrega, ENTONCES el sistema DEBE mantener programada esa entrega.
+
+✅ Ejemplo: El cliente cancela el viernes 13/11/2026 a las 18:00:00; la entrega del sábado 14/11/2026 se mantiene.
+❌ Contraejemplo: El sistema retira la entrega del sábado, que ya se cobró.
+---
+
+---
+**RN-083** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente modifica la cantidad de litros, el día de entrega o la dirección de su suscripción, el sistema DEBE aplicar el cambio desde el primer ciclo cuyo corte ocurra después de la modificación.
+
+✅ Ejemplo: El cliente pasa de 2 L a 3 L el viernes 13/11/2026 a las 19:00; la entrega del 14/11/2026 se mantiene en 2 L y la del 21/11/2026 sale con 3 L.
+❌ Contraejemplo: El cambio de las 19:00 altera la entrega del 14/11/2026, cuyo pedido a la finca ya se calculó.
+---
+
+---
+**RN-084** | Categoría: Suscripción | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un cliente crea una suscripción, el sistema DEBE fijar su primera entrega en el primer día de entrega elegido cuyo corte ocurra después de la creación.
+
+✅ Ejemplo: Una suscripción de los sábados creada el viernes 13/11/2026 a las 19:00 tiene su primera entrega el 21/11/2026; su primer cobro es el viernes 20/11/2026 a las 18:00:00.
+❌ Contraejemplo: La suscripción creada el viernes a las 19:00 genera una entrega para el 14/11/2026.
+---
+
+## Temperatura: obligatoriedad, precisión e inmutabilidad (QA-012 y QA-013)
+
+---
+**RN-085** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el registro de un lote no incluye la temperatura de recepción, ENTONCES el sistema DEBE rechazar el registro.
+
+✅ Ejemplo: El operador registra un lote con 120 L comprometidos, 114 L recibidos y 3.9 °C.
+❌ Contraejemplo: El lote queda registrado sin temperatura.
+---
+
+---
+**RN-086** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el repartidor cierra una entrega como `entregada` sin registrar la temperatura de entrega, ENTONCES el sistema DEBE rechazar el cierre.
+
+✅ Ejemplo: El repartidor registra 4.1 °C y cierra la entrega.
+❌ Contraejemplo: La entrega queda como `entregada` sin temperatura.
+---
+
+---
+**RN-087** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE registrar cada temperatura en grados Celsius con exactamente 1 decimal.
+
+✅ Ejemplo: Se registra `3.5`.
+❌ Contraejemplo: Se registra `3.52`, o `4` sin decimal.
+---
+
+---
+**RN-088** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI se intenta sobrescribir una lectura de temperatura ya registrada, ENTONCES el sistema DEBE rechazar la operación.
+
+✅ Ejemplo: El sistema rechaza un `UPDATE` sobre la lectura de 5.1 °C del lote L-2026-1114-01.
+❌ Contraejemplo: El operador cambia 5.1 °C por 4.1 °C y no queda rastro del valor original.
+---
+
+---
+**RN-089** | Categoría: Auditoría | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO un usuario corrige una lectura de temperatura, el sistema DEBE guardar la corrección como un registro nuevo con el valor corregido, la justificación, el usuario y el timestamp, y mantener la lectura original. Si la corrección puede revertir una invalidación está pendiente (P17).
+
+✅ Ejemplo: El operador corrige 5.1 °C por 4.1 °C con la justificación "error de digitación"; quedan ambos registros.
+❌ Contraejemplo: La corrección no tiene justificación ni usuario.
+---
+
+## Abastecimiento y escasez (QA-014 y QA-015)
+
+---
+**RN-090** | Categoría: Abastecimiento | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se cumple la hora de corte de un día de reparto, el sistema DEBE calcular los litros demandados para ese día como la suma de los litros de sus entregas `programada`, incluidas las reprogramadas.
+
+✅ Ejemplo: El viernes 13/11/2026 a las 18:00:00 hay 40 entregas programadas que suman 96 L, más 2 reprogramadas de 4 L; la demanda del sábado 14/11/2026 es de 100 L.
+❌ Contraejemplo: La demanda se calcula con todas las suscripciones, incluidas las pausadas.
+---
+
+---
+**RN-091** | Categoría: Abastecimiento | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE registrar los litros demandados de cada día de reparto como los litros comprometidos del pedido a la finca.
+
+✅ Ejemplo: La demanda del 14/11/2026 es de 100 L y el lote se registra con 100 L comprometidos.
+❌ Contraejemplo: El operador escribe 120 L comprometidos sin relación con la demanda calculada.
+---
+
+---
+**RN-092** | Categoría: Abastecimiento | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI los litros recibidos de un día no alcanzan para todas sus entregas `programada`, ENTONCES el sistema DEBE registrar como `fallida`, con causa `imputable_muuvi` y motivo `falla_abastecimiento_finca`, cada entrega que quede sin leche. El criterio para elegir qué entregas se cubren está pendiente (P12).
+
+✅ Ejemplo: Se demandaron 100 L y llegaron 94 L; las entregas que suman los 6 L faltantes quedan `fallida` con motivo `falla_abastecimiento_finca` y se reembolsan (RN-053).
+❌ Contraejemplo: Las entregas sin leche quedan en `programada` y nunca se cierran.
+---
+
+## Medios de pago (QA-017)
+
+---
+**RN-094** | Categoría: Pagos | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE guardar de un pago con Yape o Plin únicamente el identificador de transacción o la referencia que devuelve la billetera.
+
+✅ Ejemplo: Un pago con Yape guarda `referencia = YP-20261113-889120`.
+❌ Contraejemplo: Un pago con Yape guarda el número de celular del cliente en texto plano.
+---
+
+---
+**RN-095** | Categoría: Pagos | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE registrar el tipo de cada medio de pago con uno de los valores `tarjeta`, `yape` o `plin`.
+
+✅ Ejemplo: `tipo_medio = yape`.
+❌ Contraejemplo: `tipo_medio = culqi`, que mezcla la pasarela con el medio.
+---
+
+## Saldo a favor (QA-018)
+
+---
+**RN-096** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el saldo a favor de un cliente es menor que el importe de su siguiente ciclo, ENTONCES el sistema DEBE cobrar solo la diferencia.
+
+✅ Ejemplo: Saldo de S/ 14.50 y ciclo de S/ 43.50: se cobran S/ 29.00 y el saldo queda en S/ 0.00.
+❌ Contraejemplo: Se cobran S/ 43.50 y el saldo de S/ 14.50 se mantiene.
+---
+
+---
+**RN-097** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el saldo a favor de un cliente es mayor o igual que el importe de su siguiente ciclo, ENTONCES el sistema NO DEBE enviar un cobro a la pasarela y DEBE conservar el saldo restante para los ciclos siguientes. El comprobante de un ciclo cubierto por completo con saldo está pendiente (P16).
+
+✅ Ejemplo: Saldo de S/ 58.00 y ciclo de S/ 43.50: no hay cargo y quedan S/ 14.50 para el ciclo siguiente.
+❌ Contraejemplo: El sistema envía un cargo de S/ 0.00 a Culqi.
+---
+
+## Baja de cuenta con pendientes (QA-022)
+
+---
+**RN-098** | Categoría: Registro | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un cliente solicita la baja mientras tiene una suscripción activa, una entrega `programada` o `en_ruta`, o un reclamo sin respuesta, ENTONCES el sistema DEBE rechazar la solicitud e indicar qué pendiente la bloquea. Un saldo de botellas mayor de 0 o un saldo a favor mayor de S/ 0.00 **no** bloquean la baja (K5, 14/11/2026). Qué pasa con el saldo a favor al darse de baja está pendiente (P15).
+
+✅ Ejemplo: Un cliente con una entrega `en_ruta` pide la baja; el sistema la rechaza e indica "Tienes una entrega en curso".
+❌ Contraejemplo: Un cliente sin suscripción activa, sin entregas en curso y sin reclamos, pero con 2 botellas sin devolver, pide la baja y el sistema la rechaza.
+---
+
+## Permisos por rol (QA-023)
+
+### Matriz de permisos (aprobada el 14/11/2026)
+| Acción | Cliente | Operador | Repartidor | Administrador titular |
+|---|---|---|---|---|
+| Gestionar su cuenta y su suscripción (alta, pausa, modificación, cancelación, baja) | ✅ solo la propia | ❌ | ❌ | ❌ |
+| Registrar un reclamo o una queja | ✅ (también cualquier consumidor sin cuenta, RN-109) | ❌ | ❌ | ❌ |
+| Responder reclamos y quejas | ❌ | ✅ | ❌ | ✅ |
+| Registrar fincas, productos, registro DIGESA y certificación SENASA | ❌ | ✅ | ❌ | ✅ |
+| Proponer un cambio de precio por litro | ❌ | ✅ | ❌ | ✅ |
+| Confirmar un cambio de precio (doble confirmación, RN-032) | ❌ | ❌ | ❌ | ✅ |
+| Registrar lotes y temperatura de recepción | ❌ | ✅ | ❌ | ✅ |
+| Generar la lista de entregas del día | ❌ | ✅ | ❌ | ✅ |
+| Cerrar entregas y registrar temperatura de entrega y botellas devueltas | ❌ | ❌ | ✅ solo sus entregas | ❌ |
+| Corregir una lectura de temperatura (RN-089) | ❌ | ✅ | ❌ | ✅ |
+| Anular pagos, comprobantes, suscripciones o entregas (RN-032) | ❌ | ❌ | ❌ | ✅ |
+| Cargar el calendario de feriados (RN-100) | ❌ | ✅ | ❌ | ✅ |
+| Ver la dirección y el nombre de un cliente | ✅ solo los propios | ✅ | ✅ solo de sus entregas del día | ✅ |
+
+---
+**RN-099** | Categoría: Permisos | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI un usuario intenta una acción que la matriz de permisos no permite a su rol, ENTONCES el sistema DEBE rechazarla.
+
+✅ Ejemplo: Un repartidor intenta cambiar el precio por litro y el sistema lo rechaza.
+❌ Contraejemplo: Un repartidor ve la dirección de un cliente que no está en sus entregas del día.
+---
+
+## Feriados (QA-024)
+
+---
+**RN-100** | Categoría: Calendario | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE tomar los feriados nacionales del Perú de un calendario cargado por el operador desde la fuente oficial (normas publicadas en el diario oficial El Peruano).
+
+✅ Ejemplo: El calendario 2026 incluye el martes 08/12/2026 (Inmaculada Concepción).
+❌ Contraejemplo: El sistema usa una librería con feriados de otro país.
+---
+
+---
+**RN-101** | Categoría: Calendario | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE excluir los feriados nacionales del calendario (RN-100) al calcular días hábiles (RN-035 y RN-036). Qué pasa con un día de reparto que cae en feriado está pendiente (P13).
+
+✅ Ejemplo: Un plazo de 15 días hábiles que cruza el 08/12/2026 no cuenta ese día.
+❌ Contraejemplo: El 08/12/2026 se cuenta como día hábil.
+---
+
+## Precio (QA-025)
+
+---
+**RN-102** | Categoría: Precio | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI se cambia el precio por litro, ENTONCES el sistema NO DEBE aplicar el nuevo precio a ningún ciclo cuyo corte ya ocurrió.
+
+✅ Ejemplo: El precio sube a S/ 15.00 el sábado 14/11/2026; la entrega del 14/11/2026, cobrada el 13/11/2026, mantiene S/ 14.50.
+❌ Contraejemplo: El sistema cobra la diferencia de S/ 0.50 por litro de una entrega ya cobrada.
+---
+
+---
+**RN-103** | Categoría: Precio | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se confirma un cambio de precio por litro, el sistema DEBE avisar a cada cliente con suscripción activa con una antelación de ❓ días antes del primer ciclo que use el nuevo precio (P14).
+
+✅ Ejemplo: (Se completará cuando se decida la antelación.)
+❌ Contraejemplo: El cliente descubre el nuevo precio en su boleta.
+---
+
+## Fallas de servicios externos (QA-026)
+
+---
+**RN-104** | Categoría: Comprobantes | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI el OSE/PSE no emite un comprobante, ENTONCES el sistema DEBE reintentar la emisión con backoff exponencial: primer reintento a los 60 s, cada intervalo el doble del anterior y un máximo de 5 reintentos.
+
+✅ Ejemplo: Falla la emisión a las 18:00:05; se reintenta a las 18:01:05, 18:03:05, 18:07:05, 18:15:05 y 18:31:05.
+❌ Contraejemplo: El sistema reintenta cada segundo durante 10 minutos, o no reintenta.
+---
+
+---
+**RN-105** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI la pasarela rechaza un reembolso, ENTONCES el sistema DEBE reintentarlo con el mismo backoff exponencial de RN-104.
+
+✅ Ejemplo: El reembolso falla a las 09:45:00 y se reintenta a las 09:46:00.
+❌ Contraejemplo: El reembolso falla y el sistema lo da por cerrado.
+---
+
+---
+**RN-106** | Categoría: Auditoría | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se agotan los reintentos de RN-104 o de RN-105, el sistema DEBE generar una alerta crítica para el operador en un máximo de 60 s.
+
+✅ Ejemplo: El quinto reintento falla a las 18:31:05 y la alerta aparece a las 18:31:20.
+❌ Contraejemplo: El comprobante queda sin emitir y nadie se entera.
+---
+
+## Reprogramación fallida (QA-027)
+
+---
+**RN-107** | Categoría: Entregas | Prioridad: MUST
+Patrón EARS: Unwanted
+
+SI una entrega reprogramada queda como `fallida` con causa `imputable_cliente`, ENTONCES el sistema DEBE pasarla a estado `cancelada` sin volver a reprogramarla. El máximo es 1 reprogramación.
+
+✅ Ejemplo: La entrega reprogramada del martes 17/11/2026 vuelve a fallar porque el cliente no estaba; pasa a `cancelada`.
+❌ Contraejemplo: La entrega se reprograma por segunda vez para el jueves 19/11/2026.
+---
+
+---
+**RN-108** | Categoría: Reembolso | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO una entrega pasa a `cancelada` por haber agotado su reprogramación, el sistema DEBE reembolsar el importe íntegro de esa entrega al medio de pago original.
+
+✅ Ejemplo: La entrega de S/ 43.50 queda `cancelada` el 17/11/2026 y se reembolsan S/ 43.50.
+❌ Contraejemplo: La entrega se cancela y el cliente pierde los S/ 43.50.
+---
+
+## Libro de Reclamaciones sin cuenta (QA-028)
+
+---
+**RN-109** | Categoría: Reclamos | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE permitir registrar un reclamo o una queja sin iniciar sesión.
+
+✅ Ejemplo: Una persona sin cuenta abre el Libro de Reclamaciones desde el menú y registra su reclamo.
+❌ Contraejemplo: El sistema pide iniciar sesión antes de mostrar el formulario.
+---
+
+---
+**RN-112** | Categoría: Reclamos | Prioridad: MUST
+Patrón EARS: Event-driven
+
+CUANDO se asigna el código a un reclamo o a una queja, el sistema DEBE enviar al consumidor una constancia con ese código al correo que indicó.
+
+✅ Ejemplo: El reclamo `LR-2026-000017` genera una constancia enviada al correo del consumidor.
+❌ Contraejemplo: El consumidor no recibe ninguna constancia.
+---
+
+## Partes separadas de reglas compuestas (QA-051)
+
+---
+**RN-111** | Categoría: Privacidad | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE conservar los comprobantes electrónicos que SUNAT obliga a guardar cuando anonimiza la cuenta de un cliente (RN-008).
+
+✅ Ejemplo: Tras la anonimización, las boletas del cliente siguen disponibles para SUNAT.
+❌ Contraejemplo: La anonimización borra las boletas del cliente.
+---
+
+---
+**RN-113** | Categoría: Cadena de frío | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema NO DEBE asignar a una entrega reprogramada las botellas del lote de la entrega original.
+
+✅ Ejemplo: La entrega reprogramada del 17/11/2026 no usa botellas del lote L-2026-1114-01.
+❌ Contraejemplo: El repartidor entrega el 17/11/2026 las botellas del lote L-2026-1114-01.
+---
+
+## Localización (bajos de la auditoría)
+
+---
+**RN-110** | Categoría: Localización | Prioridad: MUST
+Patrón EARS: Ubiquitous
+
+El sistema DEBE mostrar los montos negativos con el signo menos antes del prefijo: `-S/ 43.50`.
+
+✅ Ejemplo: Una nota de crédito se muestra como "-S/ 43.50".
+❌ Contraejemplo: Se muestra "S/ -43.50" o "(S/ 43.50)".
+---
+
+## Aclaración sobre la anonimización (QA-010)
+La anonimización de RN-008 es un proceso automático que exige el PRINCIPIO-005.5. **No es una anulación manual** de registros críticos, así que no requiere la doble confirmación de RN-032. Solo modifica los campos de datos personales: no borra ventas, pagos, suscripciones, entregas, comprobantes ni auditorías (RN-111).
+
+
+---
+
+04-glosario.md.
+
+
+| # | Término | Nombre en código | Definición |
+|---|---|---|---|
+| 1 | **Cliente** | `cliente` | Persona mayor de 18 años, con cuenta y dirección de entrega en un distrito atendido, tenga o no una suscripción. No confundir con *suscriptor activo* (término 48). Quien registra un reclamo sin cuenta es un **consumidor**, no un cliente (RN-109). |
+| 2 | **Operador** | `operador` | Persona de Muuvi que registra fincas, lotes y precios, arma la lista de entregas y atiende reclamos. |
+| 3 | **Administrador titular** | `administrador_titular` | El fundador de Muuvi. Es el único que puede dar la doble confirmación para anular datos críticos (RN-032). |
+| 4 | **Repartidor** | `repartidor` | Persona de Muuvi que hace la última milla y cierra cada entrega como "entregada" o "fallida". |
+| 5 | **Finca proveedora** | `finca` | Productor de Cañete o Huaral que ordeña, enfría y envasa la leche en botellas de vidrio y la lleva al punto de acopio. No usa el sistema en el MVP. |
+| 6 | **Punto de acopio** | `punto_acopio` | Local refrigerado de Muuvi en Lima donde se reciben los lotes antes de repartirlos. |
+| 7 | **Lote** | `lote` | Conjunto de botellas de 1 L que una finca entrega en una fecha. Atributos: código (por ejemplo `L-2026-1114-01`), finca de procedencia, producto, fecha de ordeño, fecha de recepción, litros comprometidos (RN-091), litros recibidos y temperatura de recepción (RN-085). |
+| 8 | **Lote invalidado** | `lote.estado = 'invalidado'` | Lote con alguna lectura mayor de 4.5 °C en la recepción o en una entrega. Sus botellas no pueden asignarse a entregas (RN-024 a RN-027). |
+| 9 | **Cadena de frío** | `cadena_frio` | Mantener la leche a 4.5 °C o menos desde la recepción en el punto de acopio hasta la entrega al cliente. |
+| 10 | **Alerta crítica** | `alerta_critica` | Aviso al operador que se genera cuando un lote se invalida (RN-026). |
+| 11 | **Suscripción semanal** | `suscripcion` | Acuerdo por el que el cliente recibe una cantidad fija de litros en 1 día fijo cada semana, al precio por litro vigente. |
+| 12 | **Ciclo** | `ciclo` | Cada semana de una suscripción. Tiene como máximo un cobro confirmado (RN-073), que puede ser menor o no existir si hay saldo a favor (RN-096 y RN-097), y una entrega, que puede generar como máximo una entrega reprogramada (RN-107). |
+| 13 | **Hora de corte** | `hora_corte` | 18:00:00 del día previo a una entrega, en hora de Lima. Pausar o cancelar esa entrega solo es posible **antes** de ese instante, y en ese mismo instante se cobra el ciclo (RN-012 a RN-014 y RN-045). |
+| 14 | **Franja de entrega** | `franja_entrega` | Rango horario en que se entrega la leche. En el PMV es único: de 07:00 a 10:00 (RN-015). |
+| 15 | **Pausa** | `suscripcion.estado = 'pausada'` | Suspensión de las entregas que decide el propio cliente, sin cancelar la suscripción. Puede ser **con plazo** (N semanas, se reanuda sola al terminar; RN-062) o **indefinida** (hasta que el cliente la reactiva; RN-063 y RN-064). |
+| 16 | **Cancelación** | `suscripcion.estado = 'cancelada'` | Fin definitivo de una suscripción. Si se pide antes del corte, no se crean más entregas (RN-014); si se pide después, se mantiene solo la entrega de ese ciclo (RN-081 y RN-082). |
+| 17 | **Precio por litro vigente** | `precio_litro` | Valor configurado por el operador, que ningún proceso automático modifica. S/ 14.50 en el PMV (RN-011). |
+| 18 | **Botella retornable** | `botella` | Envase de vidrio en que se entrega la leche y que el cliente devuelve al repartidor. |
+| 19 | **Saldo de botellas** | `saldo_botellas` | Botellas entregadas menos botellas devueltas por un cliente. Nunca es negativo (RN-030 y RN-031). |
+| 20 | **Módulo de pagos** | `pagos` | Único componente que se comunica con las pasarelas (Culqi, Yape y Plin en el MVP) mediante una interfaz común (PRINCIPIO-002). |
+| 21 | **Token de pasarela** | `token_pasarela` | Identificador que devuelve la pasarela en lugar de los datos de la tarjeta. Es lo único que se guarda del medio de pago, junto con los 4 últimos dígitos (RN-021). |
+| 22 | **Pago confirmado** | `pago.estado = 'confirmado'` | Pago que la pasarela aprobó. Es la única condición para emitir una boleta o una factura (RN-022 y RN-023). La nota de crédito tiene otra condición (RN-057). Los otros estados de un pago son `pendiente` y `rechazado` (término 52). |
+| 23 | **Comprobante electrónico** | `comprobante` | Boleta o factura electrónica SUNAT emitida por cada pago confirmado. |
+| 24 | **OSE / PSE** | `proveedor_facturacion` | Operador o proveedor de servicios electrónicos autorizado por SUNAT, a través del cual Muuvi emite los comprobantes. |
+| 25 | **Registro sanitario DIGESA** | `registro_digesa` | Autorización sanitaria obligatoria para publicar un producto en el catálogo (RN-009). |
+| 26 | **Certificación SENASA vigente** | `certificacion_senasa` | Certificación de la finca con fecha de vencimiento igual o posterior a la fecha actual. Es la condición para mostrar "Orgánico" (RN-010). |
+| 27 | **Distrito atendido** | `distrito_atendido` | Distrito con servicio de entrega. En el PMV: Miraflores, San Isidro y La Molina (RN-005). |
+| 28 | **Consentimiento** | `consentimiento` | Aceptación expresa del cliente, en casillas separadas y sin premarcar. Hay tres: **principal** (obligatorio; tratamiento para ejecutar el servicio, incluidos los encargados de tratamiento; RN-003, RN-114 y RN-115), **envío a terceros** (opcional; RN-004 y RN-116) y **fines comerciales** (opcional, si se habilitan campañas; RN-117). |
+| 29 | **Dato personal** | `dato_personal` | DNI, nombre completo, fecha de nacimiento, teléfono, correo, dirección exacta y coordenadas. Se guarda cifrado con AES-256-GCM (RN-006). |
+| 30 | **Baja de cuenta** | `fecha_baja` | Solicitud del cliente para cerrar su cuenta. Inicia el plazo de 2 592 000 s (30 días) para anonimizar sus datos (RN-008). |
+| 31 | **Anonimización** | `anonimizar()` | Reemplazo irreversible de los datos personales para que ya no identifiquen al cliente, conservando los comprobantes que exige SUNAT. |
+| 32 | **ANPDP** | — | Autoridad Nacional de Protección de Datos Personales, ante la que se inscriben los bancos de datos de clientes (PRINCIPIO-005). |
+| 33 | **Libro de Reclamaciones virtual** | `libro_reclamaciones` | Formulario en la PWA para registrar reclamos y quejas, conforme a la Ley 29571 (RN-033). |
+| 34 | **Reclamo** | `reclamo.tipo = 'reclamo'` | Disconformidad del cliente con el producto o el servicio. Se responde en un máximo de 15 días hábiles (RN-035). |
+| 35 | **Queja** | `reclamo.tipo = 'queja'` | Disconformidad del cliente con la atención recibida, no con el producto. Tiene el mismo plazo de respuesta que el reclamo. |
+| 36 | **Día hábil** | `dia_habil` | Día de lunes a viernes que no es feriado nacional en el Perú. Se usa para calcular los plazos del Libro de Reclamaciones. |
+| 37 | **Ventana de comunicación** | `ventana_comunicacion` | Horario permitido para enviar avisos al cliente: de 09:00 a 20:00, hora de Lima (PRINCIPIO-008.4, RN-042). |
+| 38 | **PMV** | — | Producto mínimo viable. **Término único del proyecto**: "MVP" es su sinónimo en inglés y no se usa en documentos nuevos. Son los 6 Must de `02-alcance.md`. El PMV termina cuando ocurre lo primero entre (a) superar los 50 suscriptores activos y (b) cumplirse el mes 3 desde el lanzamiento, igual que la vigencia del ADR-002. |
+| 39 | **Día de reparto** | `dia_reparto` | Día de la semana con entregas: martes, jueves y sábado en el PMV (RN-061). |
+| 40 | **Suspendida por pago** | `suscripcion.estado = 'suspendida_por_pago'` | Estado en el que entra una suscripción cuando fallan el cobro y su reintento. No genera entregas hasta que el cliente registra un nuevo medio de pago (RN-048 a RN-051). A diferencia de la pausa, no la decide el cliente. |
+| 41 | **Reintento de cobro** | `reintento_cobro` | Segundo intento automático de cobrar un ciclo, 60 s después del rechazo (RN-046). |
+| 42 | **Causa de entrega fallida** | `entrega.causa_fallo` | Motivo obligatorio de una entrega "fallida": `imputable_muuvi` (error de la operación o lote invalidado) o `imputable_cliente` (RN-052). |
+| 43 | **Reembolso** | `reembolso` | Devolución del importe íntegro de una entrega fallida imputable a Muuvi al medio de pago original (RN-053 y RN-055). |
+| 44 | **Saldo a favor** | `saldo_favor` | Importe que el cliente eligió conservar en lugar del reembolso y que se descuenta del cobro de su siguiente ciclo (RN-056). No confundir con la nota de crédito, que es el comprobante SUNAT. |
+| 45 | **Nota de crédito electrónica** | `nota_credito` | Comprobante SUNAT que anula o reduce un comprobante emitido. Se emite por cada reembolso o saldo a favor (RN-057). |
+| 46 | **RUC** | `ruc` | Registro Único de Contribuyentes, de 11 dígitos, que se exige para emitir factura (RN-058). El que empieza con `10` (persona natural) contiene el DNI y se guarda cifrado (RN-060). |
+| 47 | **Entrega reprogramada** | `entrega.reprogramada_de` | Nueva entrega que se crea cuando una entrega falla por causa `imputable_cliente`. Va al siguiente día de reparto, no se cobra de nuevo y se arma con un lote del día nuevo (RN-066 a RN-068). |
+| 48 | **Suscriptor activo** | — | Cliente con una suscripción en estado `activa` y sin pagos rechazados pendientes. **No** cuentan las suscripciones `pausada`, `suspendida_por_pago` ni `cancelada`. Es el KPI principal del PMV (Brief §5.1). |
+| 49 | **Entrega** | `entrega` | Envío de los litros de un ciclo a la dirección del cliente, en un día de reparto y en la franja de 07:00 a 10:00. Se crea al cumplirse la hora de corte (RN-069) o al reprogramarse (RN-066). |
+| 50 | **Programar una entrega** | — | Crear la entrega en estado `programada` (RN-069). Una entrega "no programada" es una que nunca se creó. |
+| 51 | **Estados de entrega** | `entrega.estado` | `programada`, `en_ruta`, `entregada`, `fallida`, `reprogramada`, `cancelada` y `suspendida` (RN-070). Las transiciones permitidas están en el diagrama del ciclo de vida de `03-reglas-de-negocio.md`. |
+| 52 | **Pago pendiente / rechazado** | `pago.estado` | *Pendiente*: la pasarela aún no confirma ni rechaza; con Yape o Plin tiene un plazo de 1 800 s (RN-074). *Rechazado*: la pasarela lo denegó (RN-046). |
+| 53 | **Motivo de suspensión** | `entrega.motivo_suspension` | `pago` (RN-047 y RN-074) o `lote_invalidado` (RN-076 y RN-077). |
+| 54 | **Clave de idempotencia** | `clave_idempotencia` | Identificador del ciclo más identificador del cliente. Impide cobrar dos veces el mismo ciclo (RN-072 y RN-073). |
+| 55 | **Medio de pago** | `medio_pago` | Forma de pago del cliente. Su tipo es `tarjeta` (por Culqi), `yape` o `plin` (RN-095). De una tarjeta se guardan el token y los últimos 4 dígitos (RN-021); de una billetera, la referencia de la transacción (RN-094). |
+| 56 | **Lista de entregas** | — | Entregas `programada` de un día de reparto, asignadas a lotes válidos, que el operador entrega a los repartidores. |
+| 57 | **Litros demandados** | `litros_demandados` | Suma de los litros de las entregas `programada` de un día de reparto, calculada al cumplirse el corte (RN-090). Es lo que se pide a la finca. |
+| 58 | **Falla de abastecimiento de la finca** | `motivo = 'falla_abastecimiento_finca'` | Motivo de una entrega `fallida` por llegar menos litros de los demandados. Su causa es `imputable_muuvi` y se reembolsa (RN-092). |
+| 59 | **Reasignación de lote** | — | Paso de las entregas `programada` de un lote invalidado a otro lote válido del mismo día (RN-093). |
+| 60 | **Lectura de temperatura** | `lectura_temperatura` | Valor en °C con 1 decimal, tomado al recibir el lote o al entregar. No se sobrescribe (RN-088); una corrección es un registro nuevo con justificación (RN-089). |
+| 61 | **Aviso de disculpa** | — | Correo a los clientes que ya recibieron leche de un lote que luego se invalidó (RN-078). |
+| 62 | **Feriado nacional** | `feriado` | Día no laborable declarado por norma publicada en El Peruano, cargado por el operador en el calendario (RN-100). |
+| 63 | **Doble confirmación** | — | Aprobación explícita y repetida del administrador titular antes de anular registros críticos o cambiar precios o límites de crédito (RN-032). ❓ El mecanismo exacto está pendiente (P18). |
+| 64 | **Consumidor** | — | Cualquier persona que registra un reclamo o una queja, tenga o no cuenta (RN-109). |
+| 65 | **Encargado de tratamiento** | `encargado_tratamiento` | Proveedor que trata datos personales por cuenta y bajo las instrucciones exclusivas de Muuvi, sin usarlos para fines propios. En el PMV: Culqi, Yape, Plin, el OSE/PSE y el proveedor de correo transaccional (QA-006). Está cubierto por el consentimiento principal. |
+| 66 | **Tercero** | — | Quien recibe datos personales para usarlos en beneficio propio, como fines comerciales propios o un proveedor de IA. Requiere el consentimiento opcional de envío a terceros (RN-004). Un encargado de tratamiento **no** es un tercero. |
+| 67 | **Contrato de encargo de tratamiento (DPA)** | — | Contrato entre Muuvi y un encargado de tratamiento que lo obliga a usar los datos solo para el servicio y con las medidas de seguridad exigidas. Se registra en `docs/proveedores-datos.md` (RN-118). |
+| 68 | **Registro de proveedores de datos** | `docs/proveedores-datos.md` | Lista de los encargados de tratamiento y terceros que reciben datos personales, con el estado de su DPA. Ningún proveedor fuera de la lista recibe datos (RN-118; PRINCIPIO-005.4). |
+
+</formato>
+
+<rol>
+Eres un Product Manager Senior (Agente PM del framework BMAD). Tu especialidad es definir alcances realistas, priorizar sin piedad, y proteger al equipo de la sobreambición.
+</rol>
+
+<contexto>
+Proyecto: Muuvi
+---
+
+## 1. Problema y oportunidad
+
+### 1.1 Problema
+**Del lado del hogar (prioridad):**
+- ✅ Hoy los hogares de Lima que quieren leche fresca de pastoreo la piden **directamente a las fincas por WhatsApp**, a un precio de **S/ 3.50 – S/ 6.00 por litro**.
+- 📌 El dolor principal, según la hipótesis del fundador, es que **no encuentran dónde comprarla cerca** y que **se olvidan de comprarla**. No se ha validado con entrevistas.
+- ❓ No sabemos todavía cuánto pierde el hogar con la situación actual (tiempo, dinero, leche desperdiciada, desconfianza en lo "orgánico").
+
+**Del lado de la finca:**
+- ✅ Las fincas **no quieren hacerse cargo de la logística de envío** ni de **atender los pedidos** de cada cliente.
+
+### 1.2 Oportunidad
+- **Hay oferta cerca de Lima.** La región Lima es la segunda cuenca lechera del Perú, con el 16.1 % de la producción nacional en 2024, solo detrás de Cajamarca (Midagri).
+- **La leche diferenciada puede pagar mejor al productor.** La gran industria paga en promedio alrededor de S/ 1.22 por kilo de leche cruda (estudio PUCP), y en algunas regiones el precio en chacra ronda los S/ 2.80 por litro en 2026. El canal directo por WhatsApp (S/ 3.50 – S/ 6.00) ya muestra que existe un consumidor que paga más por leche de finca.
+- **Hay un hueco entre los dos lados:** fincas certificadas que no quieren distribuir y hogares de alto poder adquisitivo que no tienen un acceso cómodo y recurrente.
+
+### 1.3 Cadena actual frente a la cadena propuesta
+
+```mermaid
+flowchart LR
+    subgraph Hoy
+        F1[Finca] -- WhatsApp y entrega informal --> H1[Hogar]
+    end
+    subgraph Con Muuvi
+        F2[Finca en Cañete o Huaral<br/>ordeño, enfriamiento y envasado] -- traslado refrigerado --> P[Punto de acopio en Lima]
+        P -- última milla Muuvi --> H2[Hogar]
+    end
+```
+
+---
+
+## 2. Usuarios y segmentos objetivo
+
+| Prioridad | Segmento | Estado | Por qué |
+|---|---|---|---|
+| 1 | **Hogares** de Miraflores, San Isidro y La Molina | ✅ Segmento de lanzamiento | Alto poder adquisitivo y densidad de entregas en tres distritos |
+| 2 | **Personas fitness o con dietas específicas** | ✅ Segunda fase | Valoran origen, pureza y regularidad del consumo |
+| 3 | **Cafeterías, pastelerías y otros negocios** | ✅ Fase posterior | Compran en volumen; modelo B2B con otra lógica de pedido |
+| — | Familias con niños y adultos mayores | 📌 Subsegmentos dentro de "hogares" | Mencionados por el fundador; falta priorizarlos dentro del segmento 1 |
+
+### 2.1 Usuario del otro lado: la finca proveedora
+- ✅ Fincas con **certificación SENASA** ubicadas en **Cañete y Huaral** (región Lima, a unas 2 o 3 horas de la ciudad).
+- ✅ La finca **ordeña, enfría y envasa** en botella de vidrio, y **lleva la leche hasta un punto en Lima**.
+- ❓ Número de fincas comprometidas y litros diarios disponibles: sin definir.
+
+### 2.2 Expansión geográfica prevista
+| Fase | Distritos |
+|---|---|
+| Lanzamiento (meses 1–3) | Miraflores, San Isidro, La Molina |
+| Consolidación (mes 6) | + San Borja, Surco, Barranco |
+
+---
+
+## 3. Propuesta de valor
+
+### 3.1 Para el hogar
+> **Leche fresca de vacas en libre pastoreo, de fincas con certificación SENASA, que llega en botella de vidrio a casa de forma recurrente y sin romper la cadena de frío. El hogar no tiene que acordarse de pedir ni buscar dónde comprarla.**
+
+Los cuatro diferenciadores que, según el fundador, justifican el precio adicional:
+1. **Certificación SENASA garantizada.**
+2. **Botella de vidrio retornable.**
+3. **Trazabilidad** de la finca y del bienestar del ganado.
+4. **Cadena de frío** garantizada hasta la puerta.
+
+Además: **comodidad**, porque la compra pasa a ser recurrente y ya no depende de recordar ni de buscar un proveedor.
+
+### 3.2 Para la finca
+> **Vende a hogares urbanos de alto valor sin montar su propia logística de reparto ni atender cliente por cliente.**
+
+### 3.3 Frente a las alternativas actuales
+| Alternativa | Qué ofrece | Qué le falta frente a Muuvi |
+|---|---|---|
+| Finca directa por WhatsApp | Precio bajo (S/ 3.50 – S/ 6.00) | Recurrencia, comodidad y cadena de frío garantizada 📌 |
+| Sección premium de Wong o Vivanda | Disponibilidad y confianza en la marca | Origen directo de finca, botella retornable y trazabilidad por finca 📌 |
+| Otras marcas de leche fresca con delivery | Entrega a domicilio | ❓ Falta el análisis competitivo (precios, cobertura, propuesta) |
+
+---
+
+## 4. Modelo de negocio preliminar
+
+### 4.1 Ingresos
+- ✅ **Suscripción** semanal o mensual.
+- ✅ **Pago por pedido** (compra puntual).
+- ✅ Precio al consumidor: **S/ 13.50 – S/ 16.00 por litro**.
+
+### 4.2 Costos principales (identificados, sin cuantificar)
+- ❓ Compra de leche a la finca, a un precio por litro todavía sin definir.
+- ❓ Operación del punto de acopio refrigerado en Lima.
+- ❓ Última milla propia refrigerada (personal, vehículos, cadena de frío).
+- ❓ Reposición de las botellas que no vuelven.
+- ❓ Comisiones de las pasarelas de pago (ver constitución, PRINCIPIO-002).
+
+### 4.3 Margen bruto por litro (escenario ilustrativo)
+📌 Este cálculo **supone** que Muuvi le paga a la finca el mismo precio que hoy cobra por WhatsApp. El fundador no lo ha confirmado.
+
+| Escenario | Precio de venta | Costo de la leche | Margen bruto antes de logística |
+|---|---|---|---|
+| Pesimista | S/ 13.50 | S/ 6.00 | **S/ 7.50** |
+| Optimista | S/ 16.00 | S/ 3.50 | **S/ 12.50** |
+
+### 4.4 Botella retornable
+- ✅ Botella de vidrio con meta de retorno ≥ 90 %.
+- ❓ Monto del depósito o garantía por botella: sin definir.
+
+### 4.5 Capital inicial
+- ❓ Sin definir.
+
+---
+
+## 5. Métricas de éxito (KPIs medibles)
+
+> Los meses se cuentan desde el lanzamiento comercial (fecha ❓ por definir).
+
+### 5.1 Crecimiento
+| KPI | Mes 3 (validación / PMV) | Mes 6 (consolidación) | Mes 12 (escala inicial) | Origen |
+|---|---|---|---|---|
+| Suscriptores activos | **50** | **200** | **600** | ✅ Fundador |
+| Distritos con servicio | 3 | 6 | ❓ | ✅ Fundador |
+
+### 5.2 Retención y operación
+| KPI | Meta | Cómo se mide | Origen |
+|---|---|---|---|
+| Retención de suscriptores a 3 meses | **≥ 60 %** | Suscriptores activos al día 90 ÷ suscriptores de la misma cohorte al día 0 | ✅ Fundador |
+| Tasa de retorno de botellas | **≥ 90 %** | Botellas devueltas ÷ botellas entregadas, por mes | ✅ Fundador |
+| Entregas sin rotura de cadena de frío | **100 %** en la fase PMV | Entregas dentro del rango de temperatura ÷ entregas totales | ✅ Objetivo del fundador; 📌 el rango de temperatura lo debe fijar un especialista sanitario |
+| Cumplimiento de abastecimiento de las fincas | 📌 **≥ 95 %** (propuesto) | Litros entregados ÷ litros comprometidos, por semana | 📌 Propuesto para medir el riesgo R2 |
+
+### 5.3 Validación del problema (antes o durante el PMV)
+| KPI | Meta propuesta 📌 | Cómo se mide |
+|---|---|---|
+| Entrevistas a hogares objetivo | **≥ 20** en Miraflores, San Isidro y La Molina | Conteo de entrevistas registradas |
+| Hogares que confirman el dolor ("no la encuentro cerca" o "me olvido de comprar") | **≥ 60 %** de los entrevistados | Respuestas codificadas en las entrevistas |
+| Disposición a pagar ≥ S/ 13.50 por litro | **≥ 40 %** de los entrevistados | Pregunta de precio en la entrevista |
+
+---
+
+## 6. Riesgos identificados y supuestos
+
+### 6.1 Riesgos
+| ID | Riesgo | Probabilidad | Impacto | Origen |
+|---|---|---|---|---|
+| R1 | **No hay suficientes clientes al precio de S/ 13.50 – S/ 16.00**, entre 2.3 y 4.6 veces lo que se paga hoy por WhatsApp | Alta | Crítico | ✅ Fundador |
+| R2 | **Las fincas entregan menos leche de la acordada** | Media | Alto | ✅ Fundador |
+| R3 | Rotura de la cadena de frío en el traslado de Cañete o Huaral a Lima (2 a 3 horas) o en la última milla | Media | Crítico (sanitario y reputacional) | 📌 Analista |
+| R4 | Las botellas no vuelven en la proporción esperada, lo que eleva el costo por litro | Media | Medio | 📌 Analista |
+| R5 | El cliente se salta a Muuvi y le compra directo a la finca por WhatsApp | Media | Alto | 📌 Analista |
+| R6 | La densidad de clientes por distrito no alcanza para rentabilizar la última milla propia | Media | Alto | ✅ Objetivo del mes 12 del fundador |
+| R7 | Una finca pierde o deja vencer su certificación SENASA o su registro DIGESA | Baja | Alto (no se puede vender ni rotular como orgánico) | 📌 Analista, a partir de la constitución |
+
+### 6.2 Supuestos por validar
+| ID | Supuesto | Cómo validarlo |
+|---|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar" | Entrevistas (KPI 5.3) |
+| S2 | Certificación, vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro | Pregunta de disposición a pagar y preventa |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro | Negociación con las fincas |
+| S4 | Las fincas de Cañete y Huaral tienen volumen suficiente para 600 suscriptores al mes 12 | Inventario de litros diarios por finca |
+| S5 | Las fincas aceptan llevar la leche hasta un punto en Lima por su cuenta | Acuerdo firmado con cada finca |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas | Medición en la fase PMV |
+
+---
+
+## 7. Restricciones conocidas
+
+### 7.1 Legales, sanitarias y tributarias (según `00-constitucion.md`)
+- **Datos personales:** cumplir la Ley N.° 29733 y el D.S. 016-2024-JUS. Esto incluye inscribir los bancos de datos ante la ANPDP, aceptar solo a mayores de 18 años, pedir consentimiento expreso y eliminar los datos en un plazo máximo de 30 días tras la baja (PRINCIPIO-005).
+- **Producto:** cada producto debe tener **registro sanitario DIGESA** antes de publicarse, y solo se puede rotular como "orgánico" con **certificación SENASA vigente** (PRINCIPIO-006). Como la finca envasa, estos registros dependen de ella.
+- **Tributaria:** cada pago confirmado debe emitir su **boleta o factura electrónica SUNAT** (PRINCIPIO-006).
+- **Consumidor:** **Libro de Reclamaciones virtual** (Ley 29571) y, cuando corresponda, **advertencias octogonales** (Ley 30021).
+- **Pagos:** el sistema no puede recibir ni guardar datos de tarjeta (PCI-DSS SAQ-A, PRINCIPIO-004).
+
+### 7.2 Operativas
+- **Cobertura inicial:** solo Miraflores, San Isidro y La Molina.
+- **Abastecimiento:** solo fincas de Cañete y Huaral, a 2 o 3 horas de Lima.
+- **Envasado:** lo hace la finca. Muuvi no manipula el producto, solo lo recibe y lo distribuye.
+- **Comunicaciones al cliente:** solo entre las **09:00 y las 20:00, hora de Lima** (PRINCIPIO-008).
+
+### 7.3 Del proyecto
+- El **stack tecnológico** y las **pasarelas de pago** ya están definidos en la constitución (PRINCIPIO-002). El Product Manager trabaja dentro de ese marco.
+- Fundador único, emprendedor independiente; el proyecto parte desde cero.
+- ❓ Capital inicial y fecha de lanzamiento sin definir.
+
+---
+
+<rol>
+Eres un Analista de Negocios Senior (Agente Analyst del framework BMAD). Tu especialidad es descubrimiento de producto: entender profundamente un problema antes de proponer soluciones. No propones funcionalidades: investigas, preguntas y sintetizas.
+</rol>
+
+<contexto>
+Estamos en la fase de descubrimiento del producto FiaYa.
+Descripción inicial: FiaYa digitaliza el cuaderno de fiados de las bodegas de barrio en Lima, Perú. Permite al bodeguero registrar ventas al crédito, controlar límites de crédito por cliente y enviar recordatorios de cobro por WhatsApp.
+País de operación: Perú.
+Este es un ejercicio académico de un Diploma en AI-First Software Architecture.
+</contexto>
+
+<tarea>
+FASE 1 — INVESTIGACIÓN (haz esto primero):
+Hazme preguntas para entender el proyecto. Organízalas en rondas de 3-5 preguntas. Cubre:
+- El problema real (¿quién sufre? ¿cómo lo resuelve hoy? ¿qué pierde?)
+- Los usuarios y segmentos (¿quiénes son? ¿qué necesitan diferente?)
+- La propuesta de valor (¿por qué usarían esto y no lo que tienen?)
+- El modelo de negocio (¿cómo generaría ingresos?)
+- Métricas de éxito (¿cómo sabemos que funciona?)
+- Riesgos y supuestos (¿qué puede salir mal? ¿qué estamos asumiendo?)
+
+NO propongas soluciones ni funcionalidades todavía. Solo pregunta.
+Después de mis respuestas a cada ronda, haz otra ronda hasta tener suficiente.
+
+FASE 2 — SÍNTESIS (cuando yo diga "genera el Project Brief"):
+Genera un Project Brief estructurado en Markdown con estas secciones:
+1. Problema y oportunidad
+2. Usuarios y segmentos objetivo
+3. Propuesta de valor
+4. Modelo de negocio preliminar
+5. Métricas de éxito (KPIs medibles)
+6. Riesgos identificados y supuestos
+7. Restricciones conocidas
+</tarea>
+
+<restricciones>
+- Haz preguntas, no asumas. Si algo no está claro, PREGUNTA.
+- No propongas funcionalidades técnicas. Eso es trabajo del Product Manager, no tuyo.
+- Usa datos y ejemplos específicos del contexto peruano cuando aplique.
+- Todas las métricas deben ser medibles (no "mejorar la experiencia").
+</restricciones>
+
+<formato>
+---
+
+## 1. Problema y oportunidad
+
+### 1.1 Problema
+**Del lado del hogar (prioridad):**
+- ✅ Hoy los hogares de Lima que quieren leche fresca de pastoreo la piden **directamente a las fincas por WhatsApp**, a un precio de **S/ 3.50 – S/ 6.00 por litro**.
+- 📌 El dolor principal, según la hipótesis del fundador, es que **no encuentran dónde comprarla cerca** y que **se olvidan de comprarla**. No se ha validado con entrevistas.
+- ❓ No sabemos todavía cuánto pierde el hogar con la situación actual (tiempo, dinero, leche desperdiciada, desconfianza en lo "orgánico").
+
+**Del lado de la finca:**
+- ✅ Las fincas **no quieren hacerse cargo de la logística de envío** ni de **atender los pedidos** de cada cliente.
+
+### 1.2 Oportunidad
+- **Hay oferta cerca de Lima.** La región Lima es la segunda cuenca lechera del Perú, con el 16.1 % de la producción nacional en 2024, solo detrás de Cajamarca (Midagri).
+- **La leche diferenciada puede pagar mejor al productor.** La gran industria paga en promedio alrededor de S/ 1.22 por kilo de leche cruda (estudio PUCP), y en algunas regiones el precio en chacra ronda los S/ 2.80 por litro en 2026. El canal directo por WhatsApp (S/ 3.50 – S/ 6.00) ya muestra que existe un consumidor que paga más por leche de finca.
+- **Hay un hueco entre los dos lados:** fincas certificadas que no quieren distribuir y hogares de alto poder adquisitivo que no tienen un acceso cómodo y recurrente.
+
+### 1.3 Cadena actual frente a la cadena propuesta
+
+```mermaid
+flowchart LR
+    subgraph Hoy
+        F1[Finca] -- WhatsApp y entrega informal --> H1[Hogar]
+    end
+    subgraph Con Muuvi
+        F2[Finca en Cañete o Huaral<br/>ordeño, enfriamiento y envasado] -- traslado refrigerado --> P[Punto de acopio en Lima]
+        P -- última milla Muuvi --> H2[Hogar]
+    end
+```
+
+---
+
+## 2. Usuarios y segmentos objetivo
+
+| Prioridad | Segmento | Estado | Por qué |
+|---|---|---|---|
+| 1 | **Hogares** de Miraflores, San Isidro y La Molina | ✅ Segmento de lanzamiento | Alto poder adquisitivo y densidad de entregas en tres distritos |
+| 2 | **Personas fitness o con dietas específicas** | ✅ Segunda fase | Valoran origen, pureza y regularidad del consumo |
+| 3 | **Cafeterías, pastelerías y otros negocios** | ✅ Fase posterior | Compran en volumen; modelo B2B con otra lógica de pedido |
+| — | Familias con niños y adultos mayores | 📌 Subsegmentos dentro de "hogares" | Mencionados por el fundador; falta priorizarlos dentro del segmento 1 |
+
+### 2.1 Usuario del otro lado: la finca proveedora
+- ✅ Fincas con **certificación SENASA** ubicadas en **Cañete y Huaral** (región Lima, a unas 2 o 3 horas de la ciudad).
+- ✅ La finca **ordeña, enfría y envasa** en botella de vidrio, y **lleva la leche hasta un punto en Lima**.
+- ❓ Número de fincas comprometidas y litros diarios disponibles: sin definir.
+
+### 2.2 Expansión geográfica prevista
+| Fase | Distritos |
+|---|---|
+| Lanzamiento (meses 1–3) | Miraflores, San Isidro, La Molina |
+| Consolidación (mes 6) | + San Borja, Surco, Barranco |
+
+---
+
+## 3. Propuesta de valor
+
+### 3.1 Para el hogar
+> **Leche fresca de vacas en libre pastoreo, de fincas con certificación SENASA, que llega en botella de vidrio a casa de forma recurrente y sin romper la cadena de frío. El hogar no tiene que acordarse de pedir ni buscar dónde comprarla.**
+
+Los cuatro diferenciadores que, según el fundador, justifican el precio adicional:
+1. **Certificación SENASA garantizada.**
+2. **Botella de vidrio retornable.**
+3. **Trazabilidad** de la finca y del bienestar del ganado.
+4. **Cadena de frío** garantizada hasta la puerta.
+
+Además: **comodidad**, porque la compra pasa a ser recurrente y ya no depende de recordar ni de buscar un proveedor.
+
+### 3.2 Para la finca
+> **Vende a hogares urbanos de alto valor sin montar su propia logística de reparto ni atender cliente por cliente.**
+
+### 3.3 Frente a las alternativas actuales
+| Alternativa | Qué ofrece | Qué le falta frente a Muuvi |
+|---|---|---|
+| Finca directa por WhatsApp | Precio bajo (S/ 3.50 – S/ 6.00) | Recurrencia, comodidad y cadena de frío garantizada 📌 |
+| Sección premium de Wong o Vivanda | Disponibilidad y confianza en la marca | Origen directo de finca, botella retornable y trazabilidad por finca 📌 |
+| Otras marcas de leche fresca con delivery | Entrega a domicilio | ❓ Falta el análisis competitivo (precios, cobertura, propuesta) |
+
+---
+
+## 4. Modelo de negocio preliminar
+
+### 4.1 Ingresos
+- ✅ **Suscripción** semanal o mensual.
+- ✅ **Pago por pedido** (compra puntual).
+- ✅ Precio al consumidor: **S/ 13.50 – S/ 16.00 por litro**.
+
+### 4.2 Costos principales (identificados, sin cuantificar)
+- ❓ Compra de leche a la finca, a un precio por litro todavía sin definir.
+- ❓ Operación del punto de acopio refrigerado en Lima.
+- ❓ Última milla propia refrigerada (personal, vehículos, cadena de frío).
+- ❓ Reposición de las botellas que no vuelven.
+- ❓ Comisiones de las pasarelas de pago (ver constitución, PRINCIPIO-002).
+
+### 4.3 Margen bruto por litro (escenario ilustrativo)
+📌 Este cálculo **supone** que Muuvi le paga a la finca el mismo precio que hoy cobra por WhatsApp. El fundador no lo ha confirmado.
+
+| Escenario | Precio de venta | Costo de la leche | Margen bruto antes de logística |
+|---|---|---|---|
+| Pesimista | S/ 13.50 | S/ 6.00 | **S/ 7.50** |
+| Optimista | S/ 16.00 | S/ 3.50 | **S/ 12.50** |
+
+### 4.4 Botella retornable
+- ✅ Botella de vidrio con meta de retorno ≥ 90 %.
+- ❓ Monto del depósito o garantía por botella: sin definir.
+
+### 4.5 Capital inicial
+- ❓ Sin definir.
+
+---
+
+## 5. Métricas de éxito (KPIs medibles)
+
+> Los meses se cuentan desde el lanzamiento comercial (fecha ❓ por definir).
+
+### 5.1 Crecimiento
+| KPI | Mes 3 (validación / PMV) | Mes 6 (consolidación) | Mes 12 (escala inicial) | Origen |
+|---|---|---|---|---|
+| Suscriptores activos | **50** | **200** | **600** | ✅ Fundador |
+| Distritos con servicio | 3 | 6 | ❓ | ✅ Fundador |
+
+### 5.2 Retención y operación
+| KPI | Meta | Cómo se mide | Origen |
+|---|---|---|---|
+| Retención de suscriptores a 3 meses | **≥ 60 %** | Suscriptores activos al día 90 ÷ suscriptores de la misma cohorte al día 0 | ✅ Fundador |
+| Tasa de retorno de botellas | **≥ 90 %** | Botellas devueltas ÷ botellas entregadas, por mes | ✅ Fundador |
+| Entregas sin rotura de cadena de frío | **100 %** en la fase PMV | Entregas dentro del rango de temperatura ÷ entregas totales | ✅ Objetivo del fundador; 📌 el rango de temperatura lo debe fijar un especialista sanitario |
+| Cumplimiento de abastecimiento de las fincas | 📌 **≥ 95 %** (propuesto) | Litros entregados ÷ litros comprometidos, por semana | 📌 Propuesto para medir el riesgo R2 |
+
+### 5.3 Validación del problema (antes o durante el PMV)
+| KPI | Meta propuesta 📌 | Cómo se mide |
+|---|---|---|
+| Entrevistas a hogares objetivo | **≥ 20** en Miraflores, San Isidro y La Molina | Conteo de entrevistas registradas |
+| Hogares que confirman el dolor ("no la encuentro cerca" o "me olvido de comprar") | **≥ 60 %** de los entrevistados | Respuestas codificadas en las entrevistas |
+| Disposición a pagar ≥ S/ 13.50 por litro | **≥ 40 %** de los entrevistados | Pregunta de precio en la entrevista |
+
+---
+
+## 6. Riesgos identificados y supuestos
+
+### 6.1 Riesgos
+| ID | Riesgo | Probabilidad | Impacto | Origen |
+|---|---|---|---|---|
+| R1 | **No hay suficientes clientes al precio de S/ 13.50 – S/ 16.00**, entre 2.3 y 4.6 veces lo que se paga hoy por WhatsApp | Alta | Crítico | ✅ Fundador |
+| R2 | **Las fincas entregan menos leche de la acordada** | Media | Alto | ✅ Fundador |
+| R3 | Rotura de la cadena de frío en el traslado de Cañete o Huaral a Lima (2 a 3 horas) o en la última milla | Media | Crítico (sanitario y reputacional) | 📌 Analista |
+| R4 | Las botellas no vuelven en la proporción esperada, lo que eleva el costo por litro | Media | Medio | 📌 Analista |
+| R5 | El cliente se salta a Muuvi y le compra directo a la finca por WhatsApp | Media | Alto | 📌 Analista |
+| R6 | La densidad de clientes por distrito no alcanza para rentabilizar la última milla propia | Media | Alto | ✅ Objetivo del mes 12 del fundador |
+| R7 | Una finca pierde o deja vencer su certificación SENASA o su registro DIGESA | Baja | Alto (no se puede vender ni rotular como orgánico) | 📌 Analista, a partir de la constitución |
+
+### 6.2 Supuestos por validar
+| ID | Supuesto | Cómo validarlo |
+|---|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar" | Entrevistas (KPI 5.3) |
+| S2 | Certificación, vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro | Pregunta de disposición a pagar y preventa |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro | Negociación con las fincas |
+| S4 | Las fincas de Cañete y Huaral tienen volumen suficiente para 600 suscriptores al mes 12 | Inventario de litros diarios por finca |
+| S5 | Las fincas aceptan llevar la leche hasta un punto en Lima por su cuenta | Acuerdo firmado con cada finca |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas | Medición en la fase PMV |
+
+---
+
+## 7. Restricciones conocidas
+
+### 7.1 Legales, sanitarias y tributarias (según `00-constitucion.md`)
+- **Datos personales:** cumplir la Ley N.° 29733 y el D.S. 016-2024-JUS. Esto incluye inscribir los bancos de datos ante la ANPDP, aceptar solo a mayores de 18 años, pedir consentimiento expreso y eliminar los datos en un plazo máximo de 30 días tras la baja (PRINCIPIO-005).
+- **Producto:** cada producto debe tener **registro sanitario DIGESA** antes de publicarse, y solo se puede rotular como "orgánico" con **certificación SENASA vigente** (PRINCIPIO-006). Como la finca envasa, estos registros dependen de ella.
+- **Tributaria:** cada pago confirmado debe emitir su **boleta o factura electrónica SUNAT** (PRINCIPIO-006).
+- **Consumidor:** **Libro de Reclamaciones virtual** (Ley 29571) y, cuando corresponda, **advertencias octogonales** (Ley 30021).
+- **Pagos:** el sistema no puede recibir ni guardar datos de tarjeta (PCI-DSS SAQ-A, PRINCIPIO-004).
+
+### 7.2 Operativas
+- **Cobertura inicial:** solo Miraflores, San Isidro y La Molina.
+- **Abastecimiento:** solo fincas de Cañete y Huaral, a 2 o 3 horas de Lima.
+- **Envasado:** lo hace la finca. Muuvi no manipula el producto, solo lo recibe y lo distribuye.
+- **Comunicaciones al cliente:** solo entre las **09:00 y las 20:00, hora de Lima** (PRINCIPIO-008).
+
+### 7.3 Del proyecto
+- El **stack tecnológico** y las **pasarelas de pago** ya están definidos en la constitución (PRINCIPIO-002). El Product Manager trabaja dentro de ese marco.
+- Fundador único, emprendedor independiente; el proyecto parte desde cero.
+- ❓ Capital inicial y fecha de lanzamiento sin definir.
+
+---
+</formato>
+
+---
+### PRINCIPIO-001: Uniformidad Lingüística
+Todo el código fuente (variables, funciones, componentes, tablas, endpoints), los comentarios, los mensajes de commit, los ADR y la documentación se redactan en español. La interfaz de usuario es bilingüe: español (`es-PE`, idioma por defecto) e inglés (`en`). Todo texto visible se carga desde archivos de traducción y nunca se escribe directamente en el código.
+- **Ejemplo de cumplimiento:** Una función `calcularProximaEntrega()` con su comentario en español, y un componente que muestra `t('pedido.titulo')` resuelto desde `src/locales/es-PE.json` y `src/locales/en.json`.
+- **Ejemplo de violación:** Una función `getNextDelivery()`, un commit "fix delivery bug" o un JSX con texto fijo como `<h1>Tu pedido</h1>`.
+
+### PRINCIPIO-002: Inmutabilidad del Stack Tecnológico Base
+El stack aprobado es:
+- **Frontend:** React 18+ como Aplicación Web Progresiva (PWA).
+- **Backend:** Node.js 20+ con Express.
+- **Base de datos:** PostgreSQL 16+.
+- **Pasarelas de pagos:** Culqi, Niubiz, Izipay y Mercado Pago, más las billeteras Yape y Plin. Todas se integran detrás de un único módulo `pagos` con una interfaz común, de modo que ninguna otra parte del sistema dependa directamente de una pasarela concreta.
+
+Ningún componente del stack puede modificarse ni sustituirse sin aprobación explícita y documentada del equipo humano titular, registrada en un ADR (`docs/adr/ADR-NNN-*.md`).
+- **Ejemplo de cumplimiento:** Desarrollar la pantalla de suscripciones en React 18+ y su endpoint en Express sobre Node.js 20.
+- **Ejemplo de violación:** Reemplazar Express por otro framework web, usar Flutter o introducir una base de datos NoSQL sin un ADR aprobado.
+
+### PRINCIPIO-003: Cifrado de Datos Personales
+Los datos personales (DNI, nombres completos, fecha de nacimiento, teléfono, correo, dirección exacta y coordenadas de geolocalización) se cifran en reposo **a nivel de campo con AES-256-GCM**, y sus claves se guardan en un gestor de secretos (KMS), nunca en el repositorio. Toda comunicación entre la PWA, el backend y los servicios de terceros usa **TLS 1.3**. Ningún dato personal puede aparecer en texto plano en logs, mensajes de error ni analítica.
+- **Ejemplo de cumplimiento:** Transmitir los datos por un canal TLS 1.3 y guardar el DNI del cliente cifrado con AES-256-GCM en la columna `dni_cifrado` de PostgreSQL; los logs solo registran `cliente_id`.
+- **Ejemplo de violación:** Guardar el DNI o el teléfono del cliente en texto plano en tablas o logs, o registrar `Error al entregar en Av. Larco 123, tel. 987654321`.
+
+### PRINCIPIO-004: Pagos sin Datos de Tarjeta (PCI-DSS SAQ-A)
+Los datos de tarjeta (número de tarjeta o PAN, CVV y fecha de vencimiento) **nunca** llegan al backend ni a la base de datos de Muuvi. Se capturan con el formulario o SDK de la pasarela, que devuelve un token; el sistema solo guarda ese token y los 4 últimos dígitos. Un test automatizado falla si algún esquema SQL, DTO o validador contiene campos como `numero_tarjeta`, `cvv` o `pan`.
+- **Ejemplo de cumplimiento:** La PWA envía al backend solo `{ "token_pasarela": "tkn_…", "ultimos_4": "4242" }` para cobrar la suscripción mensual.
+- **Ejemplo de violación:** Un endpoint `POST /pagos` que recibe `{ "numero_tarjeta": "4111…", "cvv": "123" }`.
+
+### PRINCIPIO-005: Ciclo de Vida de los Datos Personales (Ley N.° 29733 y D.S. 016-2024-JUS)
+1. **Inscripción ante la ANPDP:** los bancos de datos de clientes están inscritos ante la ANPDP. Ningún banco de datos nuevo (por ejemplo, una nueva tabla o servicio con datos personales) entra en producción sin su inscripción o actualización previa.
+2. **Solo mayores de edad:** el registro exige fecha de nacimiento y rechaza a quien tenga menos de 18 años.
+3. **Consentimiento:** se pide consentimiento expreso, separado y sin casillas premarcadas para (a) el tratamiento de datos y (b) el envío de datos a terceros, incluidos los proveedores de IA.
+4. **Datos enviados a IA:** el DNI y los datos de pago nunca se envían a un proveedor de IA. Los demás datos solo se envían si el cliente dio su consentimiento y el proveedor figura en `docs/proveedores-datos.md`.
+5. **Eliminación:** al darse de baja una cuenta, sus datos se eliminan o anonimizan en un plazo máximo de **30 días**. Solo se conservan los comprobantes que SUNAT obliga a guardar.
+- **Ejemplo de cumplimiento:** Un job diario anonimiza las cuentas cuya `fecha_baja` tiene más de 30 días y deja la ejecución registrada en la tabla de auditoría.
+- **Ejemplo de violación:** Registrar a un usuario de 17 años, o enviar a un LLM un prompt que contiene el DNI del cliente.
+
+### PRINCIPIO-006: Cumplimiento Comercial, Tributario y Sanitario
+- Todo pago confirmado emite su **boleta o factura electrónica SUNAT**.
+- Ningún producto se publica sin su **registro sanitario DIGESA**.
+- Ningún producto o finca se rotula como "orgánico" sin una **certificación SENASA vigente**.
+- La PWA ofrece acceso al **Libro de Reclamaciones virtual** desde el menú principal (Ley 29571).
+- Los productos que lo requieran muestran las **advertencias octogonales** (Ley 30021).
+- **Ejemplo de cumplimiento:** El catálogo rechaza guardar un yogurt artesanal si `registro_digesa` está vacío.
+- **Ejemplo de violación:** Mostrar la etiqueta "Orgánico" en una finca cuya certificación SENASA está vencida.
+
+### PRINCIPIO-007: Accesibilidad Universal de Interfaz (WCAG 2.1 AA)
+Todas las interfaces cumplen como mínimo el nivel AA de WCAG 2.1:
+- Contraste mínimo de **4.5:1** para texto normal y **3:1** para texto grande y componentes.
+- Navegación completa mediante teclado, con foco visible.
+- Texto alternativo (`alt` o `aria-label`) en toda imagen e ícono interactivo.
+- Áreas táctiles de al menos **48×48 px**.
+- Texto que escala hasta **200 %** sin cortarse.
+- Compatibilidad con TalkBack y VoiceOver.
+- **Dispositivos soportados:** Android 9 (API 28, Pie) o superior con Chrome actualizado, e iOS 15 o superior con Safari 15 o superior.
+- **Ejemplo de cumplimiento:** El botón "Programar entrega" tiene contraste de 5.2:1, mide 48×48 px, recibe foco con Tab y el lector de pantalla lo anuncia como "Programar entrega, botón".
+- **Ejemplo de violación:** Un botón de acción crítico con contraste inferior a 4.5:1, que no responde al foco del teclado, o un ícono de botella sin texto alternativo.
+
+### PRINCIPIO-008: Restricciones Absolutas y Líneas Rojas para Agentes de IA
+Ningún agente de IA, autónomo o asistido, puede bajo ninguna circunstancia:
+1. **Modificar el stack tecnológico:** cambiar, actualizar o introducir librerías o frameworks fuera del stack aprobado (React PWA, Node.js con Express, PostgreSQL), ni añadir o quitar dependencias sin aprobación humana.
+2. **Eliminar datos críticos:** borrar o anular registros de ventas, pedidos, pagos, abonos, suscripciones, comprobantes o auditorías sin la doble confirmación explícita del administrador titular de Muuuvi.
+3. **Alterar límites de crédito:** modificar por su cuenta los topes de crédito, descuentos o saldos de garantía de botellas retornables asignados a los clientes.
+4. **Violar ventanas de comunicación:** enviar recordatorios o notificaciones por WhatsApp, SMS o push fuera del horario permitido (**09:00–20:00, America/Lima, UTC-5**).
+5. **Saltarse los controles de integración:** hacer push o merge directo a `main` o a producción, o desplegar a producción sin aprobación humana.
+6. **Tocar secretos:** leer, crear o modificar secretos (`.env`, claves de API, credenciales de la pasarela o del KMS).
+7. **Ejecutar operaciones destructivas:** correr migraciones destructivas (`DROP`, `TRUNCATE`, `DELETE` o `UPDATE` sin `WHERE`) o acceder a datos reales de clientes.
+8. **Manipular tests:** modificar, saltar (`skip`) o borrar tests para que pasen.
+9. **Cambiar lo comercial o legal:** cambiar precios, lógica de cobro, tarifas de entrega o textos legales (términos, privacidad, consentimientos) sin revisión humana.
+10. **Modificar esta constitución:** editar este archivo.
+
+Ante cualquier duda o inconsistencia, el agente se detiene y solicita intervención humana.
+- **Ejemplo de cumplimiento:** El agente detecta suscripciones duplicadas en la base de datos, no las borra, y genera una alerta que pide intervención humana obligatoria.
+- **Ejemplo de violación:** El agente decide por su cuenta purgar registros antiguos de la tabla de pedidos, instala un ORM alternativo en el backend sin aprobación, o programa un recordatorio de renovación a las 22:30.
+
+### PRINCIPIO-009: Garantía de Calidad y Cobertura de Pruebas Automatizadas
+- Todo cambio en la lógica del sistema debe mantener al menos **80 % de cobertura en reglas de negocio** y **60 % de cobertura general**. El CI bloquea el merge si no se alcanza.
+- Cada regla de `03-reglas-de-negocio.md` está respaldada por al menos un test unitario que cita su ID.
+- Son obligatorias las pruebas unitarias, de integración, E2E de los flujos críticos (registro, suscripción, pago y entrega) y de accesibilidad automatizadas.
+- Cada PR requiere **2 aprobaciones humanas**, linter y SAST en verde, y commits en formato **Conventional Commits** en español.
+- **Ejemplo de cumplimiento:** Un PR que implementa la regla de pausa de suscripción incluye `test_RN012_pausar_suscripcion_antes_del_corte`, deja el módulo en 85 % de cobertura y tiene 2 aprobaciones.
+- **Ejemplo de violación:** Mergear con una sola aprobación, o con la cobertura del módulo de negocio por debajo del 80 %.
+
+### PRINCIPIO-010: Documentación como Código
+- Toda la documentación vive en el repositorio en formato **Markdown**.
+- Cada decisión técnica relevante se registra como **ADR** en `docs/adr/ADR-NNN-titulo.md`.
+- La API se documenta con **OpenAPI 3.x** en `docs/api/openapi.yaml`, y el CI valida que el contrato coincide con la implementación.
+- Todo diagrama se escribe en **Mermaid** dentro del propio Markdown.
+- **Ejemplo de cumplimiento:** El endpoint `GET /fincas/{id}/trazabilidad` se añade a `openapi.yaml` en el mismo PR, junto con un diagrama de secuencia en Mermaid.
+- **Ejemplo de violación:** Documentar la arquitectura en un PNG exportado de otra herramienta, o publicar un endpoint que no figura en OpenAPI.
+
+### PRINCIPIO-011: Estandarización de Formatos de Localización Peruana
+Montos, fechas y números se muestran según las convenciones del Perú:
+- Moneda en soles con el formato `S/ 1,250.50` (punto decimal y coma de miles).
+- Fechas en formato `DD/MM/AAAA` cuando la interfaz está en español.
+- Zona horaria `America/Lima` (UTC-5) para ventanas de entrega, cortes de suscripción y notificaciones.
+
+En la base de datos, los timestamps se guardan en UTC y los montos como `NUMERIC(12,2)`, nunca como `FLOAT`.
+- **Ejemplo de cumplimiento:** La suscripción semanal se muestra como `S/ 32.90 · próxima entrega 12/11/2026, 07:00–09:00`.
+- **Ejemplo de violación:** Mostrar `$32.9` o `11/12/2026`, o guardar el precio en una columna `FLOAT`.
+
+
+---
+<rol>
+Eres un Agente Constitucional especializado en gobernanza de proyectos de software AI-First. Tu trabajo es ayudar a un equipo a definir los principios no negociables de su proyecto: las reglas que NINGÚN agente de IA ni humano puede violar bajo ninguna circunstancia.
+</rol>
+
+<contexto>
+Estamos definiendo la constitución del proyecto FiaYa.
+FiaYa es una app que digitaliza el cuaderno de fiados de las bodegas de barrio en Lima, Perú. Permite al bodeguero registrar ventas al crédito, controlar límites de crédito por cliente y enviar recordatorios de cobro por WhatsApp
+Este documento será el primer archivo que cualquier agente de IA lea antes de trabajar en el proyecto.
+País de operación: Perú.
+</contexto>
+
+<tarea>
+1. Hazme preguntas clave para entender las restricciones del proyecto. Pregunta sobre:
+   - Idioma del código y la documentación
+   - Stack tecnológico preferido (si lo tienen)
+   - Regulaciones legales aplicables
+   - Políticas de privacidad y seguridad de datos
+   - Restricciones de accesibilidad
+   - Acciones prohibidas para agentes de IA
+   - Estándares de calidad y testing
+   - Formato de documentación
+
+2. Con mis respuestas, propón entre 8 y 12 principios constitucionales.
+
+3. Cada principio debe seguir este formato:
+   PRINCIPIO-[NNN]: [Título corto]
+   [Descripción en una o dos frases, con valores concretos donde aplique]
+   Ejemplo de cumplimiento: [...]
+   Ejemplo de violación: [...]
+</tarea>
+
+<restricciones>
+- NO asumas nada: si no sabes algo, PREGUNTA.
+- Sé específico: nada de "el sistema debe ser seguro". Dime QUÉ debe estar cifrado y con QUÉ algoritmo.
+- Incluye al menos un principio sobre qué NO puede hacer un agente de IA.
+- Cada principio debe ser verificable por un revisor humano o por un test automatizado.
+</restricciones>
+
+<formato>
+### PRINCIPIO-001: Uniformidad Lingüística
+Todo el código fuente (variables, funciones, componentes, tablas, endpoints), los comentarios, los mensajes de commit, los ADR y la documentación se redactan en español. La interfaz de usuario es bilingüe: español (`es-PE`, idioma por defecto) e inglés (`en`). Todo texto visible se carga desde archivos de traducción y nunca se escribe directamente en el código.
+- **Ejemplo de cumplimiento:** Una función `calcularProximaEntrega()` con su comentario en español, y un componente que muestra `t('pedido.titulo')` resuelto desde `src/locales/es-PE.json` y `src/locales/en.json`.
+- **Ejemplo de violación:** Una función `getNextDelivery()`, un commit "fix delivery bug" o un JSX con texto fijo como `<h1>Tu pedido</h1>`.
+
+### PRINCIPIO-002: Inmutabilidad del Stack Tecnológico Base
+El stack aprobado es:
+- **Frontend:** React 18+ como Aplicación Web Progresiva (PWA).
+- **Backend:** Node.js 20+ con Express.
+- **Base de datos:** PostgreSQL 16+.
+- **Pasarelas de pagos:** Culqi, Niubiz, Izipay y Mercado Pago, más las billeteras Yape y Plin. Todas se integran detrás de un único módulo `pagos` con una interfaz común, de modo que ninguna otra parte del sistema dependa directamente de una pasarela concreta.
+
+Ningún componente del stack puede modificarse ni sustituirse sin aprobación explícita y documentada del equipo humano titular, registrada en un ADR (`docs/adr/ADR-NNN-*.md`).
+- **Ejemplo de cumplimiento:** Desarrollar la pantalla de suscripciones en React 18+ y su endpoint en Express sobre Node.js 20.
+- **Ejemplo de violación:** Reemplazar Express por otro framework web, usar Flutter o introducir una base de datos NoSQL sin un ADR aprobado.
+
+### PRINCIPIO-003: Cifrado de Datos Personales
+Los datos personales (DNI, nombres completos, fecha de nacimiento, teléfono, correo, dirección exacta y coordenadas de geolocalización) se cifran en reposo **a nivel de campo con AES-256-GCM**, y sus claves se guardan en un gestor de secretos (KMS), nunca en el repositorio. Toda comunicación entre la PWA, el backend y los servicios de terceros usa **TLS 1.3**. Ningún dato personal puede aparecer en texto plano en logs, mensajes de error ni analítica.
+- **Ejemplo de cumplimiento:** Transmitir los datos por un canal TLS 1.3 y guardar el DNI del cliente cifrado con AES-256-GCM en la columna `dni_cifrado` de PostgreSQL; los logs solo registran `cliente_id`.
+- **Ejemplo de violación:** Guardar el DNI o el teléfono del cliente en texto plano en tablas o logs, o registrar `Error al entregar en Av. Larco 123, tel. 987654321`.
+
+### PRINCIPIO-004: Pagos sin Datos de Tarjeta (PCI-DSS SAQ-A)
+Los datos de tarjeta (número de tarjeta o PAN, CVV y fecha de vencimiento) **nunca** llegan al backend ni a la base de datos de Muuvi. Se capturan con el formulario o SDK de la pasarela, que devuelve un token; el sistema solo guarda ese token y los 4 últimos dígitos. Un test automatizado falla si algún esquema SQL, DTO o validador contiene campos como `numero_tarjeta`, `cvv` o `pan`.
+- **Ejemplo de cumplimiento:** La PWA envía al backend solo `{ "token_pasarela": "tkn_…", "ultimos_4": "4242" }` para cobrar la suscripción mensual.
+- **Ejemplo de violación:** Un endpoint `POST /pagos` que recibe `{ "numero_tarjeta": "4111…", "cvv": "123" }`.
+
+### PRINCIPIO-005: Ciclo de Vida de los Datos Personales (Ley N.° 29733 y D.S. 016-2024-JUS)
+1. **Inscripción ante la ANPDP:** los bancos de datos de clientes están inscritos ante la ANPDP. Ningún banco de datos nuevo (por ejemplo, una nueva tabla o servicio con datos personales) entra en producción sin su inscripción o actualización previa.
+2. **Solo mayores de edad:** el registro exige fecha de nacimiento y rechaza a quien tenga menos de 18 años.
+3. **Consentimiento:** se pide consentimiento expreso, separado y sin casillas premarcadas para (a) el tratamiento de datos y (b) el envío de datos a terceros, incluidos los proveedores de IA.
+4. **Datos enviados a IA:** el DNI y los datos de pago nunca se envían a un proveedor de IA. Los demás datos solo se envían si el cliente dio su consentimiento y el proveedor figura en `docs/proveedores-datos.md`.
+5. **Eliminación:** al darse de baja una cuenta, sus datos se eliminan o anonimizan en un plazo máximo de **30 días**. Solo se conservan los comprobantes que SUNAT obliga a guardar.
+- **Ejemplo de cumplimiento:** Un job diario anonimiza las cuentas cuya `fecha_baja` tiene más de 30 días y deja la ejecución registrada en la tabla de auditoría.
+- **Ejemplo de violación:** Registrar a un usuario de 17 años, o enviar a un LLM un prompt que contiene el DNI del cliente.
+
+### PRINCIPIO-006: Cumplimiento Comercial, Tributario y Sanitario
+- Todo pago confirmado emite su **boleta o factura electrónica SUNAT**.
+- Ningún producto se publica sin su **registro sanitario DIGESA**.
+- Ningún producto o finca se rotula como "orgánico" sin una **certificación SENASA vigente**.
+- La PWA ofrece acceso al **Libro de Reclamaciones virtual** desde el menú principal (Ley 29571).
+- Los productos que lo requieran muestran las **advertencias octogonales** (Ley 30021).
+- **Ejemplo de cumplimiento:** El catálogo rechaza guardar un yogurt artesanal si `registro_digesa` está vacío.
+- **Ejemplo de violación:** Mostrar la etiqueta "Orgánico" en una finca cuya certificación SENASA está vencida.
+
+### PRINCIPIO-007: Accesibilidad Universal de Interfaz (WCAG 2.1 AA)
+Todas las interfaces cumplen como mínimo el nivel AA de WCAG 2.1:
+- Contraste mínimo de **4.5:1** para texto normal y **3:1** para texto grande y componentes.
+- Navegación completa mediante teclado, con foco visible.
+- Texto alternativo (`alt` o `aria-label`) en toda imagen e ícono interactivo.
+- Áreas táctiles de al menos **48×48 px**.
+- Texto que escala hasta **200 %** sin cortarse.
+- Compatibilidad con TalkBack y VoiceOver.
+- **Dispositivos soportados:** Android 9 (API 28, Pie) o superior con Chrome actualizado, e iOS 15 o superior con Safari 15 o superior.
+- **Ejemplo de cumplimiento:** El botón "Programar entrega" tiene contraste de 5.2:1, mide 48×48 px, recibe foco con Tab y el lector de pantalla lo anuncia como "Programar entrega, botón".
+- **Ejemplo de violación:** Un botón de acción crítico con contraste inferior a 4.5:1, que no responde al foco del teclado, o un ícono de botella sin texto alternativo.
+
+### PRINCIPIO-008: Restricciones Absolutas y Líneas Rojas para Agentes de IA
+Ningún agente de IA, autónomo o asistido, puede bajo ninguna circunstancia:
+1. **Modificar el stack tecnológico:** cambiar, actualizar o introducir librerías o frameworks fuera del stack aprobado (React PWA, Node.js con Express, PostgreSQL), ni añadir o quitar dependencias sin aprobación humana.
+2. **Eliminar datos críticos:** borrar o anular registros de ventas, pedidos, pagos, abonos, suscripciones, comprobantes o auditorías sin la doble confirmación explícita del administrador titular de Muuuvi.
+3. **Alterar límites de crédito:** modificar por su cuenta los topes de crédito, descuentos o saldos de garantía de botellas retornables asignados a los clientes.
+4. **Violar ventanas de comunicación:** enviar recordatorios o notificaciones por WhatsApp, SMS o push fuera del horario permitido (**09:00–20:00, America/Lima, UTC-5**).
+5. **Saltarse los controles de integración:** hacer push o merge directo a `main` o a producción, o desplegar a producción sin aprobación humana.
+6. **Tocar secretos:** leer, crear o modificar secretos (`.env`, claves de API, credenciales de la pasarela o del KMS).
+7. **Ejecutar operaciones destructivas:** correr migraciones destructivas (`DROP`, `TRUNCATE`, `DELETE` o `UPDATE` sin `WHERE`) o acceder a datos reales de clientes.
+8. **Manipular tests:** modificar, saltar (`skip`) o borrar tests para que pasen.
+9. **Cambiar lo comercial o legal:** cambiar precios, lógica de cobro, tarifas de entrega o textos legales (términos, privacidad, consentimientos) sin revisión humana.
+10. **Modificar esta constitución:** editar este archivo.
+
+Ante cualquier duda o inconsistencia, el agente se detiene y solicita intervención humana.
+- **Ejemplo de cumplimiento:** El agente detecta suscripciones duplicadas en la base de datos, no las borra, y genera una alerta que pide intervención humana obligatoria.
+- **Ejemplo de violación:** El agente decide por su cuenta purgar registros antiguos de la tabla de pedidos, instala un ORM alternativo en el backend sin aprobación, o programa un recordatorio de renovación a las 22:30.
+
+### PRINCIPIO-009: Garantía de Calidad y Cobertura de Pruebas Automatizadas
+- Todo cambio en la lógica del sistema debe mantener al menos **80 % de cobertura en reglas de negocio** y **60 % de cobertura general**. El CI bloquea el merge si no se alcanza.
+- Cada regla de `03-reglas-de-negocio.md` está respaldada por al menos un test unitario que cita su ID.
+- Son obligatorias las pruebas unitarias, de integración, E2E de los flujos críticos (registro, suscripción, pago y entrega) y de accesibilidad automatizadas.
+- Cada PR requiere **2 aprobaciones humanas**, linter y SAST en verde, y commits en formato **Conventional Commits** en español.
+- **Ejemplo de cumplimiento:** Un PR que implementa la regla de pausa de suscripción incluye `test_RN012_pausar_suscripcion_antes_del_corte`, deja el módulo en 85 % de cobertura y tiene 2 aprobaciones.
+- **Ejemplo de violación:** Mergear con una sola aprobación, o con la cobertura del módulo de negocio por debajo del 80 %.
+
+### PRINCIPIO-010: Documentación como Código
+- Toda la documentación vive en el repositorio en formato **Markdown**.
+- Cada decisión técnica relevante se registra como **ADR** en `docs/adr/ADR-NNN-titulo.md`.
+- La API se documenta con **OpenAPI 3.x** en `docs/api/openapi.yaml`, y el CI valida que el contrato coincide con la implementación.
+- Todo diagrama se escribe en **Mermaid** dentro del propio Markdown.
+- **Ejemplo de cumplimiento:** El endpoint `GET /fincas/{id}/trazabilidad` se añade a `openapi.yaml` en el mismo PR, junto con un diagrama de secuencia en Mermaid.
+- **Ejemplo de violación:** Documentar la arquitectura en un PNG exportado de otra herramienta, o publicar un endpoint que no figura en OpenAPI.
+
+### PRINCIPIO-011: Estandarización de Formatos de Localización Peruana
+Montos, fechas y números se muestran según las convenciones del Perú:
+- Moneda en soles con el formato `S/ 1,250.50` (punto decimal y coma de miles).
+- Fechas en formato `DD/MM/AAAA` cuando la interfaz está en español.
+- Zona horaria `America/Lima` (UTC-5) para ventanas de entrega, cortes de suscripción y notificaciones.
+
+En la base de datos, los timestamps se guardan en UTC y los montos como `NUMERIC(12,2)`, nunca como `FLOAT`.
+- **Ejemplo de cumplimiento:** La suscripción semanal se muestra como `S/ 32.90 · próxima entrega 12/11/2026, 07:00–09:00`.
+- **Ejemplo de violación:** Mostrar `$32.9` o `11/12/2026`, o guardar el precio en una columna `FLOAT`.
+
+</formato>
+---
+
+</contexto>
+
+<tarea>
+Con base en el Project Brief y la constitución, ayúdame a definir:
+
+1. **IN-SCOPE** — Funcionalidades que SÍ construimos. Para cada una: nombre, descripción de una frase, y prioridad MoSCoW.
+
+2. **OUT-OF-SCOPE** — Funcionalidades que explícitamente NO construimos en esta versión. Para cada una: nombre y razón por la que está fuera.
+
+3. **MVP (Minimum Viable Product)** — Solo los Must have. Describe en un párrafo qué puede hacer un usuario con solo el MVP.
+
+4. **Supuestos** — Lo que asumimos como verdadero sin haberlo validado.
+
+5. **Restricciones** — Limitaciones técnicas, legales o de recursos.
+
+6. **Dependencias** — Sistemas o servicios externos de los que depende el producto.
+
+Priorización MoSCoW:
+- M (Must): sin esto, el producto no funciona. Máximo 5-6 funcionalidades.
+- S (Should): valioso, se construye después del MVP. Máximo 4-5.
+- C (Could): nice-to-have. Máximo 3-4.
+- W (Won't): explícitamente fuera de esta versión.
+</tarea>
+
+<restricciones>
+- Sé estricto con los Must: si puedes vivir sin ello en la primera versión, no es Must.
+- El out-of-scope es TAN IMPORTANTE como el in-scope. Mínimo 5 items en out-of-scope.
+- Todos los items deben ser consistentes con la constitución.
+</restricciones>
+
+<formato>
+
+---
+
+## 1. IN-SCOPE
+
+### Usuarios del sistema en esta versión
+| Rol | Quién es |
+|---|---|
+| **Cliente** | Hogar suscrito en uno de los 3 distritos de lanzamiento |
+| **Operador** | El fundador o una persona de Muuvi que gestiona fincas, lotes, entregas y clientes |
+| **Repartidor** | Personal de última milla de Muuvi |
+
+> La **finca no usa el sistema** en esta versión. El operador registra sus datos.
+
+### 1.1 Must have (6)
+| ID | Funcionalidad | Descripción | Principios que aplica |
+|---|---|---|---|
+| **F-M01** | Registro y cuenta del cliente | El cliente crea su cuenta con fecha de nacimiento (solo mayores de 18), consentimientos separados y sin premarcar, y una dirección dentro de los 3 distritos atendidos. También puede pedir la baja de su cuenta. | 003, 005 |
+| **F-M02** | Catálogo de leche con finca de origen | Muestra la leche fresca disponible con precio en soles y una ficha de la finca de origen (nombre, provincia, certificación SENASA). Un producto no se publica si falta su registro DIGESA. | 006, 011 |
+| **F-M03** | Suscripción semanal | El cliente elige cantidad de litros y día de entrega a **S/ 14.50 por litro**, con **franja única de 07:00 a 10:00**, y puede pausar o cancelar su suscripción hasta las **18:00 del día previo** a la entrega (hora de Lima). | 008.9, 011 |
+| **F-M04** | Cobro y comprobante electrónico | Cobra cada ciclo de la suscripción mediante **Culqi** (tarjetas) y las billeteras **Yape** y **Plin**, todas detrás del módulo `pagos`, y emite la boleta o factura electrónica SUNAT de cada pago confirmado. | 002, 004, 006 |
+| **F-M05** | Panel de operación diaria | El operador registra cada lote recibido de la finca (litros comprometidos frente a recibidos y temperatura de recepción), genera la lista de entregas del día y ve cuántas botellas tiene cada cliente. El repartidor marca cada entrega (entregada o fallida), las botellas devueltas y la temperatura de entrega. **Una lectura mayor de 4.5 °C en el acopio o en la entrega genera una alerta crítica e invalida el lote.** | 003, 008.2 |
+| **F-M06** | Libro de Reclamaciones virtual | Acceso desde el menú principal para registrar quejas y reclamos, conforme a la Ley 29571. | 006 |
+
+> **Por qué estos 6 y no otros:** F-M01 a F-M04 son el mínimo para que alguien pague una suscripción de forma legal. F-M05 es el mínimo para entregar la leche y **medir** los KPIs del Brief: abastecimiento de fincas (R2), cadena de frío (R3) y retorno de botellas (S6). F-M06 es obligación legal.
+
+### 1.2 Should have (5)
+| ID | Funcionalidad | Descripción | Por qué no es Must |
+|---|---|---|---|
+| **F-S01** | Pedido puntual y plan mensual | Compra de una sola vez y suscripción con cobro mensual, además de la semanal. | La métrica del PMV es "suscriptores activos"; una sola modalidad basta para validar. |
+| **F-S02** | Avisos de entrega y renovación | Aviso de próxima entrega, cobro y pausa por WhatsApp o push, **solo entre las 09:00 y las 20:00, hora de Lima**. | Con 50 clientes, el operador puede avisar manualmente; la suscripción ya resuelve el "me olvido de comprar". |
+| **F-S03** | Trazabilidad por lote | El cliente ve de qué finca, lote y fecha de ordeño viene su leche y qué temperatura tuvo en la recepción. | La ficha estática de finca (F-M02) cubre el diferenciador mínimo; requiere que F-M05 ya acumule datos. |
+| **F-S04** | Depósito de garantía por botella | Cobro y devolución de una garantía por botella, con saldo visible para el cliente. | El monto todavía no está definido (Brief §4.4) y cambiar la lógica de cobro requiere revisión humana (008.9). En el PMV solo se **cuentan** las botellas. |
+| **F-S05** | Pasarelas adicionales | Agregar **Niubiz**, **Izipay** y **Mercado Pago** detrás del módulo `pagos` en la fase de escala. | Culqi, Yape y Plin bastan para validar la disposición a pagar (ADR-001). |
+
+### 1.3 Could have (4)
+| ID | Funcionalidad | Descripción |
+|---|---|---|
+| **F-C01** | Portal de la finca | La finca registra sus litros comprometidos, lotes y certificados por su cuenta. |
+| **F-C02** | Programa de referidos | Beneficio para el cliente que trae a otro hogar de su distrito. |
+| **F-C03** | Contenido de bienestar animal | Fotos y videos de la finca y del ganado en pastoreo. |
+| **F-C04** | Encuesta de satisfacción por entrega | Calificación corta después de cada entrega. |
+
+---
+
+## 2. OUT-OF-SCOPE
+
+### 2.1 Won't have en esta versión
+| ID | Funcionalidad | Razón por la que está fuera |
+|---|---|---|
+| **F-W01** | **Lácteos artesanales** (yogurt, queso, mantequilla) | Cada producto suma su propio registro DIGESA y, posiblemente, advertencias octogonales (Ley 30021). Primero hay que validar la leche, que es el producto central. |
+| **F-W02** | **Segmentos fitness y B2B** (cafeterías, pastelerías) | El Brief los ubica en fases posteriores. El B2B necesita facturación, volúmenes y crédito distintos. |
+| **F-W03** | **Distritos fuera de Miraflores, San Isidro y La Molina** | La densidad de entregas por distrito es el riesgo R6. San Borja, Surco y Barranco entran en el mes 6. |
+| **F-W04** | **App nativa** iOS o Android | La constitución fija una PWA en React (PRINCIPIO-002). |
+| **F-W05** | **Funciones con IA** (recomendaciones, chatbot, predicción de demanda) | Exigen consentimiento de envío a terceros y que el proveedor figure en `docs/proveedores-datos.md` (PRINCIPIO-005.3 y 005.4). No aportan a validar R1. |
+| **F-W06** | **Sensores IoT de temperatura en tiempo real** | Hardware y costo sin capital definido. En el PMV, la temperatura se registra manualmente en F-M05. |
+| **F-W07** | **Optimización automática de rutas** | Con 50 clientes en 3 distritos, la ruta se arma a mano. Se revisa con 200 suscriptores o más. |
+| **F-W08** | **Pago contra entrega en efectivo** | Exige manejo de caja por el repartidor y complica la emisión de comprobantes SUNAT. |
+| **F-W09** | **Marketplace donde el cliente elige finca o precio por finca** | Muuvi vende una sola leche con un precio fijado por un humano (PRINCIPIO-008.9). Es otro modelo de negocio. |
+| **F-W10** | **Fidelización por puntos o descuentos automáticos** | Afecta precios y descuentos, que requieren revisión humana (PRINCIPIO-008.3 y 008.9). |
+
+---
+
+## 3. MVP
+
+**Con el MVP, un hogar de Miraflores, San Isidro o La Molina puede** crear su cuenta, si es mayor de 18 años y da sus consentimientos; ver la leche fresca disponible, su precio en soles y la finca certificada de la que viene; suscribirse a S/ 14.50 por litro para recibir cierta cantidad de litros cada semana, el día que elija, entre las 07:00 y las 10:00; pagar con tarjeta (Culqi), Yape o Plin y recibir su boleta electrónica; pausar o cancelar hasta las 18:00 del día previo, y registrar un reclamo en el Libro de Reclamaciones. La interfaz está solo en español (es-PE). **Del lado de Muuvi**, el operador registra cada lote que llega de Cañete o Huaral (litros y temperatura), obtiene la lista de entregas del día y sabe cuántas botellas tiene cada cliente. El repartidor confirma cada entrega, la temperatura y las botellas que recoge. Si una lectura pasa de 4.5 °C, el lote se invalida. Todo esto basta para conseguir y retener a los primeros 50 suscriptores y para medir los KPIs del Brief: suscriptores activos, retención a 3 meses, retorno de botellas, cumplimiento de las fincas y cadena de frío.
+
+```mermaid
+flowchart LR
+    A[Cliente se registra<br/>F-M01] --> B[Elige leche<br/>F-M02]
+    B --> C[Se suscribe<br/>F-M03]
+    C --> D[Paga y recibe boleta<br/>F-M04]
+    D --> E[Operador recibe lote<br/>y arma entregas<br/>F-M05]
+    E --> F[Repartidor entrega<br/>y recoge botellas<br/>F-M05]
+    F -->|siguiente semana| D
+```
+
+---
+
+## 4. Supuestos
+
+### 4.1 Heredados del Brief (sin validar)
+| ID | Supuesto |
+|---|---|
+| S1 | El dolor principal del hogar es "no la encuentra cerca" o "se olvida de comprar". |
+| S2 | Certificación, botella de vidrio, trazabilidad y cadena de frío justifican pagar unos S/ 10 más por litro. |
+| S3 | Muuvi le compra a la finca a S/ 3.50 – S/ 6.00 por litro. |
+| S4 | Las fincas de Cañete y Huaral tienen volumen para 600 suscriptores al mes 12. |
+| S5 | Las fincas llevan la leche hasta un punto en Lima por su cuenta. |
+| S6 | Los hogares devuelven ≥ 90 % de las botellas. |
+
+### 4.2 Nuevos, propios del alcance
+| ID | Supuesto | Si resulta falso… |
+|---|---|---|
+| S7 | Culqi, Yape y Plin bastan para no perder clientes en el PMV. | Niubiz o Izipay (F-S05) suben a Must. |
+| S8 | El hogar acepta una suscripción **semanal** como única modalidad al inicio. | F-S01 sube a Must. |
+| S9 | Con 50 suscriptores, un solo operador puede gestionar lotes, entregas y avisos sin automatizar. | F-S02 sube a Must. |
+| S10 | Cada finca proveedora tiene registro sanitario DIGESA vigente para su leche envasada. | No se puede publicar el producto (PRINCIPIO-006); el lanzamiento se bloquea. |
+| S11 | Los repartidores tienen un smartphone Android 9+ o iOS 15+ con datos móviles. | F-M05 necesita otra forma de registrar las entregas. |
+| S12 | ✅ **Confirmado por el fundador (12/11/2026):** los lotes llegan al punto de acopio en Lima **antes de las 07:00**. La finca sale hacia las 04:00. | Hay que mover la franja de 07:00–10:00 o cambiar el horario de ordeño y despacho. |
+| S13 | ✅ **Confirmado por el fundador (12/11/2026):** Yape y Plin permiten cobrar la suscripción semanal de forma **automática y recurrente**. | El cobro con billetera pasa a ser manual por ciclo, o la suscripción con billetera queda fuera del PMV. |
+| S14 | El corte a las 18:00 del día previo deja tiempo para avisar a la finca cuántos litros despachar esa madrugada. | Hay que adelantar el corte. |
+| S15 | Un margen bruto de **S/ 9.00 por litro** (S/ 14.50 − S/ 5.50) cubre la logística y las comisiones de pago. | Hay que revisar el precio (posible subida a S/ 15.00 o S/ 16.00). |
+
+---
+
+## 5. Restricciones
+
+### 5.1 Técnicas (constitución)
+- **Stack fijo:** PWA en React 18+, Node.js 20+ con Express y PostgreSQL 16+. Cualquier cambio requiere un ADR aprobado por un humano (PRINCIPIO-002).
+- **Pagos:** todas las pasarelas pasan por el módulo `pagos`; el backend nunca recibe número de tarjeta, CVV ni vencimiento (PRINCIPIO-004).
+- **Datos personales:** se cifran con AES-256-GCM a nivel de campo, con claves en un KMS; las comunicaciones usan TLS 1.3, y los logs no contienen datos personales (PRINCIPIO-003).
+- **Interfaz solo en es-PE en el MVP**, por excepción al PRINCIPIO-001 (ADR-002). Los textos **siguen cargándose desde archivos de traducción** (`es-PE.json`), así que agregar `en.json` después no obliga a reescribir componentes.
+- **Accesibilidad:** WCAG 2.1 AA, áreas táctiles de 48×48 px, compatibilidad con TalkBack y VoiceOver, Android 9+ y iOS 15+ (PRINCIPIO-007).
+- **Formatos:** montos como `S/ 1,250.50`, fechas `DD/MM/AAAA`, zona horaria `America/Lima`, montos `NUMERIC(12,2)` y timestamps en UTC (PRINCIPIO-011).
+- **Calidad:** cobertura ≥ 80 % en reglas de negocio y ≥ 60 % general, E2E de registro, suscripción, pago y entrega, y **1 aprobación humana por PR durante la etapa inicial**, por excepción al PRINCIPIO-009 (ADR-003). Se vuelve a 2 aprobaciones cuando se incorpore el primer desarrollador o cofundador técnico.
+- **Documentación:** OpenAPI 3.x validado en el CI, ADR y diagramas en Mermaid (PRINCIPIO-010).
+
+### 5.2 Legales y regulatorias
+- Ley N.° 29733 y D.S. 016-2024-JUS: bancos de datos inscritos ante la ANPDP **antes** de salir a producción, solo mayores de 18 años, consentimientos separados y eliminación de datos en un máximo de 30 días tras la baja.
+- SUNAT: comprobante electrónico por cada pago confirmado.
+- DIGESA: registro sanitario por producto. SENASA: certificación vigente para usar la palabra "orgánico".
+- Ley 29571: Libro de Reclamaciones virtual.
+- Avisos al cliente solo entre las 09:00 y las 20:00, hora de Lima (PRINCIPIO-008.4).
+
+### 5.3 De negocio y recursos
+- Fundador único; el capital inicial y la fecha de lanzamiento no están definidos.
+- Cobertura solo en Miraflores, San Isidro y La Molina, y abastecimiento solo de Cañete y Huaral.
+- **Ningún agente de IA fija ni cambia precios, cobros, tarifas o textos legales** (PRINCIPIO-008.9). El precio por litro lo configura un humano en el sistema. Para el PMV, el fundador fijó **S/ 14.50** al cliente y **S/ 5.50** a la finca.
+
+---
+
+## 6. Dependencias
+
+| ID | Dependencia | Tipo | La usa | ¿Bloquea el MVP? |
+|---|---|---|---|---|
+| D1 | **Culqi** (tarjetas) y las billeteras **Yape** y **Plin** (ADR-001) | Servicio externo | F-M04 | Sí |
+| D2 | **Proveedor de facturación electrónica** (OSE o PSE autorizado por SUNAT) | Servicio externo | F-M04 | Sí |
+| D3 | **Gestor de secretos (KMS)** | Infraestructura | F-M01, F-M04 | Sí |
+| D4 | **Hosting** con TLS 1.3 y PostgreSQL 16+ | Infraestructura | Todas | Sí |
+| D5 | **Proveedor de correo transaccional** (verificación de cuenta y envío de comprobantes) | Servicio externo | F-M01, F-M04 | Sí |
+| D6 | **Inscripción del banco de datos ante la ANPDP** | Trámite legal | F-M01 | Sí |
+| D7 | **Fincas proveedoras** con certificación SENASA y registro DIGESA vigentes | Operativa | F-M02, F-M05 | Sí |
+| D8 | **Transporte refrigerado** de la finca al punto de acopio en Lima | Operativa (a cargo de la finca, S5) | F-M05 | Sí |
+| D9 | **Punto de acopio refrigerado en Lima** | Operativa | F-M05 | Sí |
+| D10 | **WhatsApp Business API** o un servicio de push | Servicio externo | F-S02 | No (Should) |
+
+---
+
+</formato>
+
+<rol>
+Eres un Agente Constitucional especializado en gobernanza de proyectos de software AI-First. Tu trabajo es ayudar a un equipo a definir los principios no negociables de su proyecto: las reglas que NINGÚN agente de IA ni humano puede violar bajo ninguna circunstancia.
+</rol>
+
+<contexto>
+Estamos definiendo la constitución del proyecto FiaYa.
+FiaYa es una app que digitaliza el cuaderno de fiados de las bodegas de barrio en Lima, Perú. Permite al bodeguero registrar ventas al crédito, controlar límites de crédito por cliente y enviar recordatorios de cobro por WhatsApp
+Este documento será el primer archivo que cualquier agente de IA lea antes de trabajar en el proyecto.
+País de operación: Perú.
+</contexto>
+
+<tarea>
+1. Hazme preguntas clave para entender las restricciones del proyecto. Pregunta sobre:
+   - Idioma del código y la documentación
+   - Stack tecnológico preferido (si lo tienen)
+   - Regulaciones legales aplicables
+   - Políticas de privacidad y seguridad de datos
+   - Restricciones de accesibilidad
+   - Acciones prohibidas para agentes de IA
+   - Estándares de calidad y testing
+   - Formato de documentación
+
+2. Con mis respuestas, propón entre 8 y 12 principios constitucionales.
+
+3. Cada principio debe seguir este formato:
+   PRINCIPIO-[NNN]: [Título corto]
+   [Descripción en una o dos frases, con valores concretos donde aplique]
+   Ejemplo de cumplimiento: [...]
+   Ejemplo de violación: [...]
+</tarea>
+
+<restricciones>
+- NO asumas nada: si no sabes algo, PREGUNTA.
+- Sé específico: nada de "el sistema debe ser seguro". Dime QUÉ debe estar cifrado y con QUÉ algoritmo.
+- Incluye al menos un principio sobre qué NO puede hacer un agente de IA.
+- Cada principio debe ser verificable por un revisor humano o por un test automatizado.
+</restricciones>
+
+<formato>
+Entrega los principios en Markdown con el formato indicado, listos para copiar al archivo 00-constitucion.md.
+</formato>
+</contexto>
+
+<tarea>
+1. Analiza el PRD, las reglas de negocio, el alcance y la constitución del proyecto.
+2. Genera entre 8 y 12 Historias de Usuario priorizadas.
+3. Cada HU debe seguir este formato:
+
+   HU-[NNN]: [Título descriptivo]
+   Prioridad: [Must/Should/Could/Won't]
+
+   Como [actor], quiero [acción], para [beneficio].
+
+   Criterios de aceptación:
+   - DADO QUE [precondición], CUANDO [acción], ENTONCES [resultado esperado].
+   - DADO QUE [precondición], CUANDO [acción], ENTONCES [resultado esperado].
+
+   Reglas de negocio relacionadas: [IDs de reglas EARS, ej: RN-001, RN-003]
+   Notas: [Cualquier aclaración técnica o de negocio]
+
+4. Agrupa las HUs por épica o módulo funcional.
+5. Verifica que cada HU cumpla INVEST:
+   - Independent: ¿se puede desarrollar sin depender de otra?
+   - Negotiable: ¿el "cómo" es flexible?
+   - Valuable: ¿entrega valor al usuario?
+   - Estimable: ¿se puede estimar el esfuerzo?
+   - Small: ¿se puede completar en un sprint?
+   - Testable: ¿los criterios de aceptación son verificables?
+</tarea>
+
+<restricciones>
+- TODAS las HUs Must deben trazarse a al menos una regla de negocio.
+- NO generes HUs para features out-of-scope (revisa 02-alcance.md).
+- Usa el lenguaje del dominio (glosario del proyecto si existe).
+- Los criterios de aceptación deben tener valores concretos, no adjetivos vagos.
+- Mínimo 2 criterios de aceptación por HU.
+</restricciones>
+
+<formato>
+Entrega en Markdown, listo para copiar a 06-user-stories.md.
+</formato>
